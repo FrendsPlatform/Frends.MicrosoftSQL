@@ -1,0 +1,40 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.1.32319.34
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Frends.MicrosoftSQL.BulkInsert", "Frends.MicrosoftSQL.BulkInsert\Frends.MicrosoftSQL.BulkInsert.csproj", "{35C305C0-8108-4A98-BB1D-AFE5C926239E}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{78F7F22E-6E20-4BCE-8362-0C558568B729}"
+	ProjectSection(SolutionItems) = preProject
+		CHANGELOG.md = CHANGELOG.md
+		..\.github\workflows\BulkInsert_build_and_test_on_main.yml = ..\.github\workflows\BulkInsert_build_and_test_on_main.yml
+		..\.github\workflows\BulkInsert_build_and_test_on_push.yml = ..\.github\workflows\BulkInsert_build_and_test_on_push.yml
+		..\.github\workflows\BulkInsert_release.yml = ..\.github\workflows\BulkInsert_release.yml
+		README.md = README.md
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Frends.MicrosoftSQL.BulkInsert.Tests", "Frends.MicrosoftSQL.BulkInsert.Tests\Frends.MicrosoftSQL.BulkInsert.Tests.csproj", "{57A63142-3694-4833-AA13-20233A6B57B0}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{35C305C0-8108-4A98-BB1D-AFE5C926239E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{35C305C0-8108-4A98-BB1D-AFE5C926239E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{35C305C0-8108-4A98-BB1D-AFE5C926239E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{35C305C0-8108-4A98-BB1D-AFE5C926239E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{57A63142-3694-4833-AA13-20233A6B57B0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{57A63142-3694-4833-AA13-20233A6B57B0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{57A63142-3694-4833-AA13-20233A6B57B0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{57A63142-3694-4833-AA13-20233A6B57B0}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {8986D685-9988-4F5F-B8D9-E42A4E44BFED}
+	EndGlobalSection
+EndGlobal
