@@ -113,7 +113,7 @@ public class MicrosoftSQL
         if(options.TableLock)
             sqlBulkCopyOptions += (int)SqlBulkCopyOptions.TableLock;
 
-        if (options.TableLock)
+        if (options.KeepNulls)
             sqlBulkCopyOptions += (int)SqlBulkCopyOptions.KeepNulls;
 
         return sqlBulkCopyOptions;
