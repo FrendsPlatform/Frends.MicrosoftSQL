@@ -31,7 +31,7 @@ public class MicrosoftSQL
     }
 
     /// <summary>
-    /// Execute MSSQL statement.
+    /// Execute MSSQL query.
     /// [Documentation](https://tasks.frends.com/tasks/frends-tasks/Frends.MicrosoftSQL.ExecuteQuery)
     /// </summary>
     /// <param name="input">Input parameters</param>

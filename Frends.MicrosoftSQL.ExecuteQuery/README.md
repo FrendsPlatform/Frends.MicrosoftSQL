@@ -1,5 +1,5 @@
 # Frends.MicrosoftSQL.ExecuteQuery
-Frends MicrosoftSQL Task to execute MSSQL statement.
+Frends MicrosoftSQL Task to execute MSSQL query.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT) 
 [![Build](https://github.com/FrendsPlatform/Frends.MicrosoftSQL/actions/workflows/ExecuteQuery_build_and_test_on_main.yml/badge.svg)](https://github.com/FrendsPlatform/Frends.MicrosoftSQL/actions)
