@@ -101,7 +101,7 @@ public class UnitTests
         var inputInsert = new Input()
         {
             ConnectionString = _connString,
-            Query = $@"INSERT INTO {_tableName} VALUES (1, 'Suku', 'Etu'), (2, 'Läst', 'Först'), (3, 'Hiiri', 'Mikki')",
+            Query = $@"INSERT INTO {_tableName} VALUES (1, 'Suku', 'Etu'), (2, 'Last', 'Forst'), (3, 'Hiiri', 'Mikki')",
             ExecuteType = ExecuteTypes.ExecuteReader,
             Parameters = null
         };
@@ -129,7 +129,7 @@ public class UnitTests
         var inputInsert = new Input()
         {
             ConnectionString = _connString,
-            Query = $@"INSERT INTO {_tableName} VALUES (1, 'Suku', 'Etu'), (2, 'Läst', 'Först'), (3, 'Hiiri', 'Mikki')",
+            Query = $@"INSERT INTO {_tableName} VALUES (1, 'Suku', 'Etu'), (2, 'Last', 'Forst'), (3, 'Hiiri', 'Mikki')",
             ExecuteType = ExecuteTypes.ExecuteReader,
             Parameters = null
         };
@@ -157,7 +157,7 @@ public class UnitTests
         var inputInsert = new Input()
         {
             ConnectionString = _connString,
-            Query = $@"INSERT INTO {_tableName} VALUES (1, 'Suku', 'Etu'), (2, 'Läst', 'Först'), (3, 'Hiiri', 'Mikki')",
+            Query = $@"INSERT INTO {_tableName} VALUES (1, 'Suku', 'Etu'), (2, 'Last', 'Forst'), (3, 'Hiiri', 'Mikki')",
             ExecuteType = ExecuteTypes.ExecuteReader,
             Parameters = null
         };
@@ -216,8 +216,8 @@ public class UnitTests
         Assert.AreEqual(typeof(JArray), select.QueryResult.GetType());
         Assert.AreEqual("Suku", (string)select.QueryResult[0]["LastName"]);
         Assert.AreEqual("Etu", (string)select.QueryResult[0]["FirstName"]);
-        Assert.AreEqual("Läst", (string)select.QueryResult[1]["LastName"]);
-        Assert.AreEqual("Först", (string)select.QueryResult[1]["FirstName"]);
+        Assert.AreEqual("Last", (string)select.QueryResult[1]["LastName"]);
+        Assert.AreEqual("Forst", (string)select.QueryResult[1]["FirstName"]);
         Assert.AreEqual("Hiiri", (string)select.QueryResult[2]["LastName"]);
         Assert.AreEqual("Mikki", (string)select.QueryResult[2]["FirstName"]);
         Assert.AreEqual(3, GetRowCount()); // double check
@@ -242,7 +242,7 @@ public class UnitTests
         Assert.AreEqual("Suku", (string)checkUpdateResult.QueryResult[0]["LastName"]);
         Assert.AreEqual("Etu", (string)checkUpdateResult.QueryResult[0]["FirstName"]);
         Assert.AreEqual("Edit", (string)checkUpdateResult.QueryResult[1]["LastName"]);
-        Assert.AreEqual("Först", (string)checkUpdateResult.QueryResult[1]["FirstName"]);
+        Assert.AreEqual("Forst", (string)checkUpdateResult.QueryResult[1]["FirstName"]);
         Assert.AreEqual("Hiiri", (string)checkUpdateResult.QueryResult[2]["LastName"]);
         Assert.AreEqual("Mikki", (string)checkUpdateResult.QueryResult[2]["FirstName"]);
         Assert.AreEqual(3, GetRowCount()); // double check
@@ -267,7 +267,7 @@ public class UnitTests
         var inputInsert = new Input()
         {
             ConnectionString = _connString,
-            Query = $@"INSERT INTO {_tableName} VALUES (1, 'Suku', 'Etu'), (2, 'Läst', 'Först'), (3, 'Hiiri', 'Mikki')",
+            Query = $@"INSERT INTO {_tableName} VALUES (1, 'Suku', 'Etu'), (2, 'Last', 'Forst'), (3, 'Hiiri', 'Mikki')",
             ExecuteType = ExecuteTypes.ExecuteReader,
             Parameters = null
         };
@@ -326,8 +326,8 @@ public class UnitTests
         Assert.AreEqual(typeof(JArray), select.QueryResult.GetType());
         Assert.AreEqual("Suku", (string)select.QueryResult[0]["LastName"]);
         Assert.AreEqual("Etu", (string)select.QueryResult[0]["FirstName"]);
-        Assert.AreEqual("Läst", (string)select.QueryResult[1]["LastName"]);
-        Assert.AreEqual("Först", (string)select.QueryResult[1]["FirstName"]);
+        Assert.AreEqual("Last", (string)select.QueryResult[1]["LastName"]);
+        Assert.AreEqual("Forst", (string)select.QueryResult[1]["FirstName"]);
         Assert.AreEqual("Hiiri", (string)select.QueryResult[2]["LastName"]);
         Assert.AreEqual("Mikki", (string)select.QueryResult[2]["FirstName"]);
         Assert.AreEqual(3, GetRowCount()); // double check
@@ -352,7 +352,7 @@ public class UnitTests
         Assert.AreEqual("Suku", (string)checkUpdateResult.QueryResult[0]["LastName"]);
         Assert.AreEqual("Etu", (string)checkUpdateResult.QueryResult[0]["FirstName"]);
         Assert.AreEqual("Edit", (string)checkUpdateResult.QueryResult[1]["LastName"]);
-        Assert.AreEqual("Först", (string)checkUpdateResult.QueryResult[1]["FirstName"]);
+        Assert.AreEqual("Forst", (string)checkUpdateResult.QueryResult[1]["FirstName"]);
         Assert.AreEqual("Hiiri", (string)checkUpdateResult.QueryResult[2]["LastName"]);
         Assert.AreEqual("Mikki", (string)checkUpdateResult.QueryResult[2]["FirstName"]);
         Assert.AreEqual(3, GetRowCount()); // double check
@@ -377,7 +377,7 @@ public class UnitTests
         var inputInsert = new Input()
         {
             ConnectionString = _connString,
-            Query = $@"INSERT INTO {_tableName} VALUES (1, 'Suku', 'Etu'), (2, 'Läst', 'Först'), (3, 'Hiiri', 'Mikki')",
+            Query = $@"INSERT INTO {_tableName} VALUES (1, 'Suku', 'Etu'), (2, 'Last', 'Forst'), (3, 'Hiiri', 'Mikki')",
             ExecuteType = ExecuteTypes.ExecuteReader,
             Parameters = null
         };
@@ -436,8 +436,8 @@ public class UnitTests
         Assert.AreEqual(typeof(JArray), select.QueryResult.GetType());
         Assert.AreEqual("Suku", (string)select.QueryResult[0]["LastName"]);
         Assert.AreEqual("Etu", (string)select.QueryResult[0]["FirstName"]);
-        Assert.AreEqual("Läst", (string)select.QueryResult[1]["LastName"]);
-        Assert.AreEqual("Först", (string)select.QueryResult[1]["FirstName"]);
+        Assert.AreEqual("Last", (string)select.QueryResult[1]["LastName"]);
+        Assert.AreEqual("Forst", (string)select.QueryResult[1]["FirstName"]);
         Assert.AreEqual("Hiiri", (string)select.QueryResult[2]["LastName"]);
         Assert.AreEqual("Mikki", (string)select.QueryResult[2]["FirstName"]);
         Assert.AreEqual(3, GetRowCount()); // double check
@@ -462,7 +462,7 @@ public class UnitTests
         Assert.AreEqual("Suku", (string)checkUpdateResult.QueryResult[0]["LastName"]);
         Assert.AreEqual("Etu", (string)checkUpdateResult.QueryResult[0]["FirstName"]);
         Assert.AreEqual("Edit", (string)checkUpdateResult.QueryResult[1]["LastName"]);
-        Assert.AreEqual("Först", (string)checkUpdateResult.QueryResult[1]["FirstName"]);
+        Assert.AreEqual("Forst", (string)checkUpdateResult.QueryResult[1]["FirstName"]);
         Assert.AreEqual("Hiiri", (string)checkUpdateResult.QueryResult[2]["LastName"]);
         Assert.AreEqual("Mikki", (string)checkUpdateResult.QueryResult[2]["FirstName"]);
         Assert.AreEqual(3, GetRowCount()); // double check
@@ -487,7 +487,7 @@ public class UnitTests
         var inputInsert = new Input()
         {
             ConnectionString = _connString,
-            Query = $@"INSERT INTO {_tableName} VALUES (1, 'Suku', 'Etu'), (2, 'Läst', 'Först'), (3, 'Hiiri', 'Mikki')",
+            Query = $@"INSERT INTO {_tableName} VALUES (1, 'Suku', 'Etu'), (2, 'Last', 'Forst'), (3, 'Hiiri', 'Mikki')",
             ExecuteType = ExecuteTypes.ExecuteReader,
             Parameters = null
         };
@@ -546,8 +546,8 @@ public class UnitTests
         Assert.AreEqual(typeof(JArray), select.QueryResult.GetType());
         Assert.AreEqual("Suku", (string)select.QueryResult[0]["LastName"]);
         Assert.AreEqual("Etu", (string)select.QueryResult[0]["FirstName"]);
-        Assert.AreEqual("Läst", (string)select.QueryResult[1]["LastName"]);
-        Assert.AreEqual("Först", (string)select.QueryResult[1]["FirstName"]);
+        Assert.AreEqual("Last", (string)select.QueryResult[1]["LastName"]);
+        Assert.AreEqual("Forst", (string)select.QueryResult[1]["FirstName"]);
         Assert.AreEqual("Hiiri", (string)select.QueryResult[2]["LastName"]);
         Assert.AreEqual("Mikki", (string)select.QueryResult[2]["FirstName"]);
         Assert.AreEqual(3, GetRowCount()); // double check
@@ -572,7 +572,7 @@ public class UnitTests
         Assert.AreEqual("Suku", (string)checkUpdateResult.QueryResult[0]["LastName"]);
         Assert.AreEqual("Etu", (string)checkUpdateResult.QueryResult[0]["FirstName"]);
         Assert.AreEqual("Edit", (string)checkUpdateResult.QueryResult[1]["LastName"]);
-        Assert.AreEqual("Först", (string)checkUpdateResult.QueryResult[1]["FirstName"]);
+        Assert.AreEqual("Forst", (string)checkUpdateResult.QueryResult[1]["FirstName"]);
         Assert.AreEqual("Hiiri", (string)checkUpdateResult.QueryResult[2]["LastName"]);
         Assert.AreEqual("Mikki", (string)checkUpdateResult.QueryResult[2]["FirstName"]);
         Assert.AreEqual(3, GetRowCount()); // double check
@@ -597,7 +597,7 @@ public class UnitTests
         var inputInsert = new Input()
         {
             ConnectionString = _connString,
-            Query = $@"INSERT INTO {_tableName} VALUES (1, 'Suku', 'Etu'), (2, 'Läst', 'Först'), (3, 'Hiiri', 'Mikki')",
+            Query = $@"INSERT INTO {_tableName} VALUES (1, 'Suku', 'Etu'), (2, 'Last', 'Forst'), (3, 'Hiiri', 'Mikki')",
             ExecuteType = ExecuteTypes.ExecuteReader,
             Parameters = null
         };
@@ -656,8 +656,8 @@ public class UnitTests
         Assert.AreEqual(typeof(JArray), select.QueryResult.GetType());
         Assert.AreEqual("Suku", (string)select.QueryResult[0]["LastName"]);
         Assert.AreEqual("Etu", (string)select.QueryResult[0]["FirstName"]);
-        Assert.AreEqual("Läst", (string)select.QueryResult[1]["LastName"]);
-        Assert.AreEqual("Först", (string)select.QueryResult[1]["FirstName"]);
+        Assert.AreEqual("Last", (string)select.QueryResult[1]["LastName"]);
+        Assert.AreEqual("Forst", (string)select.QueryResult[1]["FirstName"]);
         Assert.AreEqual("Hiiri", (string)select.QueryResult[2]["LastName"]);
         Assert.AreEqual("Mikki", (string)select.QueryResult[2]["FirstName"]);
         Assert.AreEqual(3, GetRowCount()); // double check
@@ -682,7 +682,7 @@ public class UnitTests
         Assert.AreEqual("Suku", (string)checkUpdateResult.QueryResult[0]["LastName"]);
         Assert.AreEqual("Etu", (string)checkUpdateResult.QueryResult[0]["FirstName"]);
         Assert.AreEqual("Edit", (string)checkUpdateResult.QueryResult[1]["LastName"]);
-        Assert.AreEqual("Först", (string)checkUpdateResult.QueryResult[1]["FirstName"]);
+        Assert.AreEqual("Forst", (string)checkUpdateResult.QueryResult[1]["FirstName"]);
         Assert.AreEqual("Hiiri", (string)checkUpdateResult.QueryResult[2]["LastName"]);
         Assert.AreEqual("Mikki", (string)checkUpdateResult.QueryResult[2]["FirstName"]);
         Assert.AreEqual(3, GetRowCount()); // double check
@@ -707,7 +707,7 @@ public class UnitTests
         var inputInsert = new Input()
         {
             ConnectionString = _connString,
-            Query = $@"INSERT INTO {_tableName} VALUES (1, 'Suku', 'Etu'), (2, 'Läst', 'Först'), (3, 'Hiiri', 'Mikki')",
+            Query = $@"INSERT INTO {_tableName} VALUES (1, 'Suku', 'Etu'), (2, 'Last', 'Forst'), (3, 'Hiiri', 'Mikki')",
             ExecuteType = ExecuteTypes.ExecuteReader,
             Parameters = null
         };
@@ -766,8 +766,8 @@ public class UnitTests
         Assert.AreEqual(typeof(JArray), select.QueryResult.GetType());
         Assert.AreEqual("Suku", (string)select.QueryResult[0]["LastName"]);
         Assert.AreEqual("Etu", (string)select.QueryResult[0]["FirstName"]);
-        Assert.AreEqual("Läst", (string)select.QueryResult[1]["LastName"]);
-        Assert.AreEqual("Först", (string)select.QueryResult[1]["FirstName"]);
+        Assert.AreEqual("Last", (string)select.QueryResult[1]["LastName"]);
+        Assert.AreEqual("Forst", (string)select.QueryResult[1]["FirstName"]);
         Assert.AreEqual("Hiiri", (string)select.QueryResult[2]["LastName"]);
         Assert.AreEqual("Mikki", (string)select.QueryResult[2]["FirstName"]);
         Assert.AreEqual(3, GetRowCount()); // double check
@@ -792,7 +792,7 @@ public class UnitTests
         Assert.AreEqual("Suku", (string)checkUpdateResult.QueryResult[0]["LastName"]);
         Assert.AreEqual("Etu", (string)checkUpdateResult.QueryResult[0]["FirstName"]);
         Assert.AreEqual("Edit", (string)checkUpdateResult.QueryResult[1]["LastName"]);
-        Assert.AreEqual("Först", (string)checkUpdateResult.QueryResult[1]["FirstName"]);
+        Assert.AreEqual("Forst", (string)checkUpdateResult.QueryResult[1]["FirstName"]);
         Assert.AreEqual("Hiiri", (string)checkUpdateResult.QueryResult[2]["LastName"]);
         Assert.AreEqual("Mikki", (string)checkUpdateResult.QueryResult[2]["FirstName"]);
         Assert.AreEqual(3, GetRowCount()); // double check
@@ -817,7 +817,7 @@ public class UnitTests
         var inputInsert = new Input()
         {
             ConnectionString = _connString,
-            Query = $@"INSERT INTO {_tableName} VALUES (1, 'Suku', 'Etu'), (2, 'Läst', 'Först'), (3, 'Hiiri', 'Mikki')",
+            Query = $@"INSERT INTO {_tableName} VALUES (1, 'Suku', 'Etu'), (2, 'Last', 'Forst'), (3, 'Hiiri', 'Mikki')",
             ExecuteType = ExecuteTypes.ExecuteReader,
             Parameters = null
         };
@@ -876,8 +876,8 @@ public class UnitTests
         Assert.AreEqual(typeof(JArray), select.QueryResult.GetType());
         Assert.AreEqual("Suku", (string)select.QueryResult[0]["LastName"]);
         Assert.AreEqual("Etu", (string)select.QueryResult[0]["FirstName"]);
-        Assert.AreEqual("Läst", (string)select.QueryResult[1]["LastName"]);
-        Assert.AreEqual("Först", (string)select.QueryResult[1]["FirstName"]);
+        Assert.AreEqual("Last", (string)select.QueryResult[1]["LastName"]);
+        Assert.AreEqual("Forst", (string)select.QueryResult[1]["FirstName"]);
         Assert.AreEqual("Hiiri", (string)select.QueryResult[2]["LastName"]);
         Assert.AreEqual("Mikki", (string)select.QueryResult[2]["FirstName"]);
         Assert.AreEqual(3, GetRowCount()); // double check
@@ -902,7 +902,7 @@ public class UnitTests
         Assert.AreEqual("Suku", (string)checkUpdateResult.QueryResult[0]["LastName"]);
         Assert.AreEqual("Etu", (string)checkUpdateResult.QueryResult[0]["FirstName"]);
         Assert.AreEqual("Edit", (string)checkUpdateResult.QueryResult[1]["LastName"]);
-        Assert.AreEqual("Först", (string)checkUpdateResult.QueryResult[1]["FirstName"]);
+        Assert.AreEqual("Forst", (string)checkUpdateResult.QueryResult[1]["FirstName"]);
         Assert.AreEqual("Hiiri", (string)checkUpdateResult.QueryResult[2]["LastName"]);
         Assert.AreEqual("Mikki", (string)checkUpdateResult.QueryResult[2]["FirstName"]);
         Assert.AreEqual(3, GetRowCount()); // double check
@@ -927,7 +927,7 @@ public class UnitTests
         var inputInsert = new Input()
         {
             ConnectionString = _connString,
-            Query = $@"INSERT INTO {_tableName} VALUES (1, 'Suku', 'Etu'), (2, 'Läst', 'Först'), (3, 'Hiiri', 'Mikki')",
+            Query = $@"INSERT INTO {_tableName} VALUES (1, 'Suku', 'Etu'), (2, 'Last', 'Forst'), (3, 'Hiiri', 'Mikki')",
             ExecuteType = ExecuteTypes.ExecuteReader,
             Parameters = null
         };
@@ -986,8 +986,8 @@ public class UnitTests
         Assert.AreEqual(typeof(JArray), select.QueryResult.GetType());
         Assert.AreEqual("Suku", (string)select.QueryResult[0]["LastName"]);
         Assert.AreEqual("Etu", (string)select.QueryResult[0]["FirstName"]);
-        Assert.AreEqual("Läst", (string)select.QueryResult[1]["LastName"]);
-        Assert.AreEqual("Först", (string)select.QueryResult[1]["FirstName"]);
+        Assert.AreEqual("Last", (string)select.QueryResult[1]["LastName"]);
+        Assert.AreEqual("Forst", (string)select.QueryResult[1]["FirstName"]);
         Assert.AreEqual("Hiiri", (string)select.QueryResult[2]["LastName"]);
         Assert.AreEqual("Mikki", (string)select.QueryResult[2]["FirstName"]);
         Assert.AreEqual(3, GetRowCount()); // double check
@@ -1012,7 +1012,7 @@ public class UnitTests
         Assert.AreEqual("Suku", (string)checkUpdateResult.QueryResult[0]["LastName"]);
         Assert.AreEqual("Etu", (string)checkUpdateResult.QueryResult[0]["FirstName"]);
         Assert.AreEqual("Edit", (string)checkUpdateResult.QueryResult[1]["LastName"]);
-        Assert.AreEqual("Först", (string)checkUpdateResult.QueryResult[1]["FirstName"]);
+        Assert.AreEqual("Forst", (string)checkUpdateResult.QueryResult[1]["FirstName"]);
         Assert.AreEqual("Hiiri", (string)checkUpdateResult.QueryResult[2]["LastName"]);
         Assert.AreEqual("Mikki", (string)checkUpdateResult.QueryResult[2]["FirstName"]);
         Assert.AreEqual(3, GetRowCount()); // double check
@@ -1039,7 +1039,7 @@ public class UnitTests
         var inputInsert = new Input()
         {
             ConnectionString = _connString,
-            Query = $@"INSERT INTO {_tableName} VALUES (1, 'Suku', 'Etu'), (2, 'Läst', 'Först'), (3, 'Hiiri', 'Mikki')",
+            Query = $@"INSERT INTO {_tableName} VALUES (1, 'Suku', 'Etu'), (2, 'Last', 'Forst'), (3, 'Hiiri', 'Mikki')",
             ExecuteType = ExecuteTypes.NonQuery,
             Parameters = null
         };
@@ -1099,8 +1099,8 @@ public class UnitTests
         Assert.AreEqual(typeof(JArray), select.QueryResult.GetType());
         Assert.AreEqual("Suku", (string)select.QueryResult[0]["LastName"]);
         Assert.AreEqual("Etu", (string)select.QueryResult[0]["FirstName"]);
-        Assert.AreEqual("Läst", (string)select.QueryResult[1]["LastName"]);
-        Assert.AreEqual("Först", (string)select.QueryResult[1]["FirstName"]);
+        Assert.AreEqual("Last", (string)select.QueryResult[1]["LastName"]);
+        Assert.AreEqual("Forst", (string)select.QueryResult[1]["FirstName"]);
         Assert.AreEqual("Hiiri", (string)select.QueryResult[2]["LastName"]);
         Assert.AreEqual("Mikki", (string)select.QueryResult[2]["FirstName"]);
         Assert.AreEqual(3, GetRowCount()); // double check
@@ -1125,7 +1125,7 @@ public class UnitTests
         Assert.AreEqual("Suku", (string)checkUpdateResult.QueryResult[0]["LastName"]);
         Assert.AreEqual("Etu", (string)checkUpdateResult.QueryResult[0]["FirstName"]);
         Assert.AreEqual("Edit", (string)checkUpdateResult.QueryResult[1]["LastName"]);
-        Assert.AreEqual("Först", (string)checkUpdateResult.QueryResult[1]["FirstName"]);
+        Assert.AreEqual("Forst", (string)checkUpdateResult.QueryResult[1]["FirstName"]);
         Assert.AreEqual("Hiiri", (string)checkUpdateResult.QueryResult[2]["LastName"]);
         Assert.AreEqual("Mikki", (string)checkUpdateResult.QueryResult[2]["FirstName"]);
         Assert.AreEqual(3, GetRowCount()); // double check
@@ -1150,7 +1150,7 @@ public class UnitTests
         var inputInsert = new Input()
         {
             ConnectionString = _connString,
-            Query = $@"INSERT INTO {_tableName} VALUES (1, 'Suku', 'Etu'), (2, 'Läst', 'Först'), (3, 'Hiiri', 'Mikki')",
+            Query = $@"INSERT INTO {_tableName} VALUES (1, 'Suku', 'Etu'), (2, 'Last', 'Forst'), (3, 'Hiiri', 'Mikki')",
             ExecuteType = ExecuteTypes.Auto,
             Parameters = null
         };
@@ -1210,8 +1210,8 @@ public class UnitTests
         Assert.AreEqual(typeof(JArray), select.QueryResult.GetType());
         Assert.AreEqual("Suku", (string)select.QueryResult[0]["LastName"]);
         Assert.AreEqual("Etu", (string)select.QueryResult[0]["FirstName"]);
-        Assert.AreEqual("Läst", (string)select.QueryResult[1]["LastName"]);
-        Assert.AreEqual("Först", (string)select.QueryResult[1]["FirstName"]);
+        Assert.AreEqual("Last", (string)select.QueryResult[1]["LastName"]);
+        Assert.AreEqual("Forst", (string)select.QueryResult[1]["FirstName"]);
         Assert.AreEqual("Hiiri", (string)select.QueryResult[2]["LastName"]);
         Assert.AreEqual("Mikki", (string)select.QueryResult[2]["FirstName"]);
         Assert.AreEqual(3, GetRowCount()); // double check
@@ -1236,7 +1236,7 @@ public class UnitTests
         Assert.AreEqual("Suku", (string)checkUpdateResult.QueryResult[0]["LastName"]);
         Assert.AreEqual("Etu", (string)checkUpdateResult.QueryResult[0]["FirstName"]);
         Assert.AreEqual("Edit", (string)checkUpdateResult.QueryResult[1]["LastName"]);
-        Assert.AreEqual("Först", (string)checkUpdateResult.QueryResult[1]["FirstName"]);
+        Assert.AreEqual("Forst", (string)checkUpdateResult.QueryResult[1]["FirstName"]);
         Assert.AreEqual("Hiiri", (string)checkUpdateResult.QueryResult[2]["LastName"]);
         Assert.AreEqual("Mikki", (string)checkUpdateResult.QueryResult[2]["FirstName"]);
         Assert.AreEqual(3, GetRowCount()); // double check
@@ -1261,7 +1261,7 @@ public class UnitTests
         var inputInsert = new Input()
         {
             ConnectionString = _connString,
-            Query = $@"INSERT INTO {_tableName} VALUES (1, 'Suku', 'Etu'), (2, 'Läst', 'Först'), (3, 'Hiiri', 'Mikki')",
+            Query = $@"INSERT INTO {_tableName} VALUES (1, 'Suku', 'Etu'), (2, 'Last', 'Forst'), (3, 'Hiiri', 'Mikki')",
             ExecuteType = ExecuteTypes.Auto,
             Parameters = null
         };
@@ -1321,8 +1321,8 @@ public class UnitTests
         Assert.AreEqual(typeof(JArray), select.QueryResult.GetType());
         Assert.AreEqual("Suku", (string)select.QueryResult[0]["LastName"]);
         Assert.AreEqual("Etu", (string)select.QueryResult[0]["FirstName"]);
-        Assert.AreEqual("Läst", (string)select.QueryResult[1]["LastName"]);
-        Assert.AreEqual("Först", (string)select.QueryResult[1]["FirstName"]);
+        Assert.AreEqual("Last", (string)select.QueryResult[1]["LastName"]);
+        Assert.AreEqual("Forst", (string)select.QueryResult[1]["FirstName"]);
         Assert.AreEqual("Hiiri", (string)select.QueryResult[2]["LastName"]);
         Assert.AreEqual("Mikki", (string)select.QueryResult[2]["FirstName"]);
         Assert.AreEqual(3, GetRowCount()); // double check
@@ -1347,7 +1347,7 @@ public class UnitTests
         Assert.AreEqual("Suku", (string)checkUpdateResult.QueryResult[0]["LastName"]);
         Assert.AreEqual("Etu", (string)checkUpdateResult.QueryResult[0]["FirstName"]);
         Assert.AreEqual("Edit", (string)checkUpdateResult.QueryResult[1]["LastName"]);
-        Assert.AreEqual("Först", (string)checkUpdateResult.QueryResult[1]["FirstName"]);
+        Assert.AreEqual("Forst", (string)checkUpdateResult.QueryResult[1]["FirstName"]);
         Assert.AreEqual("Hiiri", (string)checkUpdateResult.QueryResult[2]["LastName"]);
         Assert.AreEqual("Mikki", (string)checkUpdateResult.QueryResult[2]["FirstName"]);
         Assert.AreEqual(3, GetRowCount()); // double check
@@ -1372,7 +1372,7 @@ public class UnitTests
         var inputInsert = new Input()
         {
             ConnectionString = _connString,
-            Query = $@"INSERT INTO {_tableName} VALUES (1, 'Suku', 'Etu'), (2, 'Läst', 'Först'), (3, 'Hiiri', 'Mikki')",
+            Query = $@"INSERT INTO {_tableName} VALUES (1, 'Suku', 'Etu'), (2, 'Last', 'Forst'), (3, 'Hiiri', 'Mikki')",
             ExecuteType = ExecuteTypes.Auto,
             Parameters = null
         };
@@ -1432,8 +1432,8 @@ public class UnitTests
         Assert.AreEqual(typeof(JArray), select.QueryResult.GetType());
         Assert.AreEqual("Suku", (string)select.QueryResult[0]["LastName"]);
         Assert.AreEqual("Etu", (string)select.QueryResult[0]["FirstName"]);
-        Assert.AreEqual("Läst", (string)select.QueryResult[1]["LastName"]);
-        Assert.AreEqual("Först", (string)select.QueryResult[1]["FirstName"]);
+        Assert.AreEqual("Last", (string)select.QueryResult[1]["LastName"]);
+        Assert.AreEqual("Forst", (string)select.QueryResult[1]["FirstName"]);
         Assert.AreEqual("Hiiri", (string)select.QueryResult[2]["LastName"]);
         Assert.AreEqual("Mikki", (string)select.QueryResult[2]["FirstName"]);
         Assert.AreEqual(3, GetRowCount()); // double check
@@ -1458,7 +1458,7 @@ public class UnitTests
         Assert.AreEqual("Suku", (string)checkUpdateResult.QueryResult[0]["LastName"]);
         Assert.AreEqual("Etu", (string)checkUpdateResult.QueryResult[0]["FirstName"]);
         Assert.AreEqual("Edit", (string)checkUpdateResult.QueryResult[1]["LastName"]);
-        Assert.AreEqual("Först", (string)checkUpdateResult.QueryResult[1]["FirstName"]);
+        Assert.AreEqual("Forst", (string)checkUpdateResult.QueryResult[1]["FirstName"]);
         Assert.AreEqual("Hiiri", (string)checkUpdateResult.QueryResult[2]["LastName"]);
         Assert.AreEqual("Mikki", (string)checkUpdateResult.QueryResult[2]["FirstName"]);
         Assert.AreEqual(3, GetRowCount()); // double check
@@ -1483,7 +1483,7 @@ public class UnitTests
         var inputInsert = new Input()
         {
             ConnectionString = _connString,
-            Query = $@"INSERT INTO {_tableName} VALUES (1, 'Suku', 'Etu'), (2, 'Läst', 'Först'), (3, 'Hiiri', 'Mikki')",
+            Query = $@"INSERT INTO {_tableName} VALUES (1, 'Suku', 'Etu'), (2, 'Last', 'Forst'), (3, 'Hiiri', 'Mikki')",
             ExecuteType = ExecuteTypes.Auto,
             Parameters = null
         };
@@ -1543,8 +1543,8 @@ public class UnitTests
         Assert.AreEqual(typeof(JArray), select.QueryResult.GetType());
         Assert.AreEqual("Suku", (string)select.QueryResult[0]["LastName"]);
         Assert.AreEqual("Etu", (string)select.QueryResult[0]["FirstName"]);
-        Assert.AreEqual("Läst", (string)select.QueryResult[1]["LastName"]);
-        Assert.AreEqual("Först", (string)select.QueryResult[1]["FirstName"]);
+        Assert.AreEqual("Last", (string)select.QueryResult[1]["LastName"]);
+        Assert.AreEqual("Forst", (string)select.QueryResult[1]["FirstName"]);
         Assert.AreEqual("Hiiri", (string)select.QueryResult[2]["LastName"]);
         Assert.AreEqual("Mikki", (string)select.QueryResult[2]["FirstName"]);
         Assert.AreEqual(3, GetRowCount()); // double check
@@ -1569,7 +1569,7 @@ public class UnitTests
         Assert.AreEqual("Suku", (string)checkUpdateResult.QueryResult[0]["LastName"]);
         Assert.AreEqual("Etu", (string)checkUpdateResult.QueryResult[0]["FirstName"]);
         Assert.AreEqual("Edit", (string)checkUpdateResult.QueryResult[1]["LastName"]);
-        Assert.AreEqual("Först", (string)checkUpdateResult.QueryResult[1]["FirstName"]);
+        Assert.AreEqual("Forst", (string)checkUpdateResult.QueryResult[1]["FirstName"]);
         Assert.AreEqual("Hiiri", (string)checkUpdateResult.QueryResult[2]["LastName"]);
         Assert.AreEqual("Mikki", (string)checkUpdateResult.QueryResult[2]["FirstName"]);
         Assert.AreEqual(3, GetRowCount()); // double check
@@ -1594,7 +1594,7 @@ public class UnitTests
         var inputInsert = new Input()
         {
             ConnectionString = _connString,
-            Query = $@"INSERT INTO {_tableName} VALUES (1, 'Suku', 'Etu'), (2, 'Läst', 'Först'), (3, 'Hiiri', 'Mikki')",
+            Query = $@"INSERT INTO {_tableName} VALUES (1, 'Suku', 'Etu'), (2, 'Last', 'Forst'), (3, 'Hiiri', 'Mikki')",
             ExecuteType = ExecuteTypes.Auto,
             Parameters = null
         };
@@ -1654,8 +1654,8 @@ public class UnitTests
         Assert.AreEqual(typeof(JArray), select.QueryResult.GetType());
         Assert.AreEqual("Suku", (string)select.QueryResult[0]["LastName"]);
         Assert.AreEqual("Etu", (string)select.QueryResult[0]["FirstName"]);
-        Assert.AreEqual("Läst", (string)select.QueryResult[1]["LastName"]);
-        Assert.AreEqual("Först", (string)select.QueryResult[1]["FirstName"]);
+        Assert.AreEqual("Last", (string)select.QueryResult[1]["LastName"]);
+        Assert.AreEqual("Forst", (string)select.QueryResult[1]["FirstName"]);
         Assert.AreEqual("Hiiri", (string)select.QueryResult[2]["LastName"]);
         Assert.AreEqual("Mikki", (string)select.QueryResult[2]["FirstName"]);
         Assert.AreEqual(3, GetRowCount()); // double check
@@ -1680,7 +1680,7 @@ public class UnitTests
         Assert.AreEqual("Suku", (string)checkUpdateResult.QueryResult[0]["LastName"]);
         Assert.AreEqual("Etu", (string)checkUpdateResult.QueryResult[0]["FirstName"]);
         Assert.AreEqual("Edit", (string)checkUpdateResult.QueryResult[1]["LastName"]);
-        Assert.AreEqual("Först", (string)checkUpdateResult.QueryResult[1]["FirstName"]);
+        Assert.AreEqual("Forst", (string)checkUpdateResult.QueryResult[1]["FirstName"]);
         Assert.AreEqual("Hiiri", (string)checkUpdateResult.QueryResult[2]["LastName"]);
         Assert.AreEqual("Mikki", (string)checkUpdateResult.QueryResult[2]["FirstName"]);
         Assert.AreEqual(3, GetRowCount()); // double check
@@ -1705,7 +1705,7 @@ public class UnitTests
         var inputInsert = new Input()
         {
             ConnectionString = _connString,
-            Query = $@"INSERT INTO {_tableName} VALUES (1, 'Suku', 'Etu'), (2, 'Läst', 'Först'), (3, 'Hiiri', 'Mikki')",
+            Query = $@"INSERT INTO {_tableName} VALUES (1, 'Suku', 'Etu'), (2, 'Last', 'Forst'), (3, 'Hiiri', 'Mikki')",
             ExecuteType = ExecuteTypes.Auto,
             Parameters = null
         };
@@ -1765,8 +1765,8 @@ public class UnitTests
         Assert.AreEqual(typeof(JArray), select.QueryResult.GetType());
         Assert.AreEqual("Suku", (string)select.QueryResult[0]["LastName"]);
         Assert.AreEqual("Etu", (string)select.QueryResult[0]["FirstName"]);
-        Assert.AreEqual("Läst", (string)select.QueryResult[1]["LastName"]);
-        Assert.AreEqual("Först", (string)select.QueryResult[1]["FirstName"]);
+        Assert.AreEqual("Last", (string)select.QueryResult[1]["LastName"]);
+        Assert.AreEqual("Forst", (string)select.QueryResult[1]["FirstName"]);
         Assert.AreEqual("Hiiri", (string)select.QueryResult[2]["LastName"]);
         Assert.AreEqual("Mikki", (string)select.QueryResult[2]["FirstName"]);
         Assert.AreEqual(3, GetRowCount()); // double check
@@ -1791,7 +1791,7 @@ public class UnitTests
         Assert.AreEqual("Suku", (string)checkUpdateResult.QueryResult[0]["LastName"]);
         Assert.AreEqual("Etu", (string)checkUpdateResult.QueryResult[0]["FirstName"]);
         Assert.AreEqual("Edit", (string)checkUpdateResult.QueryResult[1]["LastName"]);
-        Assert.AreEqual("Först", (string)checkUpdateResult.QueryResult[1]["FirstName"]);
+        Assert.AreEqual("Forst", (string)checkUpdateResult.QueryResult[1]["FirstName"]);
         Assert.AreEqual("Hiiri", (string)checkUpdateResult.QueryResult[2]["LastName"]);
         Assert.AreEqual("Mikki", (string)checkUpdateResult.QueryResult[2]["FirstName"]);
         Assert.AreEqual(3, GetRowCount()); // double check
@@ -1816,7 +1816,7 @@ public class UnitTests
         var inputInsert = new Input()
         {
             ConnectionString = _connString,
-            Query = $@"INSERT INTO {_tableName} VALUES (1, 'Suku', 'Etu'), (2, 'Läst', 'Först'), (3, 'Hiiri', 'Mikki')",
+            Query = $@"INSERT INTO {_tableName} VALUES (1, 'Suku', 'Etu'), (2, 'Last', 'Forst'), (3, 'Hiiri', 'Mikki')",
             ExecuteType = ExecuteTypes.Auto,
             Parameters = null
         };
@@ -1876,8 +1876,8 @@ public class UnitTests
         Assert.AreEqual(typeof(JArray), select.QueryResult.GetType());
         Assert.AreEqual("Suku", (string)select.QueryResult[0]["LastName"]);
         Assert.AreEqual("Etu", (string)select.QueryResult[0]["FirstName"]);
-        Assert.AreEqual("Läst", (string)select.QueryResult[1]["LastName"]);
-        Assert.AreEqual("Först", (string)select.QueryResult[1]["FirstName"]);
+        Assert.AreEqual("Last", (string)select.QueryResult[1]["LastName"]);
+        Assert.AreEqual("Forst", (string)select.QueryResult[1]["FirstName"]);
         Assert.AreEqual("Hiiri", (string)select.QueryResult[2]["LastName"]);
         Assert.AreEqual("Mikki", (string)select.QueryResult[2]["FirstName"]);
         Assert.AreEqual(3, GetRowCount()); // double check
@@ -1902,7 +1902,7 @@ public class UnitTests
         Assert.AreEqual("Suku", (string)checkUpdateResult.QueryResult[0]["LastName"]);
         Assert.AreEqual("Etu", (string)checkUpdateResult.QueryResult[0]["FirstName"]);
         Assert.AreEqual("Edit", (string)checkUpdateResult.QueryResult[1]["LastName"]);
-        Assert.AreEqual("Först", (string)checkUpdateResult.QueryResult[1]["FirstName"]);
+        Assert.AreEqual("Forst", (string)checkUpdateResult.QueryResult[1]["FirstName"]);
         Assert.AreEqual("Hiiri", (string)checkUpdateResult.QueryResult[2]["LastName"]);
         Assert.AreEqual("Mikki", (string)checkUpdateResult.QueryResult[2]["FirstName"]);
         Assert.AreEqual(3, GetRowCount()); // double check
@@ -1929,7 +1929,7 @@ public class UnitTests
         var inputInsert = new Input()
         {
             ConnectionString = _connString,
-            Query = $@"INSERT INTO {_tableName} VALUES (1, 'Suku', 'Etu'), (2, 'Läst', 'Först'), (3, 'Hiiri', 'Mikki')",
+            Query = $@"INSERT INTO {_tableName} VALUES (1, 'Suku', 'Etu'), (2, 'Last', 'Forst'), (3, 'Hiiri', 'Mikki')",
             ExecuteType = ExecuteTypes.NonQuery,
             Parameters = null
         };
@@ -2015,7 +2015,7 @@ public class UnitTests
         Assert.AreEqual("Suku", (string)checkUpdateResult.QueryResult[0]["LastName"]);
         Assert.AreEqual("Etu", (string)checkUpdateResult.QueryResult[0]["FirstName"]);
         Assert.AreEqual("Edit", (string)checkUpdateResult.QueryResult[1]["LastName"]);
-        Assert.AreEqual("Först", (string)checkUpdateResult.QueryResult[1]["FirstName"]);
+        Assert.AreEqual("Forst", (string)checkUpdateResult.QueryResult[1]["FirstName"]);
         Assert.AreEqual("Hiiri", (string)checkUpdateResult.QueryResult[2]["LastName"]);
         Assert.AreEqual("Mikki", (string)checkUpdateResult.QueryResult[2]["FirstName"]);
         Assert.AreEqual(3, GetRowCount()); // double check
@@ -2040,7 +2040,7 @@ public class UnitTests
         var inputInsert = new Input()
         {
             ConnectionString = _connString,
-            Query = $@"INSERT INTO {_tableName} VALUES (1, 'Suku', 'Etu'), (2, 'Läst', 'Först'), (3, 'Hiiri', 'Mikki')",
+            Query = $@"INSERT INTO {_tableName} VALUES (1, 'Suku', 'Etu'), (2, 'Last', 'Forst'), (3, 'Hiiri', 'Mikki')",
             ExecuteType = ExecuteTypes.NonQuery,
             Parameters = null
         };
@@ -2126,7 +2126,7 @@ public class UnitTests
         Assert.AreEqual("Suku", (string)checkUpdateResult.QueryResult[0]["LastName"]);
         Assert.AreEqual("Etu", (string)checkUpdateResult.QueryResult[0]["FirstName"]);
         Assert.AreEqual("Edit", (string)checkUpdateResult.QueryResult[1]["LastName"]);
-        Assert.AreEqual("Först", (string)checkUpdateResult.QueryResult[1]["FirstName"]);
+        Assert.AreEqual("Forst", (string)checkUpdateResult.QueryResult[1]["FirstName"]);
         Assert.AreEqual("Hiiri", (string)checkUpdateResult.QueryResult[2]["LastName"]);
         Assert.AreEqual("Mikki", (string)checkUpdateResult.QueryResult[2]["FirstName"]);
         Assert.AreEqual(3, GetRowCount()); // double check
@@ -2151,7 +2151,7 @@ public class UnitTests
         var inputInsert = new Input()
         {
             ConnectionString = _connString,
-            Query = $@"INSERT INTO {_tableName} VALUES (1, 'Suku', 'Etu'), (2, 'Läst', 'Först'), (3, 'Hiiri', 'Mikki')",
+            Query = $@"INSERT INTO {_tableName} VALUES (1, 'Suku', 'Etu'), (2, 'Last', 'Forst'), (3, 'Hiiri', 'Mikki')",
             ExecuteType = ExecuteTypes.NonQuery,
             Parameters = null
         };
@@ -2237,7 +2237,7 @@ public class UnitTests
         Assert.AreEqual("Suku", (string)checkUpdateResult.QueryResult[0]["LastName"]);
         Assert.AreEqual("Etu", (string)checkUpdateResult.QueryResult[0]["FirstName"]);
         Assert.AreEqual("Edit", (string)checkUpdateResult.QueryResult[1]["LastName"]);
-        Assert.AreEqual("Först", (string)checkUpdateResult.QueryResult[1]["FirstName"]);
+        Assert.AreEqual("Forst", (string)checkUpdateResult.QueryResult[1]["FirstName"]);
         Assert.AreEqual("Hiiri", (string)checkUpdateResult.QueryResult[2]["LastName"]);
         Assert.AreEqual("Mikki", (string)checkUpdateResult.QueryResult[2]["FirstName"]);
         Assert.AreEqual(3, GetRowCount()); // double check
@@ -2262,7 +2262,7 @@ public class UnitTests
         var inputInsert = new Input()
         {
             ConnectionString = _connString,
-            Query = $@"INSERT INTO {_tableName} VALUES (1, 'Suku', 'Etu'), (2, 'Läst', 'Först'), (3, 'Hiiri', 'Mikki')",
+            Query = $@"INSERT INTO {_tableName} VALUES (1, 'Suku', 'Etu'), (2, 'Last', 'Forst'), (3, 'Hiiri', 'Mikki')",
             ExecuteType = ExecuteTypes.NonQuery,
             Parameters = null
         };
@@ -2348,7 +2348,7 @@ public class UnitTests
         Assert.AreEqual("Suku", (string)checkUpdateResult.QueryResult[0]["LastName"]);
         Assert.AreEqual("Etu", (string)checkUpdateResult.QueryResult[0]["FirstName"]);
         Assert.AreEqual("Edit", (string)checkUpdateResult.QueryResult[1]["LastName"]);
-        Assert.AreEqual("Först", (string)checkUpdateResult.QueryResult[1]["FirstName"]);
+        Assert.AreEqual("Forst", (string)checkUpdateResult.QueryResult[1]["FirstName"]);
         Assert.AreEqual("Hiiri", (string)checkUpdateResult.QueryResult[2]["LastName"]);
         Assert.AreEqual("Mikki", (string)checkUpdateResult.QueryResult[2]["FirstName"]);
         Assert.AreEqual(3, GetRowCount()); // double check
@@ -2373,7 +2373,7 @@ public class UnitTests
         var inputInsert = new Input()
         {
             ConnectionString = _connString,
-            Query = $@"INSERT INTO {_tableName} VALUES (1, 'Suku', 'Etu'), (2, 'Läst', 'Först'), (3, 'Hiiri', 'Mikki')",
+            Query = $@"INSERT INTO {_tableName} VALUES (1, 'Suku', 'Etu'), (2, 'Last', 'Forst'), (3, 'Hiiri', 'Mikki')",
             ExecuteType = ExecuteTypes.NonQuery,
             Parameters = null
         };
@@ -2459,7 +2459,7 @@ public class UnitTests
         Assert.AreEqual("Suku", (string)checkUpdateResult.QueryResult[0]["LastName"]);
         Assert.AreEqual("Etu", (string)checkUpdateResult.QueryResult[0]["FirstName"]);
         Assert.AreEqual("Edit", (string)checkUpdateResult.QueryResult[1]["LastName"]);
-        Assert.AreEqual("Först", (string)checkUpdateResult.QueryResult[1]["FirstName"]);
+        Assert.AreEqual("Forst", (string)checkUpdateResult.QueryResult[1]["FirstName"]);
         Assert.AreEqual("Hiiri", (string)checkUpdateResult.QueryResult[2]["LastName"]);
         Assert.AreEqual("Mikki", (string)checkUpdateResult.QueryResult[2]["FirstName"]);
         Assert.AreEqual(3, GetRowCount()); // double check
@@ -2484,7 +2484,7 @@ public class UnitTests
         var inputInsert = new Input()
         {
             ConnectionString = _connString,
-            Query = $@"INSERT INTO {_tableName} VALUES (1, 'Suku', 'Etu'), (2, 'Läst', 'Först'), (3, 'Hiiri', 'Mikki')",
+            Query = $@"INSERT INTO {_tableName} VALUES (1, 'Suku', 'Etu'), (2, 'Last', 'Forst'), (3, 'Hiiri', 'Mikki')",
             ExecuteType = ExecuteTypes.NonQuery,
             Parameters = null
         };
@@ -2570,7 +2570,7 @@ public class UnitTests
         Assert.AreEqual("Suku", (string)checkUpdateResult.QueryResult[0]["LastName"]);
         Assert.AreEqual("Etu", (string)checkUpdateResult.QueryResult[0]["FirstName"]);
         Assert.AreEqual("Edit", (string)checkUpdateResult.QueryResult[1]["LastName"]);
-        Assert.AreEqual("Först", (string)checkUpdateResult.QueryResult[1]["FirstName"]);
+        Assert.AreEqual("Forst", (string)checkUpdateResult.QueryResult[1]["FirstName"]);
         Assert.AreEqual("Hiiri", (string)checkUpdateResult.QueryResult[2]["LastName"]);
         Assert.AreEqual("Mikki", (string)checkUpdateResult.QueryResult[2]["FirstName"]);
         Assert.AreEqual(3, GetRowCount()); // double check
@@ -2595,7 +2595,7 @@ public class UnitTests
         var inputInsert = new Input()
         {
             ConnectionString = _connString,
-            Query = $@"INSERT INTO {_tableName} VALUES (1, 'Suku', 'Etu'), (2, 'Läst', 'Först'), (3, 'Hiiri', 'Mikki')",
+            Query = $@"INSERT INTO {_tableName} VALUES (1, 'Suku', 'Etu'), (2, 'Last', 'Forst'), (3, 'Hiiri', 'Mikki')",
             ExecuteType = ExecuteTypes.NonQuery,
             Parameters = null
         };
@@ -2681,7 +2681,7 @@ public class UnitTests
         Assert.AreEqual("Suku", (string)checkUpdateResult.QueryResult[0]["LastName"]);
         Assert.AreEqual("Etu", (string)checkUpdateResult.QueryResult[0]["FirstName"]);
         Assert.AreEqual("Edit", (string)checkUpdateResult.QueryResult[1]["LastName"]);
-        Assert.AreEqual("Först", (string)checkUpdateResult.QueryResult[1]["FirstName"]);
+        Assert.AreEqual("Forst", (string)checkUpdateResult.QueryResult[1]["FirstName"]);
         Assert.AreEqual("Hiiri", (string)checkUpdateResult.QueryResult[2]["LastName"]);
         Assert.AreEqual("Mikki", (string)checkUpdateResult.QueryResult[2]["FirstName"]);
         Assert.AreEqual(3, GetRowCount()); // double check
@@ -2706,7 +2706,7 @@ public class UnitTests
         var inputInsert = new Input()
         {
             ConnectionString = _connString,
-            Query = $@"INSERT INTO {_tableName} VALUES (1, 'Suku', 'Etu'), (2, 'Läst', 'Först'), (3, 'Hiiri', 'Mikki')",
+            Query = $@"INSERT INTO {_tableName} VALUES (1, 'Suku', 'Etu'), (2, 'Last', 'Forst'), (3, 'Hiiri', 'Mikki')",
             ExecuteType = ExecuteTypes.NonQuery,
             Parameters = null
         };
@@ -2792,7 +2792,7 @@ public class UnitTests
         Assert.AreEqual("Suku", (string)checkUpdateResult.QueryResult[0]["LastName"]);
         Assert.AreEqual("Etu", (string)checkUpdateResult.QueryResult[0]["FirstName"]);
         Assert.AreEqual("Edit", (string)checkUpdateResult.QueryResult[1]["LastName"]);
-        Assert.AreEqual("Först", (string)checkUpdateResult.QueryResult[1]["FirstName"]);
+        Assert.AreEqual("Forst", (string)checkUpdateResult.QueryResult[1]["FirstName"]);
         Assert.AreEqual("Hiiri", (string)checkUpdateResult.QueryResult[2]["LastName"]);
         Assert.AreEqual("Mikki", (string)checkUpdateResult.QueryResult[2]["FirstName"]);
         Assert.AreEqual(3, GetRowCount()); // double check
@@ -2819,7 +2819,7 @@ public class UnitTests
         var inputInsert = new Input()
         {
             ConnectionString = _connString,
-            Query = $@"INSERT INTO {_tableName} VALUES (1, 'Suku', 'Etu'), (2, 'Läst', 'Först'), (3, 'Hiiri', 'Mikki')",
+            Query = $@"INSERT INTO {_tableName} VALUES (1, 'Suku', 'Etu'), (2, 'Last', 'Forst'), (3, 'Hiiri', 'Mikki')",
             ExecuteType = ExecuteTypes.Scalar,
             Parameters = null
         };
@@ -2904,7 +2904,7 @@ public class UnitTests
         Assert.AreEqual("Suku", (string)checkUpdateResult.QueryResult[0]["LastName"]);
         Assert.AreEqual("Etu", (string)checkUpdateResult.QueryResult[0]["FirstName"]);
         Assert.AreEqual("Edit", (string)checkUpdateResult.QueryResult[1]["LastName"]);
-        Assert.AreEqual("Först", (string)checkUpdateResult.QueryResult[1]["FirstName"]);
+        Assert.AreEqual("Forst", (string)checkUpdateResult.QueryResult[1]["FirstName"]);
         Assert.AreEqual("Hiiri", (string)checkUpdateResult.QueryResult[2]["LastName"]);
         Assert.AreEqual("Mikki", (string)checkUpdateResult.QueryResult[2]["FirstName"]);
         Assert.AreEqual(3, GetRowCount()); // double check
@@ -2929,7 +2929,7 @@ public class UnitTests
         var inputInsert = new Input()
         {
             ConnectionString = _connString,
-            Query = $@"INSERT INTO {_tableName} VALUES (1, 'Suku', 'Etu'), (2, 'Läst', 'Först'), (3, 'Hiiri', 'Mikki')",
+            Query = $@"INSERT INTO {_tableName} VALUES (1, 'Suku', 'Etu'), (2, 'Last', 'Forst'), (3, 'Hiiri', 'Mikki')",
             ExecuteType = ExecuteTypes.Scalar,
             Parameters = null
         };
@@ -3014,7 +3014,7 @@ public class UnitTests
         Assert.AreEqual("Suku", (string)checkUpdateResult.QueryResult[0]["LastName"]);
         Assert.AreEqual("Etu", (string)checkUpdateResult.QueryResult[0]["FirstName"]);
         Assert.AreEqual("Edit", (string)checkUpdateResult.QueryResult[1]["LastName"]);
-        Assert.AreEqual("Först", (string)checkUpdateResult.QueryResult[1]["FirstName"]);
+        Assert.AreEqual("Forst", (string)checkUpdateResult.QueryResult[1]["FirstName"]);
         Assert.AreEqual("Hiiri", (string)checkUpdateResult.QueryResult[2]["LastName"]);
         Assert.AreEqual("Mikki", (string)checkUpdateResult.QueryResult[2]["FirstName"]);
         Assert.AreEqual(3, GetRowCount()); // double check
@@ -3039,7 +3039,7 @@ public class UnitTests
         var inputInsert = new Input()
         {
             ConnectionString = _connString,
-            Query = $@"INSERT INTO {_tableName} VALUES (1, 'Suku', 'Etu'), (2, 'Läst', 'Först'), (3, 'Hiiri', 'Mikki')",
+            Query = $@"INSERT INTO {_tableName} VALUES (1, 'Suku', 'Etu'), (2, 'Last', 'Forst'), (3, 'Hiiri', 'Mikki')",
             ExecuteType = ExecuteTypes.Scalar,
             Parameters = null
         };
@@ -3124,7 +3124,7 @@ public class UnitTests
         Assert.AreEqual("Suku", (string)checkUpdateResult.QueryResult[0]["LastName"]);
         Assert.AreEqual("Etu", (string)checkUpdateResult.QueryResult[0]["FirstName"]);
         Assert.AreEqual("Edit", (string)checkUpdateResult.QueryResult[1]["LastName"]);
-        Assert.AreEqual("Först", (string)checkUpdateResult.QueryResult[1]["FirstName"]);
+        Assert.AreEqual("Forst", (string)checkUpdateResult.QueryResult[1]["FirstName"]);
         Assert.AreEqual("Hiiri", (string)checkUpdateResult.QueryResult[2]["LastName"]);
         Assert.AreEqual("Mikki", (string)checkUpdateResult.QueryResult[2]["FirstName"]);
         Assert.AreEqual(3, GetRowCount()); // double check
@@ -3149,7 +3149,7 @@ public class UnitTests
         var inputInsert = new Input()
         {
             ConnectionString = _connString,
-            Query = $@"INSERT INTO {_tableName} VALUES (1, 'Suku', 'Etu'), (2, 'Läst', 'Först'), (3, 'Hiiri', 'Mikki')",
+            Query = $@"INSERT INTO {_tableName} VALUES (1, 'Suku', 'Etu'), (2, 'Last', 'Forst'), (3, 'Hiiri', 'Mikki')",
             ExecuteType = ExecuteTypes.Scalar,
             Parameters = null
         };
@@ -3234,7 +3234,7 @@ public class UnitTests
         Assert.AreEqual("Suku", (string)checkUpdateResult.QueryResult[0]["LastName"]);
         Assert.AreEqual("Etu", (string)checkUpdateResult.QueryResult[0]["FirstName"]);
         Assert.AreEqual("Edit", (string)checkUpdateResult.QueryResult[1]["LastName"]);
-        Assert.AreEqual("Först", (string)checkUpdateResult.QueryResult[1]["FirstName"]);
+        Assert.AreEqual("Forst", (string)checkUpdateResult.QueryResult[1]["FirstName"]);
         Assert.AreEqual("Hiiri", (string)checkUpdateResult.QueryResult[2]["LastName"]);
         Assert.AreEqual("Mikki", (string)checkUpdateResult.QueryResult[2]["FirstName"]);
         Assert.AreEqual(3, GetRowCount()); // double check
@@ -3259,7 +3259,7 @@ public class UnitTests
         var inputInsert = new Input()
         {
             ConnectionString = _connString,
-            Query = $@"INSERT INTO {_tableName} VALUES (1, 'Suku', 'Etu'), (2, 'Läst', 'Först'), (3, 'Hiiri', 'Mikki')",
+            Query = $@"INSERT INTO {_tableName} VALUES (1, 'Suku', 'Etu'), (2, 'Last', 'Forst'), (3, 'Hiiri', 'Mikki')",
             ExecuteType = ExecuteTypes.Scalar,
             Parameters = null
         };
@@ -3344,7 +3344,7 @@ public class UnitTests
         Assert.AreEqual("Suku", (string)checkUpdateResult.QueryResult[0]["LastName"]);
         Assert.AreEqual("Etu", (string)checkUpdateResult.QueryResult[0]["FirstName"]);
         Assert.AreEqual("Edit", (string)checkUpdateResult.QueryResult[1]["LastName"]);
-        Assert.AreEqual("Först", (string)checkUpdateResult.QueryResult[1]["FirstName"]);
+        Assert.AreEqual("Forst", (string)checkUpdateResult.QueryResult[1]["FirstName"]);
         Assert.AreEqual("Hiiri", (string)checkUpdateResult.QueryResult[2]["LastName"]);
         Assert.AreEqual("Mikki", (string)checkUpdateResult.QueryResult[2]["FirstName"]);
         Assert.AreEqual(3, GetRowCount()); // double check
@@ -3369,7 +3369,7 @@ public class UnitTests
         var inputInsert = new Input()
         {
             ConnectionString = _connString,
-            Query = $@"INSERT INTO {_tableName} VALUES (1, 'Suku', 'Etu'), (2, 'Läst', 'Först'), (3, 'Hiiri', 'Mikki')",
+            Query = $@"INSERT INTO {_tableName} VALUES (1, 'Suku', 'Etu'), (2, 'Last', 'Forst'), (3, 'Hiiri', 'Mikki')",
             ExecuteType = ExecuteTypes.Scalar,
             Parameters = null
         };
@@ -3454,7 +3454,7 @@ public class UnitTests
         Assert.AreEqual("Suku", (string)checkUpdateResult.QueryResult[0]["LastName"]);
         Assert.AreEqual("Etu", (string)checkUpdateResult.QueryResult[0]["FirstName"]);
         Assert.AreEqual("Edit", (string)checkUpdateResult.QueryResult[1]["LastName"]);
-        Assert.AreEqual("Först", (string)checkUpdateResult.QueryResult[1]["FirstName"]);
+        Assert.AreEqual("Forst", (string)checkUpdateResult.QueryResult[1]["FirstName"]);
         Assert.AreEqual("Hiiri", (string)checkUpdateResult.QueryResult[2]["LastName"]);
         Assert.AreEqual("Mikki", (string)checkUpdateResult.QueryResult[2]["FirstName"]);
         Assert.AreEqual(3, GetRowCount()); // double check
@@ -3479,7 +3479,7 @@ public class UnitTests
         var inputInsert = new Input()
         {
             ConnectionString = _connString,
-            Query = $@"INSERT INTO {_tableName} VALUES (1, 'Suku', 'Etu'), (2, 'Läst', 'Först'), (3, 'Hiiri', 'Mikki')",
+            Query = $@"INSERT INTO {_tableName} VALUES (1, 'Suku', 'Etu'), (2, 'Last', 'Forst'), (3, 'Hiiri', 'Mikki')",
             ExecuteType = ExecuteTypes.Scalar,
             Parameters = null
         };
@@ -3564,7 +3564,7 @@ public class UnitTests
         Assert.AreEqual("Suku", (string)checkUpdateResult.QueryResult[0]["LastName"]);
         Assert.AreEqual("Etu", (string)checkUpdateResult.QueryResult[0]["FirstName"]);
         Assert.AreEqual("Edit", (string)checkUpdateResult.QueryResult[1]["LastName"]);
-        Assert.AreEqual("Först", (string)checkUpdateResult.QueryResult[1]["FirstName"]);
+        Assert.AreEqual("Forst", (string)checkUpdateResult.QueryResult[1]["FirstName"]);
         Assert.AreEqual("Hiiri", (string)checkUpdateResult.QueryResult[2]["LastName"]);
         Assert.AreEqual("Mikki", (string)checkUpdateResult.QueryResult[2]["FirstName"]);
         Assert.AreEqual(3, GetRowCount()); // double check
@@ -3589,7 +3589,7 @@ public class UnitTests
         var inputInsert = new Input()
         {
             ConnectionString = _connString,
-            Query = $@"INSERT INTO {_tableName} VALUES (1, 'Suku', 'Etu'), (2, 'Läst', 'Först'), (3, 'Hiiri', 'Mikki')",
+            Query = $@"INSERT INTO {_tableName} VALUES (1, 'Suku', 'Etu'), (2, 'Last', 'Forst'), (3, 'Hiiri', 'Mikki')",
             ExecuteType = ExecuteTypes.Scalar,
             Parameters = null
         };
@@ -3674,7 +3674,7 @@ public class UnitTests
         Assert.AreEqual("Suku", (string)checkUpdateResult.QueryResult[0]["LastName"]);
         Assert.AreEqual("Etu", (string)checkUpdateResult.QueryResult[0]["FirstName"]);
         Assert.AreEqual("Edit", (string)checkUpdateResult.QueryResult[1]["LastName"]);
-        Assert.AreEqual("Först", (string)checkUpdateResult.QueryResult[1]["FirstName"]);
+        Assert.AreEqual("Forst", (string)checkUpdateResult.QueryResult[1]["FirstName"]);
         Assert.AreEqual("Hiiri", (string)checkUpdateResult.QueryResult[2]["LastName"]);
         Assert.AreEqual("Mikki", (string)checkUpdateResult.QueryResult[2]["FirstName"]);
         Assert.AreEqual(3, GetRowCount()); // double check
