@@ -23,6 +23,7 @@ public class Input
     /// <example>
     /// "SELECT * FROM MyTable", 
     /// "INSERT INTO MyTable (id, first_name, last_name) VALUES (:id, :first_name, :last_name)", 
+    /// </example>
     [DisplayFormat(DataFormatString = "Sql")]
     public string Query { get; set; }
 
