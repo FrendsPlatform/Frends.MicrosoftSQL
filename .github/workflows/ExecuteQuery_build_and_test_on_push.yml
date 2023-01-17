@@ -1,0 +1,19 @@
+name: ExecuteQuery build test
+
+on:
+  push:
+    branches-ignore: 
+      - main
+    paths:
+      - 'Frends.MicrosoftSQL.ExecuteQuery/**'
+  workflow_dispatch:
+
+jobs:
+  build:
+    uses: FrendsPlatform/FrendsTasks/.github/workflows/linux_build_test.yml@main
+    with:
+      workdir: Frends.MicrosoftSQL.ExecuteQuery
+      prebuild_command: docker run -e "ACCEPT_EULA=Y" -e "SA_PASSWORD=Salakala123!" -p 1433:1433 --name sql1 --hostname sql1 -d mcr.microsoft.com/mssql/server:2019-CU18-ubuntu-20.04
+    secrets:
+      badge_service_api_key: ${{ secrets.BADGE_SERVICE_API_KEY }}
+      test_feed_api_key: ${{ secrets.TASKS_TEST_FEED_API_KEY }}
