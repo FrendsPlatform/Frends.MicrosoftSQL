@@ -54,7 +54,7 @@ public enum SqlTransactionIsolationLevel
 public enum ExecuteTypes
 {
     /// <summary>
-    /// ExecuteReader for SELECT-statement and NonQuery for UPDATE, INSERT, or DELETE statements.
+    /// ExecuteReader for SELECT-query and NonQuery for UPDATE, INSERT, or DELETE statements.
     /// </summary>
     Auto,
 

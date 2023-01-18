@@ -22,6 +22,7 @@ public class Result
     /// Error message.
     /// This value is generated when an exception occurs and Options.ThrowErrorOnFailure = false.
     /// </summary>
+    /// <example>Login failed for user 'user'.</example>
     public string ErrorMessage { get; private set; }
 
     /// <summary>

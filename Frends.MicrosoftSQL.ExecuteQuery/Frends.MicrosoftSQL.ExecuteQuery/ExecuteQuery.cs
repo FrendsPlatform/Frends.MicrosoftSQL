@@ -1,17 +1,13 @@
 ﻿using Frends.MicrosoftSQL.ExecuteQuery.Definitions;
-using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
 using System.ComponentModel;
 using System.Data;
-using System.Data.Common;
 using System.Data.SqlClient;
-using System.Globalization;
 using System.Reflection;
 using System.Runtime.Loader;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Transactions;
 using IsolationLevel = System.Data.IsolationLevel;
 
 namespace Frends.MicrosoftSQL.ExecuteQuery;
