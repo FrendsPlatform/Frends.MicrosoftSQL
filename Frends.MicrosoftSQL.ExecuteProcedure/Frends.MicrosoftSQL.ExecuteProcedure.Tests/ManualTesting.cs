@@ -1,6 +1,7 @@
 using Frends.MicrosoftSQL.ExecuteProcedure.Definitions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Data.SqlClient;
+using System.Threading;
 
 namespace Frends.MicrosoftSQL.ExecuteProcedure.Tests;
 
@@ -8,18 +9,14 @@ namespace Frends.MicrosoftSQL.ExecuteProcedure.Tests;
 public class ManualTesting
 {
     /*
-        docker run -e "ACCEPT_EULA=Y" -e "SA_PASSWORD=Salakala123!" -p 1433:1433 --name sql1 --hostname sql1 -d mcr.microsoft.com/mssql/server:2019-CU18-ubuntu-20.04
+        These tests requires code editing so they must be skipped in workflow.
+
+        docker-compose up
+
+        How to use via terminal:
         docker exec -it sql1 "bash"
         /opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P "Salakala123!"
-        
-        Check rows before CleanUp:
         SELECT * FROM TestTable
-        GO
-    
-        Optional queries:
-        SELECT Name FROM sys.Databases;
-        GO
-        SELECT * FROM INFORMATION_SCHEMA.TABLES;
         GO
    */
 
@@ -91,8 +88,8 @@ DECLARE cur CURSOR
         connection.Dispose();
     }
 
-    // Add following line 'throw new Exception();' under 'dataReader = await command.ExecuteReaderAsync(cancellationToken).ConfigureAwait(false);'
-    [Ignore("Only run manually")]
+    // Add following line to ExecuteProcedure.cs: 'throw new Exception();' after 'ExecuteTypes.ExecuteReader: dataReader = await command.ExecuteReaderAsync(cancellationToken).ConfigureAwait(false);' (currently line 112).
+    [Ignore("To run this test, comment this line after exception has been added to ExecuteProcedure.cs.")]
     [TestMethod]
     public async Task TestExecuteProcedure_RollbackInsert_ThrowErrorOnFailure_False()
     {
@@ -119,8 +116,8 @@ DECLARE cur CURSOR
         Assert.AreEqual(0, GetRowCount());
     }
 
-    // Add following line 'throw new Exception();' under 'dataReader = await command.ExecuteReaderAsync(cancellationToken).ConfigureAwait(false);'
-    [Ignore("Only run manually")]
+    // Add following line to ExecuteProcedure.cs: 'throw new Exception();' after 'ExecuteTypes.ExecuteReader: dataReader = await command.ExecuteReaderAsync(cancellationToken).ConfigureAwait(false);' (currently line 112).
+    [Ignore("To run this test, comment this line after exception has been added to ExecuteProcedure.cs.")]
     [TestMethod]
     public async Task TestExecuteProcedure_RollbackInsert_ThrowErrorOnFailure_True()
     {

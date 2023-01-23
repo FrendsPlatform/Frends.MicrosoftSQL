@@ -33,13 +33,13 @@ public class Result
     /// Input.ExecuteType = NonQuery: {{  "AffectedRows": -1 }},
     /// Input.ExecuteType = Scalar: {{  "Value": 1 }}
     /// </example>
-    public dynamic QueryResult { get; private set; }
+    public dynamic Data { get; private set; }
 
-    internal Result(bool success, int recordsAffected, string errorMessage, dynamic queryResult)
+    internal Result(bool success, int recordsAffected, string errorMessage, dynamic data)
     {
         Success = success;
         RecordsAffected = recordsAffected;
         ErrorMessage = errorMessage;
-        QueryResult = queryResult;
+        Data = data;
     }
 }
