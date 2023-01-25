@@ -87,49 +87,16 @@ DECLARE cur CURSOR
     }
 
     [TestMethod]
-    public async Task TestExecuteProcedure_Invalid_Creds_ThrowError()
+    public async Task TestExecuteProcedure_ExecuteReader()
     {
-        var input = new Input()
-        {
-            ConnectionString = "Server=127.0.0.1,1433;Database=Master;User Id=SA;Password=WrongPassWord",
+        var transactionLevels = new List<SqlTransactionIsolationLevel>() {
+            SqlTransactionIsolationLevel.Unspecified,
+            SqlTransactionIsolationLevel.Serializable,
+            SqlTransactionIsolationLevel.None,
+            SqlTransactionIsolationLevel.ReadUncommitted,
+            SqlTransactionIsolationLevel.ReadCommitted
         };
 
-        var options = new Options()
-        {
-            SqlTransactionIsolationLevel = SqlTransactionIsolationLevel.ReadCommitted,
-            CommandTimeoutSeconds = 2,
-            ThrowErrorOnFailure = true
-        };
-
-        var ex = await Assert.ThrowsExceptionAsync<Exception>(() => MicrosoftSQL.ExecuteProcedure(input, options, default));
-        Assert.IsTrue(ex.Message.Contains("SqlException (0x80131904): Login failed for user 'SA'."));
-    }
-
-    [TestMethod]
-    public async Task TestExecuteProcedure_Invalid_Creds_ReturnErrorMessage()
-    {
-        var input = new Input()
-        {
-            ConnectionString = "Server=127.0.0.1,1433;Database=Master;User Id=SA;Password=WrongPassWord",
-        };
-
-        var options = new Options()
-        {
-            SqlTransactionIsolationLevel = SqlTransactionIsolationLevel.ReadCommitted,
-            CommandTimeoutSeconds = 2,
-            ThrowErrorOnFailure = false
-        };
-
-        var result = await MicrosoftSQL.ExecuteProcedure(input, options, default);
-        Assert.IsFalse(result.Success);
-        Assert.IsTrue(result.ErrorMessage.Contains("Login failed for user 'SA'."));
-        Assert.AreEqual(0, result.RecordsAffected);
-    }
-
-    // SqlTransactionIsolationLevel.Unspecified
-    [TestMethod]
-    public async Task TestExecuteProcedure_ExecuteReader_Unspecified()
-    {
         var inputInsert = new Input()
         {
             ConnectionString = _connString,
@@ -170,843 +137,79 @@ DECLARE cur CURSOR
             Parameters = null
         };
 
-        var options = new Options()
+        foreach (var level in transactionLevels)
         {
-            SqlTransactionIsolationLevel = SqlTransactionIsolationLevel.Unspecified,
-            CommandTimeoutSeconds = 2,
-            ThrowErrorOnFailure = true
-        };
+            var options = new Options()
+            {
+                SqlTransactionIsolationLevel = level,
+                CommandTimeoutSeconds = 2,
+                ThrowErrorOnFailure = true
+            };
 
-        // Insert rows
-        var insert = await MicrosoftSQL.ExecuteProcedure(inputInsert, options, default);
-        Assert.IsTrue(insert.Success);
-        Assert.AreEqual(3, insert.RecordsAffected);
-        Assert.IsNull(insert.ErrorMessage);
-        Assert.AreEqual(3, GetRowCount()); // Make sure rows inserted before moving on.
+            // Insert rows
+            var insert = await MicrosoftSQL.ExecuteProcedure(inputInsert, options, default);
+            Assert.IsTrue(insert.Success);
+            Assert.AreEqual(3, insert.RecordsAffected);
+            Assert.IsNull(insert.ErrorMessage);
+            Assert.AreEqual(3, GetRowCount());
 
-        // Select all
-        var select = await MicrosoftSQL.ExecuteProcedure(inputSelect, options, default);
-        Assert.IsTrue(select.Success);
-        Assert.AreEqual(-1, select.RecordsAffected);
-        Assert.IsNull(select.ErrorMessage);
-        Assert.AreEqual(typeof(JArray), select.Data.GetType());
-        Assert.AreEqual("Suku", (string)select.Data[0]["LastName"]);
-        Assert.AreEqual("Etu", (string)select.Data[0]["FirstName"]);
-        Assert.AreEqual("Last", (string)select.Data[1]["LastName"]);
-        Assert.AreEqual("Forst", (string)select.Data[1]["FirstName"]);
-        Assert.AreEqual("Hiiri", (string)select.Data[2]["LastName"]);
-        Assert.AreEqual("Mikki", (string)select.Data[2]["FirstName"]);
-        Assert.AreEqual(3, GetRowCount()); // double check
+            // Select all
+            var select = await MicrosoftSQL.ExecuteProcedure(inputSelect, options, default);
+            Assert.IsTrue(select.Success);
+            Assert.AreEqual(-1, select.RecordsAffected);
+            Assert.IsNull(select.ErrorMessage);
+            Assert.AreEqual(typeof(JArray), select.Data.GetType());
+            Assert.AreEqual("Suku", (string)select.Data[0]["LastName"]);
+            Assert.AreEqual("Etu", (string)select.Data[0]["FirstName"]);
+            Assert.AreEqual("Last", (string)select.Data[1]["LastName"]);
+            Assert.AreEqual("Forst", (string)select.Data[1]["FirstName"]);
+            Assert.AreEqual("Hiiri", (string)select.Data[2]["LastName"]);
+            Assert.AreEqual("Mikki", (string)select.Data[2]["FirstName"]);
+            Assert.AreEqual(3, GetRowCount());
 
-        // Select single
-        var selectSingle = await MicrosoftSQL.ExecuteProcedure(inputSelectSingle, options, default);
-        Assert.IsTrue(selectSingle.Success);
-        Assert.AreEqual(-1, selectSingle.RecordsAffected);
-        Assert.IsNull(selectSingle.ErrorMessage);
-        Assert.AreEqual(typeof(JArray), selectSingle.Data.GetType());
-        Assert.AreEqual("Suku", (string)selectSingle.Data[0]["LastName"]);
-        Assert.AreEqual("Etu", (string)selectSingle.Data[0]["FirstName"]);
-        Assert.AreEqual(3, GetRowCount()); // double check
+            // Select single
+            var selectSingle = await MicrosoftSQL.ExecuteProcedure(inputSelectSingle, options, default);
+            Assert.IsTrue(selectSingle.Success);
+            Assert.AreEqual(-1, selectSingle.RecordsAffected);
+            Assert.IsNull(selectSingle.ErrorMessage);
+            Assert.AreEqual(typeof(JArray), selectSingle.Data.GetType());
+            Assert.AreEqual("Suku", (string)selectSingle.Data[0]["LastName"]);
+            Assert.AreEqual("Etu", (string)selectSingle.Data[0]["FirstName"]);
+            Assert.AreEqual(3, GetRowCount());
 
-        // Update
-        var update = await MicrosoftSQL.ExecuteProcedure(inputUpdate, options, default);
-        Assert.IsTrue(update.Success);
-        Assert.AreEqual(1, update.RecordsAffected);
-        Assert.IsNull(update.ErrorMessage);
-        Assert.AreEqual(3, GetRowCount()); // double check
-        var checkUpdateResult = await MicrosoftSQL.ExecuteProcedure(inputSelect, options, default);
-        Assert.AreEqual("Suku", (string)checkUpdateResult.Data[0]["LastName"]);
-        Assert.AreEqual("Etu", (string)checkUpdateResult.Data[0]["FirstName"]);
-        Assert.AreEqual("Edit", (string)checkUpdateResult.Data[1]["LastName"]);
-        Assert.AreEqual("Forst", (string)checkUpdateResult.Data[1]["FirstName"]);
-        Assert.AreEqual("Hiiri", (string)checkUpdateResult.Data[2]["LastName"]);
-        Assert.AreEqual("Mikki", (string)checkUpdateResult.Data[2]["FirstName"]);
-        Assert.AreEqual(3, GetRowCount()); // double check
+            // Update
+            var update = await MicrosoftSQL.ExecuteProcedure(inputUpdate, options, default);
+            Assert.IsTrue(update.Success);
+            Assert.AreEqual(1, update.RecordsAffected);
+            Assert.IsNull(update.ErrorMessage);
+            Assert.AreEqual(3, GetRowCount());
+            var checkUpdateResult = await MicrosoftSQL.ExecuteProcedure(inputSelect, options, default);
+            Assert.AreEqual("Suku", (string)checkUpdateResult.Data[0]["LastName"]);
+            Assert.AreEqual("Etu", (string)checkUpdateResult.Data[0]["FirstName"]);
+            Assert.AreEqual("Edit", (string)checkUpdateResult.Data[1]["LastName"]);
+            Assert.AreEqual("Forst", (string)checkUpdateResult.Data[1]["FirstName"]);
+            Assert.AreEqual("Hiiri", (string)checkUpdateResult.Data[2]["LastName"]);
+            Assert.AreEqual("Mikki", (string)checkUpdateResult.Data[2]["FirstName"]);
+            Assert.AreEqual(3, GetRowCount());
 
-        // Delete
-        var delete = await MicrosoftSQL.ExecuteProcedure(inputDelete, options, default);
-        Assert.IsTrue(delete.Success);
-        Assert.AreEqual(1, delete.RecordsAffected);
-        Assert.IsNull(delete.ErrorMessage);
-        Assert.AreEqual(2, GetRowCount()); // double check
-        var checkDeleteResult = await MicrosoftSQL.ExecuteProcedure(inputSelect, options, default);
-        Assert.AreEqual("Suku", (string)checkDeleteResult.Data[0]["LastName"]);
-        Assert.AreEqual("Etu", (string)checkDeleteResult.Data[0]["FirstName"]);
-        Assert.AreEqual("Hiiri", (string)checkDeleteResult.Data[1]["LastName"]);
-        Assert.AreEqual("Mikki", (string)checkDeleteResult.Data[1]["FirstName"]);
+            // Delete
+            var delete = await MicrosoftSQL.ExecuteProcedure(inputDelete, options, default);
+            Assert.IsTrue(delete.Success);
+            Assert.AreEqual(1, delete.RecordsAffected);
+            Assert.IsNull(delete.ErrorMessage);
+            Assert.AreEqual(2, GetRowCount());
+            var checkDeleteResult = await MicrosoftSQL.ExecuteProcedure(inputSelect, options, default);
+            Assert.AreEqual("Suku", (string)checkDeleteResult.Data[0]["LastName"]);
+            Assert.AreEqual("Etu", (string)checkDeleteResult.Data[0]["FirstName"]);
+            Assert.AreEqual("Hiiri", (string)checkDeleteResult.Data[1]["LastName"]);
+            Assert.AreEqual("Mikki", (string)checkDeleteResult.Data[1]["FirstName"]);
+
+            CleanUp();
+            Init();
+        }
     }
 
-    // SqlTransactionIsolationLevel.None
-    [TestMethod]
-    public async Task TestExecuteProcedure_ExecuteReader_None()
-    {
-        var inputInsert = new Input()
-        {
-            ConnectionString = _connString,
-            Execute = "InsertValues",
-            ExecuteType = ExecuteTypes.ExecuteReader,
-            Parameters = null
-        };
-
-        var inputSelect = new Input()
-        {
-            ConnectionString = _connString,
-            Execute = "SelectAll",
-            ExecuteType = ExecuteTypes.ExecuteReader,
-            Parameters = null
-        };
-
-        var inputSelectSingle = new Input()
-        {
-            ConnectionString = _connString,
-            Execute = "SelectSingle",
-            ExecuteType = ExecuteTypes.ExecuteReader,
-            Parameters = null
-        };
-
-        var inputUpdate = new Input()
-        {
-            ConnectionString = _connString,
-            Execute = "UpdateValue",
-            ExecuteType = ExecuteTypes.ExecuteReader,
-            Parameters = null
-        };
-
-        var inputDelete = new Input()
-        {
-            ConnectionString = _connString,
-            Execute = "DeleteValue",
-            ExecuteType = ExecuteTypes.ExecuteReader,
-            Parameters = null
-        };
-
-        var options = new Options()
-        {
-            SqlTransactionIsolationLevel = SqlTransactionIsolationLevel.None,
-            CommandTimeoutSeconds = 2,
-            ThrowErrorOnFailure = true
-        };
-
-        // Insert rows
-        var insert = await MicrosoftSQL.ExecuteProcedure(inputInsert, options, default);
-        Assert.IsTrue(insert.Success);
-        Assert.AreEqual(3, insert.RecordsAffected);
-        Assert.IsNull(insert.ErrorMessage);
-        Assert.AreEqual(3, GetRowCount()); // Make sure rows inserted before moving on.
-
-        // Select all
-        var select = await MicrosoftSQL.ExecuteProcedure(inputSelect, options, default);
-        Assert.IsTrue(select.Success);
-        Assert.AreEqual(-1, select.RecordsAffected);
-        Assert.IsNull(select.ErrorMessage);
-        Assert.AreEqual(typeof(JArray), select.Data.GetType());
-        Assert.AreEqual("Suku", (string)select.Data[0]["LastName"]);
-        Assert.AreEqual("Etu", (string)select.Data[0]["FirstName"]);
-        Assert.AreEqual("Last", (string)select.Data[1]["LastName"]);
-        Assert.AreEqual("Forst", (string)select.Data[1]["FirstName"]);
-        Assert.AreEqual("Hiiri", (string)select.Data[2]["LastName"]);
-        Assert.AreEqual("Mikki", (string)select.Data[2]["FirstName"]);
-        Assert.AreEqual(3, GetRowCount()); // double check
-
-        // Select single
-        var selectSingle = await MicrosoftSQL.ExecuteProcedure(inputSelectSingle, options, default);
-        Assert.IsTrue(selectSingle.Success);
-        Assert.AreEqual(-1, selectSingle.RecordsAffected);
-        Assert.IsNull(selectSingle.ErrorMessage);
-        Assert.AreEqual(typeof(JArray), selectSingle.Data.GetType());
-        Assert.AreEqual("Suku", (string)selectSingle.Data[0]["LastName"]);
-        Assert.AreEqual("Etu", (string)selectSingle.Data[0]["FirstName"]);
-        Assert.AreEqual(3, GetRowCount()); // double check
-
-        // Update
-        var update = await MicrosoftSQL.ExecuteProcedure(inputUpdate, options, default);
-        Assert.IsTrue(update.Success);
-        Assert.AreEqual(1, update.RecordsAffected);
-        Assert.IsNull(update.ErrorMessage);
-        Assert.AreEqual(3, GetRowCount()); // double check
-        var checkUpdateResult = await MicrosoftSQL.ExecuteProcedure(inputSelect, options, default);
-        Assert.AreEqual("Suku", (string)checkUpdateResult.Data[0]["LastName"]);
-        Assert.AreEqual("Etu", (string)checkUpdateResult.Data[0]["FirstName"]);
-        Assert.AreEqual("Edit", (string)checkUpdateResult.Data[1]["LastName"]);
-        Assert.AreEqual("Forst", (string)checkUpdateResult.Data[1]["FirstName"]);
-        Assert.AreEqual("Hiiri", (string)checkUpdateResult.Data[2]["LastName"]);
-        Assert.AreEqual("Mikki", (string)checkUpdateResult.Data[2]["FirstName"]);
-        Assert.AreEqual(3, GetRowCount()); // double check
-
-        // Delete
-        var delete = await MicrosoftSQL.ExecuteProcedure(inputDelete, options, default);
-        Assert.IsTrue(delete.Success);
-        Assert.AreEqual(1, delete.RecordsAffected);
-        Assert.IsNull(delete.ErrorMessage);
-        Assert.AreEqual(2, GetRowCount()); // double check
-        var checkDeleteResult = await MicrosoftSQL.ExecuteProcedure(inputSelect, options, default);
-        Assert.AreEqual("Suku", (string)checkDeleteResult.Data[0]["LastName"]);
-        Assert.AreEqual("Etu", (string)checkDeleteResult.Data[0]["FirstName"]);
-        Assert.AreEqual("Hiiri", (string)checkDeleteResult.Data[1]["LastName"]);
-        Assert.AreEqual("Mikki", (string)checkDeleteResult.Data[1]["FirstName"]);
-    }
-
-    // SqlTransactionIsolationLevel.Default
-    [TestMethod]
-    public async Task TestExecuteProcedure_ExecuteReader_Default()
-    {
-        var inputInsert = new Input()
-        {
-            ConnectionString = _connString,
-            Execute = "InsertValues",
-            ExecuteType = ExecuteTypes.ExecuteReader,
-            Parameters = null
-        };
-
-        var inputSelect = new Input()
-        {
-            ConnectionString = _connString,
-            Execute = "SelectAll",
-            ExecuteType = ExecuteTypes.ExecuteReader,
-            Parameters = null
-        };
-
-        var inputSelectSingle = new Input()
-        {
-            ConnectionString = _connString,
-            Execute = "SelectSingle",
-            ExecuteType = ExecuteTypes.ExecuteReader,
-            Parameters = null
-        };
-
-        var inputUpdate = new Input()
-        {
-            ConnectionString = _connString,
-            Execute = "UpdateValue",
-            ExecuteType = ExecuteTypes.ExecuteReader,
-            Parameters = null
-        };
-
-        var inputDelete = new Input()
-        {
-            ConnectionString = _connString,
-            Execute = "DeleteValue",
-            ExecuteType = ExecuteTypes.ExecuteReader,
-            Parameters = null
-        };
-
-        var options = new Options()
-        {
-            SqlTransactionIsolationLevel = SqlTransactionIsolationLevel.Default,
-            CommandTimeoutSeconds = 2,
-            ThrowErrorOnFailure = true
-        };
-
-        // Insert rows
-        var insert = await MicrosoftSQL.ExecuteProcedure(inputInsert, options, default);
-        Assert.IsTrue(insert.Success);
-        Assert.AreEqual(3, insert.RecordsAffected);
-        Assert.IsNull(insert.ErrorMessage);
-        Assert.AreEqual(3, GetRowCount()); // Make sure rows inserted before moving on.
-
-        // Select all
-        var select = await MicrosoftSQL.ExecuteProcedure(inputSelect, options, default);
-        Assert.IsTrue(select.Success);
-        Assert.AreEqual(-1, select.RecordsAffected);
-        Assert.IsNull(select.ErrorMessage);
-        Assert.AreEqual(typeof(JArray), select.Data.GetType());
-        Assert.AreEqual("Suku", (string)select.Data[0]["LastName"]);
-        Assert.AreEqual("Etu", (string)select.Data[0]["FirstName"]);
-        Assert.AreEqual("Last", (string)select.Data[1]["LastName"]);
-        Assert.AreEqual("Forst", (string)select.Data[1]["FirstName"]);
-        Assert.AreEqual("Hiiri", (string)select.Data[2]["LastName"]);
-        Assert.AreEqual("Mikki", (string)select.Data[2]["FirstName"]);
-        Assert.AreEqual(3, GetRowCount()); // double check
-
-        // Select single
-        var selectSingle = await MicrosoftSQL.ExecuteProcedure(inputSelectSingle, options, default);
-        Assert.IsTrue(selectSingle.Success);
-        Assert.AreEqual(-1, selectSingle.RecordsAffected);
-        Assert.IsNull(selectSingle.ErrorMessage);
-        Assert.AreEqual(typeof(JArray), selectSingle.Data.GetType());
-        Assert.AreEqual("Suku", (string)selectSingle.Data[0]["LastName"]);
-        Assert.AreEqual("Etu", (string)selectSingle.Data[0]["FirstName"]);
-        Assert.AreEqual(3, GetRowCount()); // double check
-
-        // Update
-        var update = await MicrosoftSQL.ExecuteProcedure(inputUpdate, options, default);
-        Assert.IsTrue(update.Success);
-        Assert.AreEqual(1, update.RecordsAffected);
-        Assert.IsNull(update.ErrorMessage);
-        Assert.AreEqual(3, GetRowCount()); // double check
-        var checkUpdateResult = await MicrosoftSQL.ExecuteProcedure(inputSelect, options, default);
-        Assert.AreEqual("Suku", (string)checkUpdateResult.Data[0]["LastName"]);
-        Assert.AreEqual("Etu", (string)checkUpdateResult.Data[0]["FirstName"]);
-        Assert.AreEqual("Edit", (string)checkUpdateResult.Data[1]["LastName"]);
-        Assert.AreEqual("Forst", (string)checkUpdateResult.Data[1]["FirstName"]);
-        Assert.AreEqual("Hiiri", (string)checkUpdateResult.Data[2]["LastName"]);
-        Assert.AreEqual("Mikki", (string)checkUpdateResult.Data[2]["FirstName"]);
-        Assert.AreEqual(3, GetRowCount()); // double check
-
-        // Delete
-        var delete = await MicrosoftSQL.ExecuteProcedure(inputDelete, options, default);
-        Assert.IsTrue(delete.Success);
-        Assert.AreEqual(1, delete.RecordsAffected);
-        Assert.IsNull(delete.ErrorMessage);
-        Assert.AreEqual(2, GetRowCount()); // double check
-        var checkDeleteResult = await MicrosoftSQL.ExecuteProcedure(inputSelect, options, default);
-        Assert.AreEqual("Suku", (string)checkDeleteResult.Data[0]["LastName"]);
-        Assert.AreEqual("Etu", (string)checkDeleteResult.Data[0]["FirstName"]);
-        Assert.AreEqual("Hiiri", (string)checkDeleteResult.Data[1]["LastName"]);
-        Assert.AreEqual("Mikki", (string)checkDeleteResult.Data[1]["FirstName"]);
-    }
-
-    // SqlTransactionIsolationLevel.ReadCommitted
-    [TestMethod]
-    public async Task TestExecuteProcedure_ExecuteReader_ReadCommitted()
-    {
-        var inputInsert = new Input()
-        {
-            ConnectionString = _connString,
-            Execute = "InsertValues",
-            ExecuteType = ExecuteTypes.ExecuteReader,
-            Parameters = null
-        };
-
-        var inputSelect = new Input()
-        {
-            ConnectionString = _connString,
-            Execute = "SelectAll",
-            ExecuteType = ExecuteTypes.ExecuteReader,
-            Parameters = null
-        };
-
-        var inputSelectSingle = new Input()
-        {
-            ConnectionString = _connString,
-            Execute = "SelectSingle",
-            ExecuteType = ExecuteTypes.ExecuteReader,
-            Parameters = null
-        };
-
-        var inputUpdate = new Input()
-        {
-            ConnectionString = _connString,
-            Execute = "UpdateValue",
-            ExecuteType = ExecuteTypes.ExecuteReader,
-            Parameters = null
-        };
-
-        var inputDelete = new Input()
-        {
-            ConnectionString = _connString,
-            Execute = "DeleteValue",
-            ExecuteType = ExecuteTypes.ExecuteReader,
-            Parameters = null
-        };
-
-        var options = new Options()
-        {
-            SqlTransactionIsolationLevel = SqlTransactionIsolationLevel.ReadCommitted,
-            CommandTimeoutSeconds = 2,
-            ThrowErrorOnFailure = true
-        };
-
-        // Insert rows
-        var insert = await MicrosoftSQL.ExecuteProcedure(inputInsert, options, default);
-        Assert.IsTrue(insert.Success);
-        Assert.AreEqual(3, insert.RecordsAffected);
-        Assert.IsNull(insert.ErrorMessage);
-        Assert.AreEqual(3, GetRowCount()); // Make sure rows inserted before moving on.
-
-        // Select all
-        var select = await MicrosoftSQL.ExecuteProcedure(inputSelect, options, default);
-        Assert.IsTrue(select.Success);
-        Assert.AreEqual(-1, select.RecordsAffected);
-        Assert.IsNull(select.ErrorMessage);
-        Assert.AreEqual(typeof(JArray), select.Data.GetType());
-        Assert.AreEqual("Suku", (string)select.Data[0]["LastName"]);
-        Assert.AreEqual("Etu", (string)select.Data[0]["FirstName"]);
-        Assert.AreEqual("Last", (string)select.Data[1]["LastName"]);
-        Assert.AreEqual("Forst", (string)select.Data[1]["FirstName"]);
-        Assert.AreEqual("Hiiri", (string)select.Data[2]["LastName"]);
-        Assert.AreEqual("Mikki", (string)select.Data[2]["FirstName"]);
-        Assert.AreEqual(3, GetRowCount()); // double check
-
-        // Select single
-        var selectSingle = await MicrosoftSQL.ExecuteProcedure(inputSelectSingle, options, default);
-        Assert.IsTrue(selectSingle.Success);
-        Assert.AreEqual(-1, selectSingle.RecordsAffected);
-        Assert.IsNull(selectSingle.ErrorMessage);
-        Assert.AreEqual(typeof(JArray), selectSingle.Data.GetType());
-        Assert.AreEqual("Suku", (string)selectSingle.Data[0]["LastName"]);
-        Assert.AreEqual("Etu", (string)selectSingle.Data[0]["FirstName"]);
-        Assert.AreEqual(3, GetRowCount()); // double check
-
-        // Update
-        var update = await MicrosoftSQL.ExecuteProcedure(inputUpdate, options, default);
-        Assert.IsTrue(update.Success);
-        Assert.AreEqual(1, update.RecordsAffected);
-        Assert.IsNull(update.ErrorMessage);
-        Assert.AreEqual(3, GetRowCount()); // double check
-        var checkUpdateResult = await MicrosoftSQL.ExecuteProcedure(inputSelect, options, default);
-        Assert.AreEqual("Suku", (string)checkUpdateResult.Data[0]["LastName"]);
-        Assert.AreEqual("Etu", (string)checkUpdateResult.Data[0]["FirstName"]);
-        Assert.AreEqual("Edit", (string)checkUpdateResult.Data[1]["LastName"]);
-        Assert.AreEqual("Forst", (string)checkUpdateResult.Data[1]["FirstName"]);
-        Assert.AreEqual("Hiiri", (string)checkUpdateResult.Data[2]["LastName"]);
-        Assert.AreEqual("Mikki", (string)checkUpdateResult.Data[2]["FirstName"]);
-        Assert.AreEqual(3, GetRowCount()); // double check
-
-        // Delete
-        var delete = await MicrosoftSQL.ExecuteProcedure(inputDelete, options, default);
-        Assert.IsTrue(delete.Success);
-        Assert.AreEqual(1, delete.RecordsAffected);
-        Assert.IsNull(delete.ErrorMessage);
-        Assert.AreEqual(2, GetRowCount()); // double check
-        var checkDeleteResult = await MicrosoftSQL.ExecuteProcedure(inputSelect, options, default);
-        Assert.AreEqual("Suku", (string)checkDeleteResult.Data[0]["LastName"]);
-        Assert.AreEqual("Etu", (string)checkDeleteResult.Data[0]["FirstName"]);
-        Assert.AreEqual("Hiiri", (string)checkDeleteResult.Data[1]["LastName"]);
-        Assert.AreEqual("Mikki", (string)checkDeleteResult.Data[1]["FirstName"]);
-    }
-
-    // SqlTransactionIsolationLevel.ReadUncommitted
-    [TestMethod]
-    public async Task TestExecuteProcedure_ExecuteReader_ReadUncommitted()
-    {
-        var inputInsert = new Input()
-        {
-            ConnectionString = _connString,
-            Execute = "InsertValues",
-            ExecuteType = ExecuteTypes.ExecuteReader,
-            Parameters = null
-        };
-
-        var inputSelect = new Input()
-        {
-            ConnectionString = _connString,
-            Execute = "SelectAll",
-            ExecuteType = ExecuteTypes.ExecuteReader,
-            Parameters = null
-        };
-
-        var inputSelectSingle = new Input()
-        {
-            ConnectionString = _connString,
-            Execute = "SelectSingle",
-            ExecuteType = ExecuteTypes.ExecuteReader,
-            Parameters = null
-        };
-
-        var inputUpdate = new Input()
-        {
-            ConnectionString = _connString,
-            Execute = "UpdateValue",
-            ExecuteType = ExecuteTypes.ExecuteReader,
-            Parameters = null
-        };
-
-        var inputDelete = new Input()
-        {
-            ConnectionString = _connString,
-            Execute = "DeleteValue",
-            ExecuteType = ExecuteTypes.ExecuteReader,
-            Parameters = null
-        };
-
-        var options = new Options()
-        {
-            SqlTransactionIsolationLevel = SqlTransactionIsolationLevel.ReadUncommitted,
-            CommandTimeoutSeconds = 2,
-            ThrowErrorOnFailure = true
-        };
-
-        // Insert rows
-        var insert = await MicrosoftSQL.ExecuteProcedure(inputInsert, options, default);
-        Assert.IsTrue(insert.Success);
-        Assert.AreEqual(3, insert.RecordsAffected);
-        Assert.IsNull(insert.ErrorMessage);
-        Assert.AreEqual(3, GetRowCount()); // Make sure rows inserted before moving on.
-
-        // Select all
-        var select = await MicrosoftSQL.ExecuteProcedure(inputSelect, options, default);
-        Assert.IsTrue(select.Success);
-        Assert.AreEqual(-1, select.RecordsAffected);
-        Assert.IsNull(select.ErrorMessage);
-        Assert.AreEqual(typeof(JArray), select.Data.GetType());
-        Assert.AreEqual("Suku", (string)select.Data[0]["LastName"]);
-        Assert.AreEqual("Etu", (string)select.Data[0]["FirstName"]);
-        Assert.AreEqual("Last", (string)select.Data[1]["LastName"]);
-        Assert.AreEqual("Forst", (string)select.Data[1]["FirstName"]);
-        Assert.AreEqual("Hiiri", (string)select.Data[2]["LastName"]);
-        Assert.AreEqual("Mikki", (string)select.Data[2]["FirstName"]);
-        Assert.AreEqual(3, GetRowCount()); // double check
-
-        // Select single
-        var selectSingle = await MicrosoftSQL.ExecuteProcedure(inputSelectSingle, options, default);
-        Assert.IsTrue(selectSingle.Success);
-        Assert.AreEqual(-1, selectSingle.RecordsAffected);
-        Assert.IsNull(selectSingle.ErrorMessage);
-        Assert.AreEqual(typeof(JArray), selectSingle.Data.GetType());
-        Assert.AreEqual("Suku", (string)selectSingle.Data[0]["LastName"]);
-        Assert.AreEqual("Etu", (string)selectSingle.Data[0]["FirstName"]);
-        Assert.AreEqual(3, GetRowCount()); // double check
-
-        // Update
-        var update = await MicrosoftSQL.ExecuteProcedure(inputUpdate, options, default);
-        Assert.IsTrue(update.Success);
-        Assert.AreEqual(1, update.RecordsAffected);
-        Assert.IsNull(update.ErrorMessage);
-        Assert.AreEqual(3, GetRowCount()); // double check
-        var checkUpdateResult = await MicrosoftSQL.ExecuteProcedure(inputSelect, options, default);
-        Assert.AreEqual("Suku", (string)checkUpdateResult.Data[0]["LastName"]);
-        Assert.AreEqual("Etu", (string)checkUpdateResult.Data[0]["FirstName"]);
-        Assert.AreEqual("Edit", (string)checkUpdateResult.Data[1]["LastName"]);
-        Assert.AreEqual("Forst", (string)checkUpdateResult.Data[1]["FirstName"]);
-        Assert.AreEqual("Hiiri", (string)checkUpdateResult.Data[2]["LastName"]);
-        Assert.AreEqual("Mikki", (string)checkUpdateResult.Data[2]["FirstName"]);
-        Assert.AreEqual(3, GetRowCount()); // double check
-
-        // Delete
-        var delete = await MicrosoftSQL.ExecuteProcedure(inputDelete, options, default);
-        Assert.IsTrue(delete.Success);
-        Assert.AreEqual(1, delete.RecordsAffected);
-        Assert.IsNull(delete.ErrorMessage);
-        Assert.AreEqual(2, GetRowCount()); // double check
-        var checkDeleteResult = await MicrosoftSQL.ExecuteProcedure(inputSelect, options, default);
-        Assert.AreEqual("Suku", (string)checkDeleteResult.Data[0]["LastName"]);
-        Assert.AreEqual("Etu", (string)checkDeleteResult.Data[0]["FirstName"]);
-        Assert.AreEqual("Hiiri", (string)checkDeleteResult.Data[1]["LastName"]);
-        Assert.AreEqual("Mikki", (string)checkDeleteResult.Data[1]["FirstName"]);
-    }
-
-    // SqlTransactionIsolationLevel.RepeatableRead
-    [TestMethod]
-    public async Task TestExecuteProcedure_ExecuteReader_RepeatableRead()
-    {
-        var inputInsert = new Input()
-        {
-            ConnectionString = _connString,
-            Execute = "InsertValues",
-            ExecuteType = ExecuteTypes.ExecuteReader,
-            Parameters = null
-        };
-
-        var inputSelect = new Input()
-        {
-            ConnectionString = _connString,
-            Execute = "SelectAll",
-            ExecuteType = ExecuteTypes.ExecuteReader,
-            Parameters = null
-        };
-
-        var inputSelectSingle = new Input()
-        {
-            ConnectionString = _connString,
-            Execute = "SelectSingle",
-            ExecuteType = ExecuteTypes.ExecuteReader,
-            Parameters = null
-        };
-
-        var inputUpdate = new Input()
-        {
-            ConnectionString = _connString,
-            Execute = "UpdateValue",
-            ExecuteType = ExecuteTypes.ExecuteReader,
-            Parameters = null
-        };
-
-        var inputDelete = new Input()
-        {
-            ConnectionString = _connString,
-            Execute = "DeleteValue",
-            ExecuteType = ExecuteTypes.ExecuteReader,
-            Parameters = null
-        };
-
-        var options = new Options()
-        {
-            SqlTransactionIsolationLevel = SqlTransactionIsolationLevel.RepeatableRead,
-            CommandTimeoutSeconds = 2,
-            ThrowErrorOnFailure = true
-        };
-
-        // Insert rows
-        var insert = await MicrosoftSQL.ExecuteProcedure(inputInsert, options, default);
-        Assert.IsTrue(insert.Success);
-        Assert.AreEqual(3, insert.RecordsAffected);
-        Assert.IsNull(insert.ErrorMessage);
-        Assert.AreEqual(3, GetRowCount()); // Make sure rows inserted before moving on.
-
-        // Select all
-        var select = await MicrosoftSQL.ExecuteProcedure(inputSelect, options, default);
-        Assert.IsTrue(select.Success);
-        Assert.AreEqual(-1, select.RecordsAffected);
-        Assert.IsNull(select.ErrorMessage);
-        Assert.AreEqual(typeof(JArray), select.Data.GetType());
-        Assert.AreEqual("Suku", (string)select.Data[0]["LastName"]);
-        Assert.AreEqual("Etu", (string)select.Data[0]["FirstName"]);
-        Assert.AreEqual("Last", (string)select.Data[1]["LastName"]);
-        Assert.AreEqual("Forst", (string)select.Data[1]["FirstName"]);
-        Assert.AreEqual("Hiiri", (string)select.Data[2]["LastName"]);
-        Assert.AreEqual("Mikki", (string)select.Data[2]["FirstName"]);
-        Assert.AreEqual(3, GetRowCount()); // double check
-
-        // Select single
-        var selectSingle = await MicrosoftSQL.ExecuteProcedure(inputSelectSingle, options, default);
-        Assert.IsTrue(selectSingle.Success);
-        Assert.AreEqual(-1, selectSingle.RecordsAffected);
-        Assert.IsNull(selectSingle.ErrorMessage);
-        Assert.AreEqual(typeof(JArray), selectSingle.Data.GetType());
-        Assert.AreEqual("Suku", (string)selectSingle.Data[0]["LastName"]);
-        Assert.AreEqual("Etu", (string)selectSingle.Data[0]["FirstName"]);
-        Assert.AreEqual(3, GetRowCount()); // double check
-
-        // Update
-        var update = await MicrosoftSQL.ExecuteProcedure(inputUpdate, options, default);
-        Assert.IsTrue(update.Success);
-        Assert.AreEqual(1, update.RecordsAffected);
-        Assert.IsNull(update.ErrorMessage);
-        Assert.AreEqual(3, GetRowCount()); // double check
-        var checkUpdateResult = await MicrosoftSQL.ExecuteProcedure(inputSelect, options, default);
-        Assert.AreEqual("Suku", (string)checkUpdateResult.Data[0]["LastName"]);
-        Assert.AreEqual("Etu", (string)checkUpdateResult.Data[0]["FirstName"]);
-        Assert.AreEqual("Edit", (string)checkUpdateResult.Data[1]["LastName"]);
-        Assert.AreEqual("Forst", (string)checkUpdateResult.Data[1]["FirstName"]);
-        Assert.AreEqual("Hiiri", (string)checkUpdateResult.Data[2]["LastName"]);
-        Assert.AreEqual("Mikki", (string)checkUpdateResult.Data[2]["FirstName"]);
-        Assert.AreEqual(3, GetRowCount()); // double check
-
-        // Delete
-        var delete = await MicrosoftSQL.ExecuteProcedure(inputDelete, options, default);
-        Assert.IsTrue(delete.Success);
-        Assert.AreEqual(1, delete.RecordsAffected);
-        Assert.IsNull(delete.ErrorMessage);
-        Assert.AreEqual(2, GetRowCount()); // double check
-        var checkDeleteResult = await MicrosoftSQL.ExecuteProcedure(inputSelect, options, default);
-        Assert.AreEqual("Suku", (string)checkDeleteResult.Data[0]["LastName"]);
-        Assert.AreEqual("Etu", (string)checkDeleteResult.Data[0]["FirstName"]);
-        Assert.AreEqual("Hiiri", (string)checkDeleteResult.Data[1]["LastName"]);
-        Assert.AreEqual("Mikki", (string)checkDeleteResult.Data[1]["FirstName"]);
-    }
-
-    // SqlTransactionIsolationLevel.Serializable
-    [TestMethod]
-    public async Task TestExecuteProcedure_ExecuteReader_Serializable()
-    {
-        var inputInsert = new Input()
-        {
-            ConnectionString = _connString,
-            Execute = "InsertValues",
-            ExecuteType = ExecuteTypes.ExecuteReader,
-            Parameters = null
-        };
-
-        var inputSelect = new Input()
-        {
-            ConnectionString = _connString,
-            Execute = "SelectAll",
-            ExecuteType = ExecuteTypes.ExecuteReader,
-            Parameters = null
-        };
-
-        var inputSelectSingle = new Input()
-        {
-            ConnectionString = _connString,
-            Execute = "SelectSingle",
-            ExecuteType = ExecuteTypes.ExecuteReader,
-            Parameters = null
-        };
-
-        var inputUpdate = new Input()
-        {
-            ConnectionString = _connString,
-            Execute = "UpdateValue",
-            ExecuteType = ExecuteTypes.ExecuteReader,
-            Parameters = null
-        };
-
-        var inputDelete = new Input()
-        {
-            ConnectionString = _connString,
-            Execute = "DeleteValue",
-            ExecuteType = ExecuteTypes.ExecuteReader,
-            Parameters = null
-        };
-
-        var options = new Options()
-        {
-            SqlTransactionIsolationLevel = SqlTransactionIsolationLevel.Serializable,
-            CommandTimeoutSeconds = 2,
-            ThrowErrorOnFailure = true
-        };
-
-        // Insert rows
-        var insert = await MicrosoftSQL.ExecuteProcedure(inputInsert, options, default);
-        Assert.IsTrue(insert.Success);
-        Assert.AreEqual(3, insert.RecordsAffected);
-        Assert.IsNull(insert.ErrorMessage);
-        Assert.AreEqual(3, GetRowCount()); // Make sure rows inserted before moving on.
-
-        // Select all
-        var select = await MicrosoftSQL.ExecuteProcedure(inputSelect, options, default);
-        Assert.IsTrue(select.Success);
-        Assert.AreEqual(-1, select.RecordsAffected);
-        Assert.IsNull(select.ErrorMessage);
-        Assert.AreEqual(typeof(JArray), select.Data.GetType());
-        Assert.AreEqual("Suku", (string)select.Data[0]["LastName"]);
-        Assert.AreEqual("Etu", (string)select.Data[0]["FirstName"]);
-        Assert.AreEqual("Last", (string)select.Data[1]["LastName"]);
-        Assert.AreEqual("Forst", (string)select.Data[1]["FirstName"]);
-        Assert.AreEqual("Hiiri", (string)select.Data[2]["LastName"]);
-        Assert.AreEqual("Mikki", (string)select.Data[2]["FirstName"]);
-        Assert.AreEqual(3, GetRowCount()); // double check
-
-        // Select single
-        var selectSingle = await MicrosoftSQL.ExecuteProcedure(inputSelectSingle, options, default);
-        Assert.IsTrue(selectSingle.Success);
-        Assert.AreEqual(-1, selectSingle.RecordsAffected);
-        Assert.IsNull(selectSingle.ErrorMessage);
-        Assert.AreEqual(typeof(JArray), selectSingle.Data.GetType());
-        Assert.AreEqual("Suku", (string)selectSingle.Data[0]["LastName"]);
-        Assert.AreEqual("Etu", (string)selectSingle.Data[0]["FirstName"]);
-        Assert.AreEqual(3, GetRowCount()); // double check
-
-        // Update
-        var update = await MicrosoftSQL.ExecuteProcedure(inputUpdate, options, default);
-        Assert.IsTrue(update.Success);
-        Assert.AreEqual(1, update.RecordsAffected);
-        Assert.IsNull(update.ErrorMessage);
-        Assert.AreEqual(3, GetRowCount()); // double check
-        var checkUpdateResult = await MicrosoftSQL.ExecuteProcedure(inputSelect, options, default);
-        Assert.AreEqual("Suku", (string)checkUpdateResult.Data[0]["LastName"]);
-        Assert.AreEqual("Etu", (string)checkUpdateResult.Data[0]["FirstName"]);
-        Assert.AreEqual("Edit", (string)checkUpdateResult.Data[1]["LastName"]);
-        Assert.AreEqual("Forst", (string)checkUpdateResult.Data[1]["FirstName"]);
-        Assert.AreEqual("Hiiri", (string)checkUpdateResult.Data[2]["LastName"]);
-        Assert.AreEqual("Mikki", (string)checkUpdateResult.Data[2]["FirstName"]);
-        Assert.AreEqual(3, GetRowCount()); // double check
-
-        // Delete
-        var delete = await MicrosoftSQL.ExecuteProcedure(inputDelete, options, default);
-        Assert.IsTrue(delete.Success);
-        Assert.AreEqual(1, delete.RecordsAffected);
-        Assert.IsNull(delete.ErrorMessage);
-        Assert.AreEqual(2, GetRowCount()); // double check
-        var checkDeleteResult = await MicrosoftSQL.ExecuteProcedure(inputSelect, options, default);
-        Assert.AreEqual("Suku", (string)checkDeleteResult.Data[0]["LastName"]);
-        Assert.AreEqual("Etu", (string)checkDeleteResult.Data[0]["FirstName"]);
-        Assert.AreEqual("Hiiri", (string)checkDeleteResult.Data[1]["LastName"]);
-        Assert.AreEqual("Mikki", (string)checkDeleteResult.Data[1]["FirstName"]);
-    }
-
-    // SqlTransactionIsolationLevel.Snapshot
-    [TestMethod]
-    public async Task TestExecuteProcedure_ExecuteReader_Snapshot()
-    {
-        var inputInsert = new Input()
-        {
-            ConnectionString = _connString,
-            Execute = "InsertValues",
-            ExecuteType = ExecuteTypes.ExecuteReader,
-            Parameters = null
-        };
-
-        var inputSelect = new Input()
-        {
-            ConnectionString = _connString,
-            Execute = "SelectAll",
-            ExecuteType = ExecuteTypes.ExecuteReader,
-            Parameters = null
-        };
-
-        var inputSelectSingle = new Input()
-        {
-            ConnectionString = _connString,
-            Execute = "SelectSingle",
-            ExecuteType = ExecuteTypes.ExecuteReader,
-            Parameters = null
-        };
-
-        var inputUpdate = new Input()
-        {
-            ConnectionString = _connString,
-            Execute = "UpdateValue",
-            ExecuteType = ExecuteTypes.ExecuteReader,
-            Parameters = null
-        };
-
-        var inputDelete = new Input()
-        {
-            ConnectionString = _connString,
-            Execute = "DeleteValue",
-            ExecuteType = ExecuteTypes.ExecuteReader,
-            Parameters = null
-        };
-
-        var options = new Options()
-        {
-            SqlTransactionIsolationLevel = SqlTransactionIsolationLevel.Snapshot,
-            CommandTimeoutSeconds = 2,
-            ThrowErrorOnFailure = true
-        };
-
-        // Insert rows
-        var insert = await MicrosoftSQL.ExecuteProcedure(inputInsert, options, default);
-        Assert.IsTrue(insert.Success);
-        Assert.AreEqual(3, insert.RecordsAffected);
-        Assert.IsNull(insert.ErrorMessage);
-        Assert.AreEqual(3, GetRowCount()); // Make sure rows inserted before moving on.
-
-        // Select all
-        var select = await MicrosoftSQL.ExecuteProcedure(inputSelect, options, default);
-        Assert.IsTrue(select.Success);
-        Assert.AreEqual(-1, select.RecordsAffected);
-        Assert.IsNull(select.ErrorMessage);
-        Assert.AreEqual(typeof(JArray), select.Data.GetType());
-        Assert.AreEqual("Suku", (string)select.Data[0]["LastName"]);
-        Assert.AreEqual("Etu", (string)select.Data[0]["FirstName"]);
-        Assert.AreEqual("Last", (string)select.Data[1]["LastName"]);
-        Assert.AreEqual("Forst", (string)select.Data[1]["FirstName"]);
-        Assert.AreEqual("Hiiri", (string)select.Data[2]["LastName"]);
-        Assert.AreEqual("Mikki", (string)select.Data[2]["FirstName"]);
-        Assert.AreEqual(3, GetRowCount()); // double check
-
-        // Select single
-        var selectSingle = await MicrosoftSQL.ExecuteProcedure(inputSelectSingle, options, default);
-        Assert.IsTrue(selectSingle.Success);
-        Assert.AreEqual(-1, selectSingle.RecordsAffected);
-        Assert.IsNull(selectSingle.ErrorMessage);
-        Assert.AreEqual(typeof(JArray), selectSingle.Data.GetType());
-        Assert.AreEqual("Suku", (string)selectSingle.Data[0]["LastName"]);
-        Assert.AreEqual("Etu", (string)selectSingle.Data[0]["FirstName"]);
-        Assert.AreEqual(3, GetRowCount()); // double check
-
-        // Update
-        var update = await MicrosoftSQL.ExecuteProcedure(inputUpdate, options, default);
-        Assert.IsTrue(update.Success);
-        Assert.AreEqual(1, update.RecordsAffected);
-        Assert.IsNull(update.ErrorMessage);
-        Assert.AreEqual(3, GetRowCount()); // double check
-        var checkUpdateResult = await MicrosoftSQL.ExecuteProcedure(inputSelect, options, default);
-        Assert.AreEqual("Suku", (string)checkUpdateResult.Data[0]["LastName"]);
-        Assert.AreEqual("Etu", (string)checkUpdateResult.Data[0]["FirstName"]);
-        Assert.AreEqual("Edit", (string)checkUpdateResult.Data[1]["LastName"]);
-        Assert.AreEqual("Forst", (string)checkUpdateResult.Data[1]["FirstName"]);
-        Assert.AreEqual("Hiiri", (string)checkUpdateResult.Data[2]["LastName"]);
-        Assert.AreEqual("Mikki", (string)checkUpdateResult.Data[2]["FirstName"]);
-        Assert.AreEqual(3, GetRowCount()); // double check
-
-        // Delete
-        var delete = await MicrosoftSQL.ExecuteProcedure(inputDelete, options, default);
-        Assert.IsTrue(delete.Success);
-        Assert.AreEqual(1, delete.RecordsAffected);
-        Assert.IsNull(delete.ErrorMessage);
-        Assert.AreEqual(2, GetRowCount()); // double check
-        var checkDeleteResult = await MicrosoftSQL.ExecuteProcedure(inputSelect, options, default);
-        Assert.AreEqual("Suku", (string)checkDeleteResult.Data[0]["LastName"]);
-        Assert.AreEqual("Etu", (string)checkDeleteResult.Data[0]["FirstName"]);
-        Assert.AreEqual("Hiiri", (string)checkDeleteResult.Data[1]["LastName"]);
-        Assert.AreEqual("Mikki", (string)checkDeleteResult.Data[1]["FirstName"]);
-    }
-
-    // Simple select statement for result double checks.
+    // Simple select query
     private static int GetRowCount()
     {
         using var connection = new SqlConnection(_connString);

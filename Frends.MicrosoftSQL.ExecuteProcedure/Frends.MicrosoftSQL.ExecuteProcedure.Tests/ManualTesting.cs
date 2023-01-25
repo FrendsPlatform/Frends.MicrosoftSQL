@@ -141,7 +141,7 @@ DECLARE cur CURSOR
         Assert.IsTrue(insert.Message.Contains("ExecuteHandler exception: (If required) transaction rollback completed without exception."));
     }
 
-    // Simple select statement for result double checks.
+    // Simple select query
     private static int GetRowCount()
     {
         using var connection = new SqlConnection(_connString);
