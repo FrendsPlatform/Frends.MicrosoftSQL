@@ -60,10 +60,18 @@ public class Options
     public bool ConvertEmptyPropertyValuesToNull { get; set; }
 
     /// <summary>
+    /// (true) Throw an exception or (false) stop the Task and return result object containing Result.Success = false and Result.ErrorMessage = 'exception message'.
+    /// </summary>
+    /// <example>true</example>
+    [DefaultValue(true)]
+    public bool ThrowErrorOnFailure { get; set; }
+
+    /// <summary>
     /// Starts a database transaction with the specified isolation level.
     /// Isolation evel specifies the transaction locking behavior for the connection.
-    /// ReadCommitted: Default value. Shared locks are held while the data is being read to avoid dirty reads, but the data can be changed before the end of the transaction, resulting in non-repeatable reads or phantom data.
-    /// None: None.
+    /// None: No transaction is set up so there won't be a rollback if exception occurs.
+    /// Default: Default is configured by the SQL Server, usually ReadCommited.
+    /// ReadCommitted: (Default value in most of the SQL Servers). Shared locks are held while the data is being read to avoid dirty reads, but the data can be changed before the end of the transaction, resulting in non-repeatable reads or phantom data.
     /// Unspecified: A different isolation level than the one specified is being used, but the level cannot be determined.
     /// ReadUncommitted: A dirty read is possible, meaning that no shared locks are issued and no exclusive locks are honored.
     /// RepeatableRead: Locks are placed on all data that is used in a query, preventing other users from updating the data.Prevents non-repeatable reads but phantom rows are still possible.
