@@ -69,7 +69,7 @@ public class UnitTests
 
     [TestMethod]
     public async Task TestBulkInsert_FireTriggers()
-    {
+    { 
         var transactionLevels = new List<SqlTransactionIsolationLevel>() {
             SqlTransactionIsolationLevel.Unspecified,
             SqlTransactionIsolationLevel.Serializable,

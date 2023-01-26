@@ -13,7 +13,7 @@ jobs:
     uses: FrendsPlatform/FrendsTasks/.github/workflows/linux_build_test.yml@main
     with:
       workdir: Frends.MicrosoftSQL.BulkInsert
-      prebuild_command: docker-compose up
+      prebuild_command: docker-compose -f ./Frends.MicrosoftSQL.BulkInsert.Tests/docker-compose.yml up -d
     secrets:
       badge_service_api_key: ${{ secrets.BADGE_SERVICE_API_KEY }}
       test_feed_api_key: ${{ secrets.TASKS_TEST_FEED_API_KEY }}
