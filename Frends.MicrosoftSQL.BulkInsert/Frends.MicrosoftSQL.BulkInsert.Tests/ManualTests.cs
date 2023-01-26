@@ -89,7 +89,7 @@ public class ManualTests
     }
 
     // Add following line to BulkInsert.cs: 'throw new Exception();' before 'transaction.Commit();' (currently line 78).
-    //[Ignore("To run this test, comment this line after exception has been added to BulkInsert.cs.")]
+    [Ignore("To run this test, comment this line after exception has been added to BulkInsert.cs.")]
     [TestMethod]
     public async Task TestExecuteProcedure_RollbackInsert_ThrowErrorOnFailure_True()
     {
