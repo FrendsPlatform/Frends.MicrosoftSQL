@@ -5,11 +5,9 @@ using System.Data.SqlClient;
 namespace Frends.MicrosoftSQL.ExecuteQuery.Tests;
 
 [TestClass]
-public class ManualTesting
+public class ExceptionUnitTests
 {
     /*
-        These tests requires code editing so they must be skipped in workflow.
-
         docker-compose up
 
         How to use via terminal:
@@ -46,57 +44,44 @@ public class ManualTesting
         connection.Dispose();
     }
 
-    // Add following line to ExecuteQuery.cs: 'throw new Exception();' under 'dataReader = await command.ExecuteReaderAsync(cancellationToken).ConfigureAwait(false);' (currently line 124)
-    [Ignore("To run this test, comment this line after exception has been added to ExecuteQuery.cs.")]
     [TestMethod]
-    public async Task TestExecuteQuery_RollbackInsert_ThrowErrorOnFailure_False()
+    public async Task TestExecuteQuery_Invalid_Creds_ThrowError()
     {
-        var inputInsert = new Input()
+        var input = new Input()
         {
-            ConnectionString = _connString,
-            Query = $@"INSERT INTO {_tableName} VALUES (1, 'Suku', 'Etu'), (2, 'Last', 'Forst'), (3, 'Hiiri', 'Mikki')",
-            ExecuteType = ExecuteTypes.ExecuteReader,
-            Parameters = null
+            ConnectionString = "Server=127.0.0.1,1433;Database=Master;User Id=SA;Password=WrongPassWord",
         };
 
         var options = new Options()
         {
-            SqlTransactionIsolationLevel = SqlTransactionIsolationLevel.Unspecified,
-            CommandTimeoutSeconds = 2,
-            ThrowErrorOnFailure = false
-        };
-
-        // Insert rows
-        var insert = await MicrosoftSQL.ExecuteQuery(inputInsert, options, default);
-        Assert.IsFalse(insert.Success);
-        Assert.AreEqual(0, insert.RecordsAffected);
-        Assert.IsTrue(insert.ErrorMessage.Contains("(If required) transaction rollback completed without exception."));
-        Assert.AreEqual(0, GetRowCount());
-    }
-
-    // Add following line to ExecuteQuery.cs: 'throw new Exception();' under 'dataReader = await command.ExecuteReaderAsync(cancellationToken).ConfigureAwait(false);' (currently line 124)
-    [Ignore("To run this test, comment this line after exception has been added to ExecuteQuery.cs.")]
-    [TestMethod]
-    public async Task TestExecuteQuery_RollbackInsert_ThrowErrorOnFailure_True()
-    {
-        var inputInsert = new Input()
-        {
-            ConnectionString = _connString,
-            Query = $@"INSERT INTO {_tableName} VALUES (1, 'Suku', 'Etu'), (2, 'Last', 'Forst'), (3, 'Hiiri', 'Mikki')",
-            ExecuteType = ExecuteTypes.ExecuteReader,
-            Parameters = null
-        };
-
-        var options = new Options()
-        {
-            SqlTransactionIsolationLevel = SqlTransactionIsolationLevel.Unspecified,
+            SqlTransactionIsolationLevel = SqlTransactionIsolationLevel.ReadCommitted,
             CommandTimeoutSeconds = 2,
             ThrowErrorOnFailure = true
         };
 
-        // Insert rows
-        var insert = await Assert.ThrowsExceptionAsync<Exception>(async () => await MicrosoftSQL.ExecuteQuery(inputInsert, options, default));
-        Assert.IsTrue(insert.Message.Contains("(If required) transaction rollback completed without exception."));
+        var ex = await Assert.ThrowsExceptionAsync<Exception>(() => MicrosoftSQL.ExecuteQuery(input, options, default));
+        Assert.IsTrue(ex.Message.Contains("Login failed for user 'SA'."));
+    }
+
+    [TestMethod]
+    public async Task TestExecuteQuery_Invalid_Creds_ReturnErrorMessage()
+    {
+        var input = new Input()
+        {
+            ConnectionString = "Server=127.0.0.1,1433;Database=Master;User Id=SA;Password=WrongPassWord",
+        };
+
+        var options = new Options()
+        {
+            SqlTransactionIsolationLevel = SqlTransactionIsolationLevel.ReadCommitted,
+            CommandTimeoutSeconds = 2,
+            ThrowErrorOnFailure = false
+        };
+
+        var result = await MicrosoftSQL.ExecuteQuery(input, options, default);
+        Assert.IsFalse(result.Success);
+        Assert.IsTrue(result.ErrorMessage.Contains("Login failed for user 'SA'."));
+        Assert.AreEqual(0, result.RecordsAffected);
     }
 
     // Simple select statement for result double checks.
