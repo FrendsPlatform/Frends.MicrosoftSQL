@@ -83,17 +83,4 @@ public class ExceptionUnitTests
         Assert.IsTrue(result.ErrorMessage.Contains("Login failed for user 'SA'."));
         Assert.AreEqual(0, result.RecordsAffected);
     }
-
-    // Simple select statement for result double checks.
-    private static int GetRowCount()
-    {
-        using var connection = new SqlConnection(_connString);
-        connection.Open();
-        var getRows = connection.CreateCommand();
-        getRows.CommandText = $"SELECT COUNT(*) FROM {_tableName}";
-        var count = (int)getRows.ExecuteScalar();
-        connection.Close();
-        connection.Dispose();
-        return count;
-    }
 }
