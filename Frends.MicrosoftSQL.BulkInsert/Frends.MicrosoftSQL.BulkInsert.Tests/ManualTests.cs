@@ -71,7 +71,7 @@ public class ManualTests
     // Add following line to BulkInsert.cs: 'throw new Exception();' before 'transaction.Commit();' (currently line 78).
     [Ignore("To run this test, comment this line after exception has been added to BulkInsert.cs.")]
     [TestMethod]
-    public async Task TestExecuteProcedure_RollbackSuccess_ThrowErrorOnFailure_False()
+    public async Task TestBulkInsert_RollbackSuccess_ThrowErrorOnFailure_False()
     {
         var options = new Options()
         {
@@ -91,7 +91,7 @@ public class ManualTests
     // Add following line to BulkInsert.cs: 'throw new Exception();' before 'transaction.Commit();' (currently line 78).
     [Ignore("To run this test, comment this line after exception has been added to BulkInsert.cs.")]
     [TestMethod]
-    public async Task TestExecuteProcedure_RollbackInsert_ThrowErrorOnFailure_True()
+    public async Task TestBulkInsert_RollbackInsert_ThrowErrorOnFailure_True()
     {
         var options = new Options()
         {
@@ -101,7 +101,8 @@ public class ManualTests
         };
 
         var ex = await Assert.ThrowsExceptionAsync<Exception>(async () => await MicrosoftSQL.BulkInsert(_input, options, default));
-        Assert.IsTrue(ex.InnerException != null && ex.InnerException.Message.Contains("(If required) transaction rollback completed without exception."));
+        Assert.IsNotNull(ex.InnerException);
+        Assert.IsTrue(ex.InnerException.Message.Contains("(If required) transaction rollback completed without exception."));
         Assert.Equals(0, GetRowCount());
     }
 
