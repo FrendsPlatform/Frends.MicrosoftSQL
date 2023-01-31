@@ -43,7 +43,8 @@ public class ExceptionUnitTests
         };
 
         var ex = await Assert.ThrowsExceptionAsync<Exception>(() => MicrosoftSQL.BulkInsert(input, options, default));
-        Assert.IsTrue(ex.InnerException != null && ex.InnerException.Message.Contains("Login failed for user 'SA'."));
+        Assert.IsNotNull(ex.InnerException);
+        Assert.IsTrue(ex.InnerException.Message.Contains("Login failed for user 'SA'."));
     }
 
     [TestMethod]
