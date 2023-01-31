@@ -8,18 +8,14 @@ namespace Frends.MicrosoftSQL.ExecuteQuery.Tests;
 public class ManualTesting
 {
     /*
-        docker run -e "ACCEPT_EULA=Y" -e "SA_PASSWORD=Salakala123!" -p 1433:1433 --name sql1 --hostname sql1 -d mcr.microsoft.com/mssql/server:2019-CU18-ubuntu-20.04
+        These tests requires code editing so they must be skipped in workflow.
+
+        docker-compose up
+
+        How to use via terminal:
         docker exec -it sql1 "bash"
         /opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P "Salakala123!"
-        
-        Check rows before CleanUp:
         SELECT * FROM TestTable
-        GO
-    
-        Optional queries:
-        SELECT Name FROM sys.Databases;
-        GO
-        SELECT * FROM INFORMATION_SCHEMA.TABLES;
         GO
    */
 
@@ -50,8 +46,8 @@ public class ManualTesting
         connection.Dispose();
     }
 
-    // Add following line 'throw new Exception();' under 'dataReader = await command.ExecuteReaderAsync(cancellationToken).ConfigureAwait(false);'
-    [Ignore("Only run manually")]
+    // Add following line to ExecuteQuery.cs: 'throw new Exception();' under 'dataReader = await command.ExecuteReaderAsync(cancellationToken).ConfigureAwait(false);' (currently line 124)
+    [Ignore("To run this test, comment this line after exception has been added to ExecuteQuery.cs.")]
     [TestMethod]
     public async Task TestExecuteQuery_RollbackInsert_ThrowErrorOnFailure_False()
     {
@@ -74,12 +70,12 @@ public class ManualTesting
         var insert = await MicrosoftSQL.ExecuteQuery(inputInsert, options, default);
         Assert.IsFalse(insert.Success);
         Assert.AreEqual(0, insert.RecordsAffected);
-        Assert.IsTrue(insert.ErrorMessage.Contains("ExecuteHandler exception: (If required) transaction rollback completed without exception."));
+        Assert.IsTrue(insert.ErrorMessage.Contains("(If required) transaction rollback completed without exception."));
         Assert.AreEqual(0, GetRowCount());
     }
 
-    // Add following line 'throw new Exception();' under 'dataReader = await command.ExecuteReaderAsync(cancellationToken).ConfigureAwait(false);'
-    [Ignore("Only run manually")]
+    // Add following line to ExecuteQuery.cs: 'throw new Exception();' under 'dataReader = await command.ExecuteReaderAsync(cancellationToken).ConfigureAwait(false);' (currently line 124)
+    [Ignore("To run this test, comment this line after exception has been added to ExecuteQuery.cs.")]
     [TestMethod]
     public async Task TestExecuteQuery_RollbackInsert_ThrowErrorOnFailure_True()
     {
@@ -100,7 +96,7 @@ public class ManualTesting
 
         // Insert rows
         var insert = await Assert.ThrowsExceptionAsync<Exception>(async () => await MicrosoftSQL.ExecuteQuery(inputInsert, options, default));
-        Assert.IsTrue(insert.Message.Contains("ExecuteHandler exception: (If required) transaction rollback completed without exception."));
+        Assert.IsTrue(insert.Message.Contains("(If required) transaction rollback completed without exception."));
     }
 
     // Simple select statement for result double checks.
