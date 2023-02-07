@@ -46,7 +46,7 @@ public class UnitTests
 
     [TestMethod]
     public async Task TestBatchOperation()
-    {
+    { 
         var transactionLevels = new List<SqlTransactionIsolationLevel>() {
             SqlTransactionIsolationLevel.Unspecified,
             SqlTransactionIsolationLevel.Serializable,
