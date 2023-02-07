@@ -7,6 +7,7 @@ Frends Task for MicrosoftSQL operations.
 - [Frends.MicrosoftSQL.BulkInsert](Frends.MicrosoftSQL.BulkInsert/README.md)
 - [Frends.MicrosoftSQL.ExecuteQuery](Frends.MicrosoftSQL.ExecuteQuery/README.md)
 - [Frends.MicrosoftSQL.ExecuteProcedure](Frends.MicrosoftSQL.ExecuteProcedure/README.md)
+- [Frends.MicrosoftSQL.BatchOperation](Frends.MicrosoftSQL.BatchOperation/README.md)
 
 # Contributing
 When contributing to this repository, please first discuss the change you wish to make via issue, email, or any other method with the owners of this repository before making a change.
