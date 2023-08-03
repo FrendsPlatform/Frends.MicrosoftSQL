@@ -39,6 +39,10 @@ public class ScalarUnitTests
         command.CommandText = $"CREATE PROCEDURE SelectAll AS select * from {_tableName}";
         command.ExecuteNonQuery();
 
+        //Select single parameter
+        command.CommandText = $"CREATE PROCEDURE SelectSingleParameter (@id INT) AS SELECT * FROM {_tableName} WHERE Id = @id";
+        command.ExecuteNonQuery();
+
         //Select single
         command.CommandText = $"CREATE PROCEDURE SelectSingle AS select * from {_tableName} where Id = 1";
         command.ExecuteNonQuery();
@@ -206,6 +210,48 @@ DECLARE cur CURSOR
             CleanUp();
             Init();
         }
+    }
+
+    [TestMethod]
+    public async Task TestExecuteProcedure_ProcedureParameter()
+    {
+        var parameter = new ProcedureParameter
+        {
+            Name = "id",
+            Value = "1",
+            SqlDataType = SqlDataTypes.Auto
+        };
+
+        var inputInsert = new Input()
+        {
+            ConnectionString = _connString,
+            Execute = "InsertValues",
+            ExecuteType = ExecuteTypes.Scalar,
+            Parameters = null
+        };
+
+        var parameterInput = new Input()
+        {
+            ConnectionString = _connString,
+            Execute = "SelectSingleParameter",
+            ExecuteType = ExecuteTypes.ExecuteReader,
+            Parameters = new ProcedureParameter[] { parameter }
+        };
+
+        var options = new Options()
+        {
+            SqlTransactionIsolationLevel = SqlTransactionIsolationLevel.None,
+            CommandTimeoutSeconds = 2,
+            ThrowErrorOnFailure = true
+        };
+
+        await MicrosoftSQL.ExecuteProcedure(inputInsert, options, default);
+
+        var insert = await MicrosoftSQL.ExecuteProcedure(parameterInput, options, default);
+        Assert.IsTrue(insert.Success);
+        Assert.AreEqual(-1, insert.RecordsAffected);
+        Assert.IsNull(insert.ErrorMessage);
+        Assert.IsTrue(((IEnumerable<dynamic>)insert.Data).Any(x => x.Id == 1 && x.LastName == "Suku"));
     }
 
     // Simple select query.

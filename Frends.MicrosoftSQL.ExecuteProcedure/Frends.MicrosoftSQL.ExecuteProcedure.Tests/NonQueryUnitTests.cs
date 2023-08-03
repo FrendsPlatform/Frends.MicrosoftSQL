@@ -39,6 +39,10 @@ public class NonQueryUnitTests
         command.CommandText = $"CREATE PROCEDURE SelectAll AS select * from {_tableName}";
         command.ExecuteNonQuery();
 
+        //Select single parameter
+        command.CommandText = $"CREATE PROCEDURE InsertWithParameter (@lastname varchar(255)) AS INSERT INTO {_tableName} VALUES (4, @lastname, 'Etu')";
+        command.ExecuteNonQuery();
+
         //Select single
         command.CommandText = $"CREATE PROCEDURE SelectSingle AS select * from {_tableName} where Id = 1";
         command.ExecuteNonQuery();
@@ -207,6 +211,37 @@ DECLARE cur CURSOR
             CleanUp();
             Init();
         }
+    }
+
+    [TestMethod]
+    public async Task TestExecuteProcedure_ProcedureParameter()
+    {
+        var parameter = new ProcedureParameter
+        {
+            Name = "lastname",
+            Value = "Parametri",
+            SqlDataType = SqlDataTypes.Auto
+        };
+
+        var parameterInput = new Input()
+        {
+            ConnectionString = _connString,
+            Execute = "InsertWithParameter",
+            ExecuteType = ExecuteTypes.NonQuery,
+            Parameters = new ProcedureParameter[] { parameter }
+        };
+
+        var options = new Options()
+        {
+            SqlTransactionIsolationLevel = SqlTransactionIsolationLevel.None,
+            CommandTimeoutSeconds = 2,
+            ThrowErrorOnFailure = true
+        };
+
+        var insert = await MicrosoftSQL.ExecuteProcedure(parameterInput, options, default);
+        Assert.IsTrue(insert.Success);
+        Assert.AreEqual(1, insert.RecordsAffected);
+        Assert.IsNull(insert.ErrorMessage);
     }
 
     private static int GetRowCount()
