@@ -18,6 +18,7 @@ public class Input
 
     /// <summary>
     /// Name of stored procedure to execute.
+    /// Should only contain the name of the procedure without, for example, database name or semicolons.
     /// </summary>
     /// <example>ExampleProcedure</example>
     [DisplayFormat(DataFormatString = "Sql")]
@@ -69,5 +70,4 @@ public class ProcedureParameter
     /// <example>SqlDbTypes.Auto</example>
     [DefaultValue(SqlDataTypes.Auto)]
     public SqlDataTypes SqlDataType { get; set; }
-
 }

@@ -19,7 +19,7 @@ public class NonQueryUnitTests
 
     private static readonly string _connString = "Server=127.0.0.1,1433;Database=Master;User Id=SA;Password=Salakala123!";
     private static readonly string _tableName = "TestTable";
-    
+
     [TestInitialize]
     public void Init()
     {
@@ -88,12 +88,12 @@ DECLARE cur CURSOR
     [TestMethod]
     public async Task TestExecuteProcedure_NonQuery()
     {
-        var transactionLevels = new List<SqlTransactionIsolationLevel>() { 
+        var transactionLevels = new List<SqlTransactionIsolationLevel>() {
             SqlTransactionIsolationLevel.Unspecified,
             SqlTransactionIsolationLevel.Serializable,
             SqlTransactionIsolationLevel.None,
             SqlTransactionIsolationLevel.ReadUncommitted,
-            SqlTransactionIsolationLevel.ReadCommitted 
+            SqlTransactionIsolationLevel.ReadCommitted
         };
 
         var inputInsert = new Input()
