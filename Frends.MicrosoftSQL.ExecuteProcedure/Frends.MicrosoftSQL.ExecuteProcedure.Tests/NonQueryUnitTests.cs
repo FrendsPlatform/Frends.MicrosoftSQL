@@ -209,7 +209,6 @@ DECLARE cur CURSOR
         }
     }
 
-    // Simple select query.
     private static int GetRowCount()
     {
         using var connection = new SqlConnection(_connString);

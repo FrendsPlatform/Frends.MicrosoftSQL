@@ -16,43 +16,45 @@ public class ExceptionUnitTests
         GO
    */
 
+    Input _input = new();
+    Options _options = new();
+
+    [TestInitialize]
+    public void Init()
+    {
+        _input = new()
+        {
+            ConnectionString = "Server=127.0.0.1,1433;Database=Master;User Id=SA;Password=WrongPassWord",
+            Execute = "foo",
+            ExecuteType = ExecuteTypes.NonQuery,
+            Parameters = null
+        };
+
+        _options = new()
+        {
+            CommandTimeoutSeconds = 2,
+            SqlTransactionIsolationLevel = SqlTransactionIsolationLevel.ReadCommitted,
+            ThrowErrorOnFailure = true,
+        };
+    }
+
     [TestMethod]
     public async Task TestExecuteProcedure_Invalid_Creds_ThrowError()
     {
-        var input = new Input()
-        {
-            ConnectionString = "Server=127.0.0.1,1433;Database=Master;User Id=SA;Password=WrongPassWord",
-        };
-
-        var options = new Options()
-        {
-            SqlTransactionIsolationLevel = SqlTransactionIsolationLevel.ReadCommitted,
-            CommandTimeoutSeconds = 2,
-            ThrowErrorOnFailure = true
-        };
-
-        var ex = await Assert.ThrowsExceptionAsync<Exception>(() => MicrosoftSQL.ExecuteProcedure(input, options, default));
+        var ex = await Assert.ThrowsExceptionAsync<Exception>(() => MicrosoftSQL.ExecuteProcedure(_input, _options, default));
         Assert.IsTrue(ex.Message.Contains("SqlException (0x80131904): Login failed for user 'SA'."));
     }
 
     [TestMethod]
     public async Task TestExecuteProcedure_Invalid_Creds_ReturnErrorMessage()
     {
-        var input = new Input()
-        {
-            ConnectionString = "Server=127.0.0.1,1433;Database=Master;User Id=SA;Password=WrongPassWord",
-        };
+        var options = _options;
+        options.ThrowErrorOnFailure = false;
 
-        var options = new Options()
-        {
-            SqlTransactionIsolationLevel = SqlTransactionIsolationLevel.ReadCommitted,
-            CommandTimeoutSeconds = 2,
-            ThrowErrorOnFailure = false
-        };
-
-        var result = await MicrosoftSQL.ExecuteProcedure(input, options, default);
+        var result = await MicrosoftSQL.ExecuteProcedure(_input, options, default);
         Assert.IsFalse(result.Success);
         Assert.IsTrue(result.ErrorMessage.Contains("Login failed for user 'SA'."));
         Assert.AreEqual(0, result.RecordsAffected);
+        Assert.IsNull(result.Data);
     }
 }
