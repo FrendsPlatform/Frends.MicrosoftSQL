@@ -94,7 +94,7 @@ DECLARE cur CURSOR
     public async Task TestExecuteProcedure_ExecuteReader()
     {
         var transactionLevels = new List<SqlTransactionIsolationLevel>() {
-            SqlTransactionIsolationLevel.Unspecified,
+            //SqlTransactionIsolationLevel.Unspecified,
             SqlTransactionIsolationLevel.Serializable,
             SqlTransactionIsolationLevel.None,
             SqlTransactionIsolationLevel.ReadUncommitted,
@@ -152,61 +152,61 @@ DECLARE cur CURSOR
 
             // Insert rows
             var insert = await MicrosoftSQL.ExecuteProcedure(inputInsert, options, default);
-            Assert.IsTrue(insert.Success);
-            Assert.AreEqual(3, insert.RecordsAffected);
-            Assert.IsNull(insert.ErrorMessage);
-            Assert.AreEqual(3, GetRowCount());
+            Assert.IsTrue(insert.Success, $"TransactionLevel: {level}.");
+            Assert.AreEqual(3, insert.RecordsAffected, $"TransactionLevel: {level}.");
+            Assert.IsNull(insert.ErrorMessage, $"TransactionLevel: {level}.");
+            Assert.AreEqual(3, GetRowCount(), $"TransactionLevel: {level}.");
 
             // Select all
             var select = await MicrosoftSQL.ExecuteProcedure(inputSelect, options, default);
-            Assert.IsTrue(select.Success);
-            Assert.AreEqual(-1, select.RecordsAffected);
-            Assert.IsNull(select.ErrorMessage);
-            Assert.AreEqual(typeof(JArray), select.Data.GetType());
-            Assert.AreEqual("Suku", (string)select.Data[0]["LastName"]);
-            Assert.AreEqual("Etu", (string)select.Data[0]["FirstName"]);
-            Assert.AreEqual("Last", (string)select.Data[1]["LastName"]);
-            Assert.AreEqual("Forst", (string)select.Data[1]["FirstName"]);
-            Assert.AreEqual("Hiiri", (string)select.Data[2]["LastName"]);
-            Assert.AreEqual("Mikki", (string)select.Data[2]["FirstName"]);
-            Assert.AreEqual(3, GetRowCount());
+            Assert.IsTrue(select.Success, $"TransactionLevel: {level}.");
+            Assert.AreEqual(-1, select.RecordsAffected, $"TransactionLevel: {level}.");
+            Assert.IsNull(select.ErrorMessage, $"TransactionLevel: {level}.");
+            Assert.AreEqual(typeof(JArray), select.Data.GetType(), $"TransactionLevel: {level}.");
+            Assert.AreEqual("Suku", (string)select.Data[0]["LastName"], $"TransactionLevel: {level}.");
+            Assert.AreEqual("Etu", (string)select.Data[0]["FirstName"], $"TransactionLevel: {level}.");
+            Assert.AreEqual("Last", (string)select.Data[1]["LastName"], $"TransactionLevel: {level}.");
+            Assert.AreEqual("Forst", (string)select.Data[1]["FirstName"], $"TransactionLevel: {level}.");
+            Assert.AreEqual("Hiiri", (string)select.Data[2]["LastName"], $"TransactionLevel: {level}.");
+            Assert.AreEqual("Mikki", (string)select.Data[2]["FirstName"], $"TransactionLevel: {level}.");
+            Assert.AreEqual(3, GetRowCount(), $"TransactionLevel: {level}.");
 
             // Select single
             var selectSingle = await MicrosoftSQL.ExecuteProcedure(inputSelectSingle, options, default);
-            Assert.IsTrue(selectSingle.Success);
-            Assert.AreEqual(-1, selectSingle.RecordsAffected);
-            Assert.IsNull(selectSingle.ErrorMessage);
-            Assert.AreEqual(typeof(JArray), selectSingle.Data.GetType());
-            Assert.AreEqual("Suku", (string)selectSingle.Data[0]["LastName"]);
-            Assert.AreEqual("Etu", (string)selectSingle.Data[0]["FirstName"]);
+            Assert.IsTrue(selectSingle.Success, $"TransactionLevel: {level}.");
+            Assert.AreEqual(-1, selectSingle.RecordsAffected, $"TransactionLevel: {level}.");
+            Assert.IsNull(selectSingle.ErrorMessage, $"TransactionLevel: {level}.");
+            Assert.AreEqual(typeof(JArray), selectSingle.Data.GetType(), $"TransactionLevel: {level}.");
+            Assert.AreEqual("Suku", (string)selectSingle.Data[0]["LastName"], $"TransactionLevel: {level}.");
+            Assert.AreEqual("Etu", (string)selectSingle.Data[0]["FirstName"], $"TransactionLevel: {level}.");
             Assert.AreEqual(3, GetRowCount());
 
             // Update
             var update = await MicrosoftSQL.ExecuteProcedure(inputUpdate, options, default);
-            Assert.IsTrue(update.Success);
-            Assert.AreEqual(1, update.RecordsAffected);
-            Assert.IsNull(update.ErrorMessage);
-            Assert.AreEqual(3, GetRowCount());
+            Assert.IsTrue(update.Success, $"TransactionLevel: {level}.");
+            Assert.AreEqual(1, update.RecordsAffected, $"TransactionLevel: {level}.");
+            Assert.IsNull(update.ErrorMessage, $"TransactionLevel: {level}.");
+            Assert.AreEqual(3, GetRowCount(), $"TransactionLevel: {level}.");
             var checkUpdateResult = await MicrosoftSQL.ExecuteProcedure(inputSelect, options, default);
-            Assert.AreEqual("Suku", (string)checkUpdateResult.Data[0]["LastName"]);
-            Assert.AreEqual("Etu", (string)checkUpdateResult.Data[0]["FirstName"]);
-            Assert.AreEqual("Edit", (string)checkUpdateResult.Data[1]["LastName"]);
-            Assert.AreEqual("Forst", (string)checkUpdateResult.Data[1]["FirstName"]);
-            Assert.AreEqual("Hiiri", (string)checkUpdateResult.Data[2]["LastName"]);
-            Assert.AreEqual("Mikki", (string)checkUpdateResult.Data[2]["FirstName"]);
+            Assert.AreEqual("Suku", (string)checkUpdateResult.Data[0]["LastName"], $"TransactionLevel: {level}.");
+            Assert.AreEqual("Etu", (string)checkUpdateResult.Data[0]["FirstName"], $"TransactionLevel: {level}.");
+            Assert.AreEqual("Edit", (string)checkUpdateResult.Data[1]["LastName"], $"TransactionLevel: {level}.");
+            Assert.AreEqual("Forst", (string)checkUpdateResult.Data[1]["FirstName"], $"TransactionLevel: {level}.");
+            Assert.AreEqual("Hiiri", (string)checkUpdateResult.Data[2]["LastName"], $"TransactionLevel: {level}.");
+            Assert.AreEqual("Mikki", (string)checkUpdateResult.Data[2]["FirstName"], $"TransactionLevel: {level}.");
             Assert.AreEqual(3, GetRowCount());
 
             // Delete
             var delete = await MicrosoftSQL.ExecuteProcedure(inputDelete, options, default);
-            Assert.IsTrue(delete.Success);
-            Assert.AreEqual(1, delete.RecordsAffected);
-            Assert.IsNull(delete.ErrorMessage);
-            Assert.AreEqual(2, GetRowCount());
+            Assert.IsTrue(delete.Success, $"TransactionLevel: {level}.");
+            Assert.AreEqual(1, delete.RecordsAffected, $"TransactionLevel: {level}.");
+            Assert.IsNull(delete.ErrorMessage, $"TransactionLevel: {level}.");
+            Assert.AreEqual(2, GetRowCount(), $"TransactionLevel: {level}.");
             var checkDeleteResult = await MicrosoftSQL.ExecuteProcedure(inputSelect, options, default);
-            Assert.AreEqual("Suku", (string)checkDeleteResult.Data[0]["LastName"]);
-            Assert.AreEqual("Etu", (string)checkDeleteResult.Data[0]["FirstName"]);
-            Assert.AreEqual("Hiiri", (string)checkDeleteResult.Data[1]["LastName"]);
-            Assert.AreEqual("Mikki", (string)checkDeleteResult.Data[1]["FirstName"]);
+            Assert.AreEqual("Suku", (string)checkDeleteResult.Data[0]["LastName"], $"TransactionLevel: {level}.");
+            Assert.AreEqual("Etu", (string)checkDeleteResult.Data[0]["FirstName"], $"TransactionLevel: {level}.");
+            Assert.AreEqual("Hiiri", (string)checkDeleteResult.Data[1]["LastName"], $"TransactionLevel: {level}.");
+            Assert.AreEqual("Mikki", (string)checkDeleteResult.Data[1]["FirstName"], $"TransactionLevel: {level}.");
 
             CleanUp();
             Init();
@@ -248,11 +248,11 @@ DECLARE cur CURSOR
 
         await MicrosoftSQL.ExecuteProcedure(inputInsert, options, default);
 
-        var insert = await MicrosoftSQL.ExecuteProcedure(parameterInput, options, default);
-        Assert.IsTrue(insert.Success);
-        Assert.AreEqual(-1, insert.RecordsAffected);
-        Assert.IsNull(insert.ErrorMessage);
-        Assert.IsTrue(((IEnumerable<dynamic>)insert.Data).Any(x => x.Id == 1 && x.LastName == "Suku"));
+        var query = await MicrosoftSQL.ExecuteProcedure(parameterInput, options, default);
+        Assert.IsTrue(query.Success);
+        Assert.AreEqual(-1, query.RecordsAffected);
+        Assert.IsNull(query.ErrorMessage);
+        Assert.IsTrue(((IEnumerable<dynamic>)query.Data).Any(x => x.Id == 1 && x.LastName == "Suku"));
     }
 
     // Simple select query

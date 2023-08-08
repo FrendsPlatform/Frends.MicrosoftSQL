@@ -69,7 +69,6 @@ public class ProcedureParameter
     /// See https://learn.microsoft.com/en-us/dotnet/api/system.data.sqldbtype?view=net-7.0 for more information.
     /// </summary>
     /// <example>SqlDbTypes.Auto</example>
-    [ExcludeFromCodeCoverage(Justification = "No point to create a table to test all of these types.")]
     [DefaultValue(SqlDataTypes.Auto)]
     public SqlDataTypes SqlDataType { get; set; }
 }

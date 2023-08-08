@@ -27,7 +27,7 @@ public class ExceptionUnitTests
             ConnectionString = "Server=127.0.0.1,1433;Database=Master;User Id=SA;Password=WrongPassWord",
             Execute = "foo",
             ExecuteType = ExecuteTypes.NonQuery,
-            Parameters = null
+            Parameters = null,
         };
 
         _options = new()
@@ -41,20 +41,49 @@ public class ExceptionUnitTests
     [TestMethod]
     public async Task TestExecuteProcedure_Invalid_Creds_ThrowError()
     {
-        var ex = await Assert.ThrowsExceptionAsync<Exception>(() => MicrosoftSQL.ExecuteProcedure(_input, _options, default));
-        Assert.IsTrue(ex.Message.Contains("SqlException (0x80131904): Login failed for user 'SA'."));
+        var isolationLevel = Enum.GetValues(typeof(SqlTransactionIsolationLevel)).Cast<SqlTransactionIsolationLevel>().ToList();
+        var executeTypes = Enum.GetValues(typeof(ExecuteTypes)).Cast<ExecuteTypes>().ToList();
+
+        foreach (var executeType in executeTypes)
+        {
+            foreach (var isolation in isolationLevel)
+            {
+                var input = _input;
+                input.ExecuteType = executeType;
+
+                var options = _options;
+                options.SqlTransactionIsolationLevel = isolation;
+
+                var ex = await Assert.ThrowsExceptionAsync<Exception>(() => MicrosoftSQL.ExecuteProcedure(input, options, default));
+                Assert.IsTrue(ex.Message.Contains("SqlException (0x80131904): Login failed for user 'SA'."), $"ExecuteType: {executeType}, IsolationLevel: {isolation}");
+            }
+        }
     }
 
     [TestMethod]
     public async Task TestExecuteProcedure_Invalid_Creds_ReturnErrorMessage()
     {
-        var options = _options;
-        options.ThrowErrorOnFailure = false;
+        var isolationLevel = Enum.GetValues(typeof(SqlTransactionIsolationLevel)).Cast<SqlTransactionIsolationLevel>().ToList();
+        var executeTypes = Enum.GetValues(typeof(ExecuteTypes)).Cast<ExecuteTypes>().ToList();
 
-        var result = await MicrosoftSQL.ExecuteProcedure(_input, options, default);
-        Assert.IsFalse(result.Success);
-        Assert.IsTrue(result.ErrorMessage.Contains("Login failed for user 'SA'."));
-        Assert.AreEqual(0, result.RecordsAffected);
-        Assert.IsNull(result.Data);
+        foreach (var executeType in executeTypes)
+        {
+            foreach (var isolation in isolationLevel)
+            {
+                var input = _input;
+                input.ExecuteType = executeType;
+
+                var options = _options;
+                options.SqlTransactionIsolationLevel = isolation;
+                options.ThrowErrorOnFailure = false;
+
+                var result = await MicrosoftSQL.ExecuteProcedure(input, options, default);
+                Assert.IsFalse(result.Success, $"ExecuteType: {executeType}, IsolationLevel: {isolation}");
+                Assert.IsTrue(result.ErrorMessage.Contains("Login failed for user 'SA'."), $"ExecuteType: {executeType}, IsolationLevel: {isolation}");
+                Assert.AreEqual(0, result.RecordsAffected, $"ExecuteType: {executeType}, IsolationLevel: {isolation}");
+                Assert.IsNull(result.Data, $"ExecuteType: {executeType}, IsolationLevel: {isolation}");
+            }
+        }
+
     }
 }
