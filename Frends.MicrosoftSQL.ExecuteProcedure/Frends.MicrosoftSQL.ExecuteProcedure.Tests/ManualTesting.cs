@@ -1,7 +1,6 @@
 using Frends.MicrosoftSQL.ExecuteProcedure.Definitions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Data.SqlClient;
-using System.Threading;
 
 namespace Frends.MicrosoftSQL.ExecuteProcedure.Tests;
 
@@ -88,8 +87,8 @@ DECLARE cur CURSOR
         connection.Dispose();
     }
 
-    // Add following line to ExecuteProcedure.cs: 'throw new Exception();' after 'ExecuteTypes.ExecuteReader: dataReader = await command.ExecuteReaderAsync(cancellationToken).ConfigureAwait(false);' (currently line 112).
-    [Ignore("To run this test, comment this line after exception has been added to ExecuteProcedure.cs.")]
+    // Use 'throw new Exception();' in HandleExecutionException class.
+    [Ignore("Use 'throw new Exception();' in HandleExecutionException class.")]
     [TestMethod]
     public async Task TestExecuteProcedure_RollbackInsert_ThrowErrorOnFailure_False()
     {
@@ -116,8 +115,8 @@ DECLARE cur CURSOR
         Assert.AreEqual(0, GetRowCount());
     }
 
-    // Add following line to ExecuteProcedure.cs: 'throw new Exception();' after 'ExecuteTypes.ExecuteReader: dataReader = await command.ExecuteReaderAsync(cancellationToken).ConfigureAwait(false);' (currently line 112).
-    [Ignore("To run this test, comment this line after exception has been added to ExecuteProcedure.cs.")]
+    // Use 'throw new Exception();' in HandleExecutionException class.
+    [Ignore("Use 'throw new Exception();' in HandleExecutionException class.")]
     [TestMethod]
     public async Task TestExecuteProcedure_RollbackInsert_ThrowErrorOnFailure_True()
     {

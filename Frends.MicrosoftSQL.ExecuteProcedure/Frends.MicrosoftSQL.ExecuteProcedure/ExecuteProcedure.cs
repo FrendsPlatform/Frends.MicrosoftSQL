@@ -4,8 +4,7 @@ using System;
 using System.ComponentModel;
 using System.Data;
 using System.Data.SqlClient;
-using System.Reflection;
-using System.Runtime.Loader;
+using System.Diagnostics.CodeAnalysis;
 using System.Threading;
 using System.Threading.Tasks;
 using IsolationLevel = System.Data.IsolationLevel;
@@ -17,15 +16,6 @@ namespace Frends.MicrosoftSQL.ExecuteProcedure;
 /// </summary>
 public class MicrosoftSQL
 {
-    /// Mem cleanup.
-    static MicrosoftSQL()
-    {
-        var currentAssembly = Assembly.GetExecutingAssembly();
-        var currentContext = AssemblyLoadContext.GetLoadContext(currentAssembly);
-        if (currentContext != null)
-            currentContext.Unloading += OnPluginUnloadingRequested;
-    }
-
     /// <summary>
     /// Execute Microsoft SQL Server procedure.
     /// [Documentation](https://tasks.frends.com/tasks/frends-tasks/Frends.MicrosoftSQL.ExecuteProcedure)
@@ -76,12 +66,7 @@ public class MicrosoftSQL
         }
         catch (Exception ex)
         {
-            var eMsg = $"ExecuteProcedure exception: {ex}.";
-
-            if (options.ThrowErrorOnFailure)
-                throw new Exception(eMsg);
-
-            return new Result(false, 0, eMsg, null);
+            return HandleExecutionException(ex, options);
         }
         finally
         {
@@ -128,32 +113,45 @@ public class MicrosoftSQL
             if (dataReader != null && !dataReader.IsClosed)
                 await dataReader.CloseAsync();
 
-            if (command.Transaction is null)
-            {
-                if (options.ThrowErrorOnFailure)
-                    throw new Exception("ExecuteHandler exception: 'Options.SqlTransactionIsolationLevel = None', so there was no transaction rollback.", ex);
-                else
-                    return new Result(false, 0, $"ExecuteHandler exception: 'Options.SqlTransactionIsolationLevel = None', so there was no transaction rollback. {ex}", null);
-            }
+            return HandleExecutionException(ex, options, command);
+        }
+    }
+
+    [ExcludeFromCodeCoverage(Justification = "Requires manual tests to fully test these (see ManualTesting.cs).")]
+    private static Result HandleExecutionException(Exception ex, Options options, SqlCommand command = null)
+    {
+        var eMsg = $"ExecuteProcedure exception: {ex}.";
+
+        if (command == null || command.Transaction == null)
+        {
+            if (options.ThrowErrorOnFailure)
+                throw new Exception(eMsg);
             else
+                return new Result(false, 0, eMsg, null);
+        }
+        else
+        {
+            try
             {
-                try
-                {
-                    await command.Transaction.RollbackAsync(cancellationToken);
-                }
-                catch (Exception rollbackEx)
-                {
-                    if (options.ThrowErrorOnFailure)
-                        throw new Exception("ExecuteHandler exception: An exception occurred on transaction rollback.", rollbackEx);
-                    else
-                        return new Result(false, 0, $"ExecuteHandler exception: An exception occurred on transaction rollback. Rollback exception: {rollbackEx}. ||  Exception leading to rollback: {ex}", null);
-                }
+                command.Transaction.Rollback();
+            }
+            catch (Exception rollbackEx)
+            {
+                var rollbackErrorMsg = $"An exception occurred on transaction rollback. Rollback exception: {rollbackEx}.";
 
                 if (options.ThrowErrorOnFailure)
-                    throw new Exception("ExecuteHandler exception: (If required) transaction rollback completed without exception.", ex);
+                    throw new Exception(rollbackErrorMsg, rollbackEx);
                 else
-                    return new Result(false, 0, $"ExecuteHandler exception: (If required) transaction rollback completed without exception. {ex}.", null);
+                    return new Result(false, 0, rollbackErrorMsg, null);
             }
+
+            var rollbackCompletedMsg = "(If required) transaction rollback completed without exception.";
+            eMsg += $" || {rollbackCompletedMsg}";
+
+            if (options.ThrowErrorOnFailure)
+                throw new Exception(rollbackCompletedMsg, ex);
+            else
+                return new Result(false, 0, eMsg, null);
         }
     }
 
@@ -169,10 +167,5 @@ public class MicrosoftSQL
             SqlTransactionIsolationLevel.Snapshot => IsolationLevel.Snapshot,
             _ => IsolationLevel.ReadCommitted,
         };
-    }
-
-    private static void OnPluginUnloadingRequested(AssemblyLoadContext obj)
-    {
-        obj.Unloading -= OnPluginUnloadingRequested;
     }
 }

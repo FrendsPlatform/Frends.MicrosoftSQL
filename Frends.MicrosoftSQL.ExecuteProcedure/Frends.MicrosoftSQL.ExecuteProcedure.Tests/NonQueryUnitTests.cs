@@ -19,7 +19,7 @@ public class NonQueryUnitTests
 
     private static readonly string _connString = "Server=127.0.0.1,1433;Database=Master;User Id=SA;Password=Salakala123!";
     private static readonly string _tableName = "TestTable";
-    
+
     [TestInitialize]
     public void Init()
     {
@@ -37,6 +37,10 @@ public class NonQueryUnitTests
 
         //Select all
         command.CommandText = $"CREATE PROCEDURE SelectAll AS select * from {_tableName}";
+        command.ExecuteNonQuery();
+
+        //Select single parameter
+        command.CommandText = $"CREATE PROCEDURE InsertWithParameter (@lastname varchar(255)) AS INSERT INTO {_tableName} VALUES (4, @lastname, 'Etu')";
         command.ExecuteNonQuery();
 
         //Select single
@@ -88,12 +92,12 @@ DECLARE cur CURSOR
     [TestMethod]
     public async Task TestExecuteProcedure_NonQuery()
     {
-        var transactionLevels = new List<SqlTransactionIsolationLevel>() { 
+        var transactionLevels = new List<SqlTransactionIsolationLevel>() {
             SqlTransactionIsolationLevel.Unspecified,
             SqlTransactionIsolationLevel.Serializable,
             SqlTransactionIsolationLevel.None,
             SqlTransactionIsolationLevel.ReadUncommitted,
-            SqlTransactionIsolationLevel.ReadCommitted 
+            SqlTransactionIsolationLevel.ReadCommitted
         };
 
         var inputInsert = new Input()
@@ -209,7 +213,37 @@ DECLARE cur CURSOR
         }
     }
 
-    // Simple select query.
+    [TestMethod]
+    public async Task TestExecuteProcedure_ProcedureParameter()
+    {
+        var parameter = new ProcedureParameter
+        {
+            Name = "lastname",
+            Value = "Parametri",
+            SqlDataType = SqlDataTypes.Auto
+        };
+
+        var parameterInput = new Input()
+        {
+            ConnectionString = _connString,
+            Execute = "InsertWithParameter",
+            ExecuteType = ExecuteTypes.NonQuery,
+            Parameters = new ProcedureParameter[] { parameter }
+        };
+
+        var options = new Options()
+        {
+            SqlTransactionIsolationLevel = SqlTransactionIsolationLevel.None,
+            CommandTimeoutSeconds = 2,
+            ThrowErrorOnFailure = true
+        };
+
+        var insert = await MicrosoftSQL.ExecuteProcedure(parameterInput, options, default);
+        Assert.IsTrue(insert.Success);
+        Assert.AreEqual(1, insert.RecordsAffected);
+        Assert.IsNull(insert.ErrorMessage);
+    }
+
     private static int GetRowCount()
     {
         using var connection = new SqlConnection(_connString);
