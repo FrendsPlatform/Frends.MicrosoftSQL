@@ -9,7 +9,7 @@ namespace Frends.MicrosoftSQL.ExecuteQuery.Tests;
 public class AutoUnitTests
 {
     /*
-        docker-compose up
+        docker-compose up -d
 
         How to use via terminal:
         docker exec -it sql1 "bash"

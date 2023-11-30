@@ -13,6 +13,7 @@ public class Input
     /// </summary>
     /// <example>Server=myServerAddress;Database=myDataBase;User Id=myUsername;Password=myPassword;</example>
     [PasswordPropertyText]
+    [DisplayFormat(DataFormatString = "Text")]
     [DefaultValue("Server=myServerAddress;Database=myDataBase;User Id=myUsername;Password=myPassword;")]
     public string ConnectionString { get; set; }
 
@@ -64,7 +65,7 @@ public class QueryParameter
     /// The value of the parameter.
     /// </summary>
     /// <example>FirstName</example>
-    public string Value { get; set; }
+    public object Value { get; set; }
 
     /// <summary>
     /// SQL Server-specific data type.

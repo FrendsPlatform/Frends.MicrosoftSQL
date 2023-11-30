@@ -1,4 +1,6 @@
-﻿namespace Frends.MicrosoftSQL.ExecuteQuery.Definitions;
+﻿using System.Collections.Generic;
+
+namespace Frends.MicrosoftSQL.ExecuteQuery.Definitions;
 
 /// <summary>
 /// Task's result.
@@ -26,7 +28,7 @@ public class Result
     public string ErrorMessage { get; private set; }
 
     /// <summary>
-    /// Query result as JToken.
+    /// Query result as Dictionary.
     /// </summary>
     /// <example>
     /// Input.ExecuteType = ExecuteReader: [{"ID": "1","FIRST_NAME": "Saija","LAST_NAME": "Saijalainen","START_DATE": ""}],

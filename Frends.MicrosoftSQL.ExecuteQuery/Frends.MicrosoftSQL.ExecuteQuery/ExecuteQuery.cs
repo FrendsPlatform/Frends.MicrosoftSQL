@@ -1,11 +1,11 @@
 ﻿using Frends.MicrosoftSQL.ExecuteQuery.Definitions;
 using Newtonsoft.Json.Linq;
 using System;
+using System.Linq;
 using System.ComponentModel;
 using System.Data;
 using System.Data.SqlClient;
-using System.Reflection;
-using System.Runtime.Loader;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using IsolationLevel = System.Data.IsolationLevel;
@@ -17,15 +17,6 @@ namespace Frends.MicrosoftSQL.ExecuteQuery;
 /// </summary>
 public class MicrosoftSQL
 {
-    /// Mem cleanup.
-    static MicrosoftSQL()
-    {
-        var currentAssembly = Assembly.GetExecutingAssembly();
-        var currentContext = AssemblyLoadContext.GetLoadContext(currentAssembly);
-        if (currentContext != null)
-            currentContext.Unloading += OnPluginUnloadingRequested;
-    }
-
     /// <summary>
     /// Execute MSSQL query.
     /// [Documentation](https://tasks.frends.com/tasks/frends-tasks/Frends.MicrosoftSQL.ExecuteQuery)
@@ -181,10 +172,5 @@ public class MicrosoftSQL
             SqlTransactionIsolationLevel.Snapshot => IsolationLevel.Snapshot,
             _ => IsolationLevel.ReadCommitted,
         };
-    }
-
-    private static void OnPluginUnloadingRequested(AssemblyLoadContext obj)
-    {
-        obj.Unloading -= OnPluginUnloadingRequested;
     }
 }
