@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-
-namespace Frends.MicrosoftSQL.ExecuteQuery.Definitions;
+﻿namespace Frends.MicrosoftSQL.ExecuteQuery.Definitions;
 
 /// <summary>
 /// Task's result.

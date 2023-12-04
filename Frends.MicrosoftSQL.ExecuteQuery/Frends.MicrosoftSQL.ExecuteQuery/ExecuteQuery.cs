@@ -1,11 +1,9 @@
 ﻿using Frends.MicrosoftSQL.ExecuteQuery.Definitions;
 using Newtonsoft.Json.Linq;
 using System;
-using System.Linq;
 using System.ComponentModel;
 using System.Data;
 using System.Data.SqlClient;
-using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using IsolationLevel = System.Data.IsolationLevel;
