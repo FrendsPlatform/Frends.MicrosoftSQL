@@ -1,6 +1,5 @@
 using Frends.MicrosoftSQL.ExecuteQuery.Definitions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Newtonsoft.Json.Linq;
 using System.Data.SqlClient;
 
 namespace Frends.MicrosoftSQL.ExecuteQuery.Tests;
@@ -20,7 +19,7 @@ public class NonQueryUnitTests
 
     private static readonly string _connString = "Server=127.0.0.1,1433;Database=Master;User Id=SA;Password=Salakala123!";
     private static readonly string _tableName = "TestTable";
-    
+
     [TestInitialize]
     public void Init()
     {

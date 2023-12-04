@@ -20,29 +20,19 @@ public class ExecuteReaderUnitTests
 
     private static readonly string _connString = "Server=127.0.0.1,1433;Database=Master;User Id=SA;Password=Salakala123!";
     private static readonly string _tableName = "TestTable";
-    
+
     [TestInitialize]
     public void Init()
     {
-        using var connection = new SqlConnection(_connString);
-        connection.Open();
-        var createTable = connection.CreateCommand();
-        createTable.CommandText = $@"IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME='{_tableName}') BEGIN CREATE TABLE {_tableName} ( Id int, LastName varchar(255), FirstName varchar(255) ); END";
-        createTable.ExecuteNonQuery();
-        connection.Close();
-        connection.Dispose();
+        var command = $@"IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME='{_tableName}') BEGIN CREATE TABLE {_tableName} ( Id int, LastName varchar(255), FirstName varchar(255) ); END";
+        ExecuteQuery(command);
     }
 
     [TestCleanup]
     public void CleanUp()
     {
-        using var connection = new SqlConnection(_connString);
-        connection.Open();
-        var createTable = connection.CreateCommand();
-        createTable.CommandText = $@"IF EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME='{_tableName}') BEGIN DROP TABLE IF EXISTS {_tableName}; END";
-        createTable.ExecuteNonQuery();
-        connection.Close();
-        connection.Dispose();
+        var command = $@"IF EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME='{_tableName}') BEGIN DROP TABLE IF EXISTS {_tableName}; END";
+        ExecuteQuery(command);
     }
 
     [TestMethod]
@@ -169,6 +159,50 @@ public class ExecuteReaderUnitTests
         }
     }
 
+    [TestMethod]
+    public async Task ExecuteQueryTestWithBinaryData()
+    {
+        var table = "binarytest";
+        var command = $"IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME='{table}') BEGIN CREATE TABLE {table} ( Id int, Data varbinary(MAX)); END";
+        ExecuteQuery(command);
+
+        var binary = File.ReadAllBytes(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "../../../TestData/", "Test_image.png"));
+
+        var input = new Input
+        {
+            ConnectionString = _connString,
+            Query = $"INSERT INTO {table} VALUES (1, @bin)",
+            ExecuteType = ExecuteTypes.NonQuery,
+            Parameters = new QueryParameter[] { new QueryParameter { Name = "bin", Value = binary, SqlDataType = SqlDataTypes.VarBinary } }
+        };
+
+        var options = new Options
+        {
+            CommandTimeoutSeconds = 30,
+            SqlTransactionIsolationLevel = SqlTransactionIsolationLevel.ReadCommitted,
+            ThrowErrorOnFailure = true
+        };
+
+        var result = await MicrosoftSQL.ExecuteQuery(input, options, default);
+        Assert.IsTrue(result.Success);
+
+        input = new Input
+        {
+            ConnectionString = _connString,
+            Query = $@"SELECT Id, Data From {table}",
+            ExecuteType = ExecuteTypes.ExecuteReader,
+            Parameters = null
+        };
+
+        result = await MicrosoftSQL.ExecuteQuery(input, options, default);
+
+        command = $"IF EXISTS(SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = '{table}') BEGIN DROP TABLE IF EXISTS {table}; END";
+        ExecuteQuery(command);
+
+        Assert.IsTrue(result.Success);
+        Assert.AreEqual(Convert.ToBase64String(binary), Convert.ToBase64String((byte[])result.Data[0]["Data"]));
+    }
+
     private static int GetRowCount()
     {
         using var connection = new SqlConnection(_connString);
@@ -179,5 +213,16 @@ public class ExecuteReaderUnitTests
         connection.Close();
         connection.Dispose();
         return count;
+    }
+
+    private static void ExecuteQuery(string command)
+    {
+        using var connection = new SqlConnection(_connString);
+        connection.Open();
+        var createTable = connection.CreateCommand();
+        createTable.CommandText = command;
+        createTable.ExecuteNonQuery();
+        connection.Close();
+        connection.Dispose();
     }
 }

@@ -9,7 +9,7 @@ namespace Frends.MicrosoftSQL.ExecuteQuery.Tests;
 public class AutoUnitTests
 {
     /*
-        docker-compose up
+        docker-compose up -d
 
         How to use via terminal:
         docker exec -it sql1 "bash"
@@ -20,7 +20,7 @@ public class AutoUnitTests
 
     private static readonly string _connString = "Server=127.0.0.1,1433;Database=Master;User Id=SA;Password=Salakala123!";
     private static readonly string _tableName = "TestTable";
-    
+
     [TestInitialize]
     public void Init()
     {
