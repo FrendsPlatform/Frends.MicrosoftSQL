@@ -26,7 +26,7 @@ public class Result
     public string ErrorMessage { get; private set; }
 
     /// <summary>
-    /// Query result as Dictionary.
+    /// Query result as JToken.
     /// </summary>
     /// <example>
     /// Input.ExecuteType = ExecuteReader: [{"ID": "1","FIRST_NAME": "Saija","LAST_NAME": "Saijalainen","START_DATE": ""}],
