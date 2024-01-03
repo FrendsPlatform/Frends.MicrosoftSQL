@@ -9,7 +9,7 @@ namespace Frends.MicrosoftSQL.ExecuteProcedure.Tests;
 public class ExecuteReaderUnitTests
 {
     /*
-        docker-compose up
+        docker-compose up -d
 
         How to use via terminal:
         docker exec -it sql1 "bash"
@@ -255,6 +255,58 @@ DECLARE cur CURSOR
         Assert.IsTrue(((IEnumerable<dynamic>)query.Data).Any(x => x.Id == 1 && x.LastName == "Suku"));
     }
 
+    [TestMethod]
+    public async Task ExecuteQueryTestWithBinaryData()
+    {
+        var table = "binarytest";
+        var command = $"IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME='{table}') BEGIN CREATE TABLE {table} ( Id int, Data varbinary(MAX)); END";
+        ExecuteNonQuery(command);
+
+        var binary = File.ReadAllBytes(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "../../../TestData/", "Test_image.png"));
+
+        //Insert
+        command = $"CREATE PROCEDURE InsertBinaryValues(@binary as varbinary(MAX)) AS INSERT INTO {table} (Id, Data) VALUES (1, @binary)";
+        ExecuteNonQuery(command);
+
+        var input = new Input
+        {
+            ConnectionString = _connString,
+            Execute = "InsertBinaryValues",
+            ExecuteType = ExecuteTypes.NonQuery,
+            Parameters = new ProcedureParameter[] { new ProcedureParameter { Name = "binary", Value = binary, SqlDataType = SqlDataTypes.VarBinary } }
+        };
+
+        var options = new Options
+        {
+            CommandTimeoutSeconds = 30,
+            SqlTransactionIsolationLevel = SqlTransactionIsolationLevel.ReadCommitted,
+            ThrowErrorOnFailure = true
+        };
+
+        var result = await MicrosoftSQL.ExecuteProcedure(input, options, default);
+        Assert.IsTrue(result.Success);
+
+        //Select single
+        command = $"CREATE PROCEDURE SelectSingleBinary AS select * from {table} where Id = 1";
+        ExecuteNonQuery(command);
+
+        input = new Input
+        {
+            ConnectionString = _connString,
+            Execute = "SelectSingleBinary",
+            ExecuteType = ExecuteTypes.ExecuteReader,
+            Parameters = null
+        };
+
+        result = await MicrosoftSQL.ExecuteProcedure(input, options, default);
+
+        command = $"IF EXISTS(SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = '{table}') BEGIN DROP TABLE IF EXISTS {table}; END";
+        ExecuteNonQuery(command);
+
+        Assert.IsTrue(result.Success);
+        Assert.AreEqual(Convert.ToBase64String(binary), Convert.ToBase64String((byte[])result.Data[0]["Data"]));
+    }
+
     // Simple select query
     private static int GetRowCount()
     {
@@ -266,5 +318,16 @@ DECLARE cur CURSOR
         connection.Close();
         connection.Dispose();
         return count;
+    }
+
+    private static void ExecuteNonQuery(string command)
+    {
+        using var connection = new SqlConnection(_connString);
+        connection.Open();
+        var createTable = connection.CreateCommand();
+        createTable.CommandText = command;
+        createTable.ExecuteNonQuery();
+        connection.Close();
+        connection.Dispose();
     }
 }

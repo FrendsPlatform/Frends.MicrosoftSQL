@@ -1,6 +1,5 @@
 ﻿using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
-using System.Diagnostics.CodeAnalysis;
 
 namespace Frends.MicrosoftSQL.ExecuteProcedure.Definitions;
 
@@ -14,6 +13,7 @@ public class Input
     /// </summary>
     /// <example>Server=myServerAddress;Database=myDataBase;User Id=myUsername;Password=myPassword;</example>
     [PasswordPropertyText]
+    [DisplayFormat(DataFormatString = "Text")]
     [DefaultValue("Server=myServerAddress;Database=myDataBase;User Id=myUsername;Password=myPassword;")]
     public string ConnectionString { get; set; }
 
@@ -61,7 +61,7 @@ public class ProcedureParameter
     /// The value of the parameter.
     /// </summary>
     /// <example>FirstName</example>
-    public string Value { get; set; }
+    public object Value { get; set; }
 
     /// <summary>
     /// SQL Server-specific data type.

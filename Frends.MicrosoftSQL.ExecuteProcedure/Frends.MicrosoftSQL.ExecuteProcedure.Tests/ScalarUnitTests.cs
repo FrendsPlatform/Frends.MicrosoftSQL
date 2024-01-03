@@ -8,7 +8,7 @@ namespace Frends.MicrosoftSQL.ExecuteProcedure.Tests;
 public class ScalarUnitTests
 {
     /*
-        docker-compose up
+        docker-compose up -d
 
         How to use via terminal:
         docker exec -it sql1 "bash"

@@ -7,7 +7,7 @@ namespace Frends.MicrosoftSQL.ExecuteProcedure.Tests;
 public class ExceptionUnitTests
 {
     /*
-        docker-compose up
+        docker-compose up -d
 
         How to use via terminal:
         docker exec -it sql1 "bash"
@@ -84,6 +84,5 @@ public class ExceptionUnitTests
                 Assert.IsNull(result.Data, $"ExecuteType: {executeType}, IsolationLevel: {isolation}");
             }
         }
-
     }
 }
