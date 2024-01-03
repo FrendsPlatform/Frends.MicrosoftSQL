@@ -10,7 +10,7 @@ public class ManualTesting
     /*
         These tests requires code editing so they must be skipped in workflow.
 
-        docker-compose up
+        docker-compose up -d
 
         How to use via terminal:
         docker exec -it sql1 "bash"
