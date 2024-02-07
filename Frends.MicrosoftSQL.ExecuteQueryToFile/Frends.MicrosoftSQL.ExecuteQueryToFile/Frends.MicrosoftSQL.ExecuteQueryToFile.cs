@@ -1,10 +1,8 @@
 ﻿namespace Frends.MicrosoftSQL.ExecuteQueryToFile;
 
-using System;
 using System.ComponentModel;
 using System.Data;
 using System.Data.SqlClient;
-using System.Data.Common;
 using System.Threading;
 using System.Threading.Tasks;
 using Frends.MicrosoftSQL.ExecuteQueryToFile.Definitions;
@@ -25,7 +23,7 @@ public static class MicrosoftSQL
     /// <returns>Object { int EntriesWritten, string Path, string FileName }</returns>
     public static async Task<Result> ExecuteQueryToFile([PropertyTab] Input input, [PropertyTab] Options options, CancellationToken cancellationToken)
     {
-        Result result = new ();
+        Result result = new();
         using (var sqlConnection = new SqlConnection(input.ConnectionString))
         {
             await sqlConnection.OpenAsync(cancellationToken);

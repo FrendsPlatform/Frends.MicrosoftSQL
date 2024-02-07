@@ -170,7 +170,7 @@ public class UnitTests
 
         var output = File.ReadAllText(_destination);
 
-        Assert.AreEqual(BitConverter.ToString(File.ReadAllBytes(Path.Combine(Path.GetDirectoryName(_destination), "Test_image.png"))), output.TrimEnd(Environment.NewLine.ToCharArray()));
+        Assert.AreEqual(BitConverter.ToString(File.ReadAllBytes(Path.Combine(Path.GetDirectoryName(_destination), "Test_image.png"))), output.TrimEnd(new char[] { '\r', '\n' }));
     }
 
     [Test]
@@ -206,6 +206,6 @@ public class UnitTests
 
         var output = File.ReadAllText(_destination);
 
-        Assert.AreEqual(BitConverter.ToString(File.ReadAllBytes(Path.Combine(Path.GetDirectoryName(_destination), "Test_Text.txt"))), output.TrimEnd(Environment.NewLine.ToCharArray()));
+        Assert.AreEqual(BitConverter.ToString(File.ReadAllBytes(Path.Combine(Path.GetDirectoryName(_destination), "Test_text.txt"))), output.TrimEnd(Environment.NewLine.ToCharArray()));
     }
 }
