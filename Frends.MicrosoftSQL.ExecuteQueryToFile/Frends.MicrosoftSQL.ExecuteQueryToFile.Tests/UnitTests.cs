@@ -206,6 +206,6 @@ public class UnitTests
 
         var output = File.ReadAllText(_destination);
 
-        Assert.AreEqual(BitConverter.ToString(File.ReadAllBytes(Path.Combine(Path.GetDirectoryName(_destination), "Test_text.txt"))), output.TrimEnd(Environment.NewLine.ToCharArray()));
+        Assert.AreEqual(BitConverter.ToString(File.ReadAllBytes(Path.Combine(Path.GetDirectoryName(_destination), "Test_text.txt"))), output.TrimEnd(new char[] { '\r', '\n' }));
     }
 }
