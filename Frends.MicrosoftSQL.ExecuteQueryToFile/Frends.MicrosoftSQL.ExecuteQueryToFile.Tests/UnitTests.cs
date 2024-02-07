@@ -26,35 +26,28 @@ using NUnit.Framework;
 [TestFixture]
 public class UnitTests
 {
-    private static readonly string _connString = "Server=127.0.0.1,1433;Database=Master;User Id=SA;Password=Salakala123!";
+    private static readonly string _connString = Helper.GetConnectionString();
     private static readonly string _tableName = "TestTable";
     private static readonly string _destination = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "../../../TestData/test.csv");
 
     [SetUp]
     public void Init()
     {
-        using (var connection = new SqlConnection(_connString))
-        {
-            connection.Open();
-            var createTable = connection.CreateCommand();
-            createTable.CommandText = $@"IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME='{_tableName}') BEGIN CREATE TABLE {_tableName} ( Id int, LastName varchar(255), FirstName varchar(255), Salary decimal(6,2), Image Image, TestText VarBinary(MAX)); END";
-            createTable.ExecuteNonQuery();
-            connection.Close();
-        }
+        Helper.CreateTestTable(_connString, _tableName);
 
         var parameters = new System.Data.SqlClient.SqlParameter[]
         {
-                new System.Data.SqlClient.SqlParameter("@Hash", SqlDbType.VarBinary)
-                {
-                    Value = File.ReadAllBytes(Path.Combine(Path.GetDirectoryName(_destination), "Test_image.png")),
-                },
-                new System.Data.SqlClient.SqlParameter("@TestText", SqlDbType.VarBinary)
-                {
-                    Value = File.ReadAllBytes(Path.Combine(Path.GetDirectoryName(_destination), "Test_text.txt")),
-                },
+            new System.Data.SqlClient.SqlParameter("@Hash", SqlDbType.VarBinary)
+            {
+                Value = File.ReadAllBytes(Path.Combine(Path.GetDirectoryName(_destination), "Test_image.png")),
+            },
+            new System.Data.SqlClient.SqlParameter("@TestText", SqlDbType.VarBinary)
+            {
+                Value = File.ReadAllBytes(Path.Combine(Path.GetDirectoryName(_destination), "Test_text.txt")),
+            },
         };
 
-        InsertTestData($"Insert into {_tableName} (Id, LastName, FirstName, Salary, Image, TestText) values (1,'Meikalainen','Matti',1523.25, {parameters[0].ParameterName}, {parameters[1].ParameterName});", parameters);
+        Helper.InsertTestData(_connString, $"Insert into {_tableName} (Id, LastName, FirstName, Salary, Image, TestText) values (1,'Meikalainen','Matti',1523.25, {parameters[0].ParameterName}, {parameters[1].ParameterName});", parameters);
     }
 
     [TearDown]
@@ -214,30 +207,5 @@ public class UnitTests
         var output = File.ReadAllText(_destination);
 
         Assert.AreEqual(BitConverter.ToString(File.ReadAllBytes(Path.Combine(Path.GetDirectoryName(_destination), "Test_Text.txt"))), output.TrimEnd(Environment.NewLine.ToCharArray()));
-    }
-
-    private static void InsertTestData(string commandText, System.Data.SqlClient.SqlParameter[] parameters = null)
-    {
-        using var sqlConnection = new SqlConnection(_connString);
-        sqlConnection.Open();
-
-        using (var command = new SqlCommand())
-        {
-            command.CommandText = commandText;
-            command.CommandType = CommandType.Text;
-            command.CommandTimeout = 30;
-            command.Connection = sqlConnection;
-            if (parameters != null)
-            {
-                foreach (var param in parameters)
-                {
-                    command.Parameters.Add(param);
-                }
-            }
-
-            command.ExecuteNonQuery();
-        }
-
-        sqlConnection.Close();
     }
 }
