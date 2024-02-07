@@ -27,7 +27,6 @@ public static class MicrosoftSQL
         using (var sqlConnection = new SqlConnection(input.ConnectionString))
         {
             await sqlConnection.OpenAsync(cancellationToken);
-
             using var command = BuildSQLCommand(input.Query, input.QueryParameters);
             command.CommandTimeout = options.TimeoutSeconds;
             command.Connection = sqlConnection;
