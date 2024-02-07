@@ -8,7 +8,9 @@ internal static class Helper
 
     internal static string GetConnectionString()
     {
-        return "Server=127.0.0.1,1433;Database=Master;User Id=SA;Password=Salakala123!";
+        var user = "SA";
+        var pwd = "Salakala123!";
+        return $"Server=127.0.0.1,1433;Database=Master;User Id={user};Password={pwd}";
     }
 
     internal static void CreateTestTable(string connString, string tableName)
