@@ -1,0 +1,4 @@
+﻿[*.cs]
+
+# SA1000: Keywords should be spaced correctly
+dotnet_diagnostic.SA1000.severity = none
