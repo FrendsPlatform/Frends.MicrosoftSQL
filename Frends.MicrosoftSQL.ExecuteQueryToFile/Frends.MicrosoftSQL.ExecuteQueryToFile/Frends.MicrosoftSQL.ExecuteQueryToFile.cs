@@ -1,5 +1,6 @@
 ﻿namespace Frends.MicrosoftSQL.ExecuteQueryToFile;
 
+using System;
 using System.ComponentModel;
 using System.Data;
 using System.Data.SqlClient;
@@ -27,9 +28,28 @@ public static class MicrosoftSQL
         using (var sqlConnection = new SqlConnection(input.ConnectionString))
         {
             await sqlConnection.OpenAsync(cancellationToken);
-            using var command = BuildSQLCommand(input.Query, input.QueryParameters);
+
+            using var command = sqlConnection.CreateCommand();
             command.CommandTimeout = options.TimeoutSeconds;
-            command.Connection = sqlConnection;
+            command.CommandText = input.Query;
+            command.CommandType = CommandType.Text;
+
+            if (input.QueryParameters != null)
+            {
+                foreach (var parameter in input.QueryParameters)
+                {
+                    if (parameter.SqlDataType is SqlDataTypes.Auto)
+                    {
+                        command.Parameters.AddWithValue(parameterName: parameter.Name, value: parameter.Value);
+                    }
+                    else
+                    {
+                        var sqlDbType = (SqlDbType)Enum.Parse(typeof(SqlDbType), parameter.SqlDataType.ToString());
+                        var commandParameter = command.Parameters.Add(parameter.Name, sqlDbType);
+                        commandParameter.Value = parameter.Value;
+                    }
+                }
+            }
 
             switch (options.ReturnFormat)
             {
@@ -41,19 +61,5 @@ public static class MicrosoftSQL
         }
 
         return result;
-    }
-
-    private static SqlCommand BuildSQLCommand(string query, Definitions.SqlParameter[] parmeters)
-    {
-        using var command = new SqlCommand();
-        command.CommandText = query;
-        command.CommandType = CommandType.Text;
-
-        foreach (var parameter in parmeters)
-        {
-            command.Parameters.AddWithValue(parameter.Name, parameter.Value);
-        }
-
-        return command;
     }
 }

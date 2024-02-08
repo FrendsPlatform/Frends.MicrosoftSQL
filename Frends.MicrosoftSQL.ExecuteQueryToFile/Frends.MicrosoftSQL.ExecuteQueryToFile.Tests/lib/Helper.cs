@@ -5,7 +5,6 @@ using System.Data.SqlClient;
 
 internal static class Helper
 {
-
     internal static string GetConnectionString()
     {
         var user = "SA";

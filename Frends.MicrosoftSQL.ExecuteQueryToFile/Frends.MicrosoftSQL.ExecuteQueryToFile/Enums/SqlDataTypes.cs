@@ -37,6 +37,6 @@ public enum SqlDataTypes
     Date = 31,
     Time = 32,
     DateTime2 = 33,
-    DateTimeOffset = 34
+    DateTimeOffset = 34,
 #pragma warning restore CS1591 // self explanatory
 }
