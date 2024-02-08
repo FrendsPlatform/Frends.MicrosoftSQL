@@ -19,7 +19,7 @@ public class Options
     /// <summary>
     /// Determines in what format the query is written.
     /// </summary>
-    /// <example>ReturnFormat.JSON</example>
+    /// <example>ReturnFormat.CSV</example>
     [DefaultValue(ReturnFormat.CSV)]
     public ReturnFormat ReturnFormat { get; set; }
 
