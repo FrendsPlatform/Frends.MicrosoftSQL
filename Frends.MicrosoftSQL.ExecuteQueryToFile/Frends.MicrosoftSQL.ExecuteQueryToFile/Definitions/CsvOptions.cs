@@ -111,19 +111,14 @@ public class CsvOptions
     /// <returns>string</returns>
     internal string GetFieldDelimiterAsString()
     {
-        switch (FieldDelimiter)
+        return FieldDelimiter switch
         {
-            case CsvFieldDelimiter.Comma:
-                return ",";
-            case CsvFieldDelimiter.Pipe:
-                return "|";
-            case CsvFieldDelimiter.Semicolon:
-                return ";";
-            case CsvFieldDelimiter.Custom:
-                return CustomFieldDelimiter;
-            default:
-                throw new Exception($"Unknown field delimeter: {FieldDelimiter}");
-        }
+            CsvFieldDelimiter.Comma => ",",
+            CsvFieldDelimiter.Pipe => "|",
+            CsvFieldDelimiter.Semicolon => ";",
+            CsvFieldDelimiter.Custom => CustomFieldDelimiter,
+            _ => throw new Exception($"Unknown field delimeter: {FieldDelimiter}"),
+        };
     }
 
     /// <summary>
@@ -132,16 +127,12 @@ public class CsvOptions
     /// <returns>string</returns>
     internal string GetLineBreakAsString()
     {
-        switch (LineBreak)
+        return LineBreak switch
         {
-            case CsvLineBreak.CRLF:
-                return "\r\n";
-            case CsvLineBreak.CR:
-                return "\r";
-            case CsvLineBreak.LF:
-                return "\n";
-            default:
-                throw new Exception($"Unknown field delimeter: {FieldDelimiter}");
-        }
+            CsvLineBreak.CRLF => "\r\n",
+            CsvLineBreak.CR => "\r",
+            CsvLineBreak.LF => "\n",
+            _ => throw new Exception($"Unknown field delimeter: {FieldDelimiter}"),
+        };
     }
 }

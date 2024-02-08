@@ -30,9 +30,29 @@ public class UnitTests
     private static readonly string _tableName = "TestTable";
     private static readonly string _destination = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "../../../TestData/test.csv");
 
+    private Options _options;
+
     [SetUp]
     public void Init()
     {
+        _options = new Options()
+        {
+            TimeoutSeconds = 30,
+            CsvOptions = new CsvOptions
+            {
+                FieldDelimiter = CsvFieldDelimiter.Semicolon,
+                LineBreak = CsvLineBreak.CRLF,
+                FileEncoding = FileEncoding.UTF8,
+                EnableBom = false,
+                IncludeHeadersInOutput = false,
+                SanitizeColumnHeaders = false,
+                AddQuotesToDates = false,
+                AddQuotesToStrings = false,
+                DateFormat = "yyyy-MM-dd",
+                DateTimeFormat = "yyyy-MM-ddTHH:mm:ss",
+            },
+        };
+
         Helper.CreateTestTable(_connString, _tableName);
 
         var parameters = new System.Data.SqlClient.SqlParameter[]
@@ -67,6 +87,34 @@ public class UnitTests
     }
 
     [Test]
+    public async Task ExecuteQueryToFile_SqlParameters()
+    {
+        var query = new Input
+        {
+            Query = $"Select Id, LastName, FirstName, REPLACE(Salary, '.', ',') AS 'Salary' from {_tableName} WHERE Id = @param",
+            QueryParameters = new Definitions.SqlParameter[]
+            {
+                new Definitions.SqlParameter
+                {
+                    Name = "@param",
+                    Value = 1,
+                    SqlDataType = SqlDataTypes.Int,
+                },
+            },
+            ConnectionString = _connString,
+            OutputFilePath = _destination,
+        };
+
+        _options.CsvOptions.AddQuotesToStrings = true;
+        _options.CsvOptions.IncludeHeadersInOutput = true;
+
+        await MicrosoftSQL.ExecuteQueryToFile(query, _options, default);
+        var output = File.ReadAllText(_destination);
+
+        Assert.AreEqual("Id;LastName;FirstName;Salary\r\n1;\"Meikalainen\";\"Matti\";\"1523,25\"\r\n", output);
+    }
+
+    [Test]
     public async Task ExecuteQueryToFile_StringWithApostrophe()
     {
         var query = new Input
@@ -77,25 +125,10 @@ public class UnitTests
             OutputFilePath = _destination,
         };
 
-        var options = new Options
-        {
-            TimeoutSeconds = 30,
-            CsvOptions = new CsvOptions
-            {
-                FieldDelimiter = CsvFieldDelimiter.Semicolon,
-                LineBreak = CsvLineBreak.CRLF,
-                FileEncoding = FileEncoding.UTF8,
-                EnableBom = false,
-                IncludeHeadersInOutput = true,
-                SanitizeColumnHeaders = false,
-                AddQuotesToDates = false,
-                AddQuotesToStrings = true,
-                DateFormat = "yyyy-MM-dd",
-                DateTimeFormat = "yyyy-MM-ddTHH:mm:ss",
-            },
-        };
+        _options.CsvOptions.AddQuotesToStrings = true;
+        _options.CsvOptions.IncludeHeadersInOutput = true;
 
-        await MicrosoftSQL.ExecuteQueryToFile(query, options, default);
+        await MicrosoftSQL.ExecuteQueryToFile(query, _options, default);
         var output = File.ReadAllText(_destination);
 
         Assert.AreEqual("Id;LastName;FirstName;Salary\r\n1;\"Meikalainen\";\"Matti\";\"1523,25\"\r\n", output);
@@ -112,25 +145,9 @@ public class UnitTests
             OutputFilePath = _destination,
         };
 
-        var options = new Options
-        {
-            TimeoutSeconds = 30,
-            CsvOptions = new CsvOptions
-            {
-                FieldDelimiter = CsvFieldDelimiter.Semicolon,
-                LineBreak = CsvLineBreak.CRLF,
-                FileEncoding = FileEncoding.UTF8,
-                EnableBom = false,
-                IncludeHeadersInOutput = true,
-                SanitizeColumnHeaders = false,
-                AddQuotesToDates = false,
-                AddQuotesToStrings = false,
-                DateFormat = "yyyy-MM-dd",
-                DateTimeFormat = "yyyy-MM-ddTHH:mm:ss",
-            },
-        };
+        _options.CsvOptions.IncludeHeadersInOutput = true;
 
-        await MicrosoftSQL.ExecuteQueryToFile(query, options, default);
+        await MicrosoftSQL.ExecuteQueryToFile(query, _options, default);
 
         var output = File.ReadAllText(_destination);
 
@@ -148,25 +165,33 @@ public class UnitTests
             OutputFilePath = _destination,
         };
 
-        var options = new Options
+        await MicrosoftSQL.ExecuteQueryToFile(query, _options, default);
+
+        var output = File.ReadAllText(_destination);
+
+        Assert.AreEqual(BitConverter.ToString(File.ReadAllBytes(Path.Combine(Path.GetDirectoryName(_destination), "Test_image.png"))), output.TrimEnd(new char[] { '\r', '\n' }));
+    }
+
+    [Test]
+    public async Task ExecuteQueryToFile_WithImageDBTypeWithWhereClause()
+    {
+        var query = new Input
         {
-            TimeoutSeconds = 30,
-            CsvOptions = new CsvOptions
+            Query = $"SELECT Image from {_tableName} WHERE CONVERT(varbinary(max), Image) = @param",
+            QueryParameters = new Definitions.SqlParameter[]
             {
-                FieldDelimiter = CsvFieldDelimiter.Semicolon,
-                LineBreak = CsvLineBreak.CRLF,
-                FileEncoding = FileEncoding.UTF8,
-                EnableBom = false,
-                IncludeHeadersInOutput = false,
-                SanitizeColumnHeaders = false,
-                AddQuotesToDates = false,
-                AddQuotesToStrings = false,
-                DateFormat = "yyyy-MM-dd",
-                DateTimeFormat = "yyyy-MM-ddTHH:mm:ss",
+                new Definitions.SqlParameter
+                {
+                    Name = "@param",
+                    Value = File.ReadAllBytes(Path.Combine(Path.GetDirectoryName(_destination), "Test_image.png")),
+                    SqlDataType = SqlDataTypes.VarBinary,
+                },
             },
+            ConnectionString = _connString,
+            OutputFilePath = _destination,
         };
 
-        await MicrosoftSQL.ExecuteQueryToFile(query, options, default);
+        await MicrosoftSQL.ExecuteQueryToFile(query, _options, default);
 
         var output = File.ReadAllText(_destination);
 
@@ -184,25 +209,33 @@ public class UnitTests
             OutputFilePath = _destination,
         };
 
-        var options = new Options
+        await MicrosoftSQL.ExecuteQueryToFile(query, _options, default);
+
+        var output = File.ReadAllText(_destination);
+
+        Assert.AreEqual(BitConverter.ToString(File.ReadAllBytes(Path.Combine(Path.GetDirectoryName(_destination), "Test_text.txt"))), output.TrimEnd(new char[] { '\r', '\n' }));
+    }
+
+    [Test]
+    public async Task ExecuteQueryToFile_WithBinaryDBTypeWithWhereClause()
+    {
+        var query = new Input
         {
-            TimeoutSeconds = 30,
-            CsvOptions = new CsvOptions
+            Query = $"SELECT TestText FROM {_tableName} WHERE TestText = @param",
+            QueryParameters = new Definitions.SqlParameter[]
             {
-                FieldDelimiter = CsvFieldDelimiter.Semicolon,
-                LineBreak = CsvLineBreak.CRLF,
-                FileEncoding = FileEncoding.UTF8,
-                EnableBom = false,
-                IncludeHeadersInOutput = false,
-                SanitizeColumnHeaders = false,
-                AddQuotesToDates = false,
-                AddQuotesToStrings = false,
-                DateFormat = "yyyy-MM-dd",
-                DateTimeFormat = "yyyy-MM-ddTHH:mm:ss",
+                new Definitions.SqlParameter
+                {
+                    Name = "@param",
+                    Value = File.ReadAllBytes(Path.Combine(Path.GetDirectoryName(_destination), "Test_text.txt")),
+                    SqlDataType = SqlDataTypes.VarBinary,
+                },
             },
+            ConnectionString = _connString,
+            OutputFilePath = _destination,
         };
 
-        await MicrosoftSQL.ExecuteQueryToFile(query, options, default);
+        await MicrosoftSQL.ExecuteQueryToFile(query, _options, default);
 
         var output = File.ReadAllText(_destination);
 
