@@ -42,12 +42,16 @@ public class MicrosoftSQL
                 foreach (var parameter in input.Parameters)
                 {
                     if (parameter.SqlDataType is SqlDataTypes.Auto)
-                        command.Parameters.AddWithValue(parameterName: parameter.Name, value: parameter.Value);
+                    {
+                        command.Parameters.AddWithValue(
+                            parameterName: parameter.Name,
+                            value: parameter.Value ?? DBNull.Value);
+                    }
                     else
                     {
                         var sqlDbType = (SqlDbType)Enum.Parse(typeof(SqlDbType), parameter.SqlDataType.ToString());
                         var commandParameter = command.Parameters.Add(parameter.Name, sqlDbType);
-                        commandParameter.Value = parameter.Value;
+                        commandParameter.Value = parameter.Value ?? DBNull.Value;
                     }
                 }
             }
