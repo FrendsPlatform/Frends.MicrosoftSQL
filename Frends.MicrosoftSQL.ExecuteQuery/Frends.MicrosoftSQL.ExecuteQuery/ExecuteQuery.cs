@@ -69,12 +69,10 @@ public class MicrosoftSQL
         }
         catch (Exception ex)
         {
-            var eMsg = $"ExecuteQuery exception: {ex}.";
-
             if (options.ThrowErrorOnFailure)
-                throw new Exception(eMsg);
+                throw new Exception("Error in ExecuteQuery", ex);
 
-            return new Result(false, 0, eMsg, null);
+            return new Result(false, 0, $"Error in ExecuteQuery: {ex}", null);
         }
         finally
         {
@@ -87,7 +85,7 @@ public class MicrosoftSQL
         Result result;
         object dataObject;
         SqlDataReader dataReader = null;
-        var table = new DataTable();
+       using var table = new DataTable();
 
         try
         {
