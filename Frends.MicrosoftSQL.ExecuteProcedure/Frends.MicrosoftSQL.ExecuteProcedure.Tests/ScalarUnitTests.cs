@@ -1,6 +1,7 @@
 using Frends.MicrosoftSQL.ExecuteProcedure.Definitions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Data.SqlClient;
+using Newtonsoft.Json.Linq;
 
 namespace Frends.MicrosoftSQL.ExecuteProcedure.Tests;
 
@@ -248,6 +249,7 @@ DECLARE cur CURSOR
         Assert.IsTrue(insert.Success);
         Assert.AreEqual(-1, insert.RecordsAffected);
         Assert.IsNull(insert.ErrorMessage);
-        Assert.IsTrue(((IEnumerable<dynamic>)insert.Data).Any(x => x.Id == 1 && x.LastName == "Suku"));
+        Assert.AreEqual(1, (int)insert.Data[0]["Id"]);
+        Assert.AreEqual("Suku", (string)insert.Data[0]["LastName"]);
     }
 }

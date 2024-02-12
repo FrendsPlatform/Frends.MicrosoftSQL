@@ -256,7 +256,8 @@ DECLARE cur CURSOR
         Assert.IsTrue(query.Success);
         Assert.AreEqual(-1, query.RecordsAffected);
         Assert.IsNull(query.ErrorMessage);
-        Assert.IsTrue(((IEnumerable<dynamic>)query.Data).Any(x => x.Id == 1 && x.LastName == "Suku"));
+        Assert.AreEqual(1, (int)query.Data[0]["Id"]);
+        Assert.AreEqual("Suku", (string)query.Data[0]["LastName"]);
     }
 
     [TestMethod]
