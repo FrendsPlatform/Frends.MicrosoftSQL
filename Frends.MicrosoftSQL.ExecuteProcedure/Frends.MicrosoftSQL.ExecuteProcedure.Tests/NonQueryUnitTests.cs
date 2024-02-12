@@ -244,6 +244,37 @@ DECLARE cur CURSOR
         Assert.IsNull(insert.ErrorMessage);
     }
 
+    [TestMethod]
+    public async Task TestExecuteProcedure_ProcedureNullParameter()
+    {
+        var parameter = new ProcedureParameter
+        {
+            Name = "lastname",
+            Value = null,
+            SqlDataType = SqlDataTypes.Auto
+        };
+
+        var parameterInput = new Input()
+        {
+            ConnectionString = _connString,
+            Execute = "InsertWithParameter",
+            ExecuteType = ExecuteTypes.NonQuery,
+            Parameters = new ProcedureParameter[] { parameter }
+        };
+
+        var options = new Options()
+        {
+            SqlTransactionIsolationLevel = SqlTransactionIsolationLevel.None,
+            CommandTimeoutSeconds = 2,
+            ThrowErrorOnFailure = true
+        };
+
+        var insert = await MicrosoftSQL.ExecuteProcedure(parameterInput, options, default);
+        Assert.IsTrue(insert.Success);
+        Assert.AreEqual(1, insert.RecordsAffected);
+        Assert.IsNull(insert.ErrorMessage);
+    }
+
     private static int GetRowCount()
     {
         using var connection = new SqlConnection(_connString);

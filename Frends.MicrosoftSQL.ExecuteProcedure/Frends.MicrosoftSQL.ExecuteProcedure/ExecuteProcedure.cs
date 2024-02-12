@@ -42,6 +42,9 @@ public class MicrosoftSQL
             {
                 foreach (var parameter in input.Parameters)
                 {
+                    if (parameter.Value is null)
+                        parameter.Value = DBNull.Value;
+
                     if (parameter.SqlDataType is SqlDataTypes.Auto)
                         command.Parameters.AddWithValue(parameterName: parameter.Name, value: parameter.Value);
                     else
