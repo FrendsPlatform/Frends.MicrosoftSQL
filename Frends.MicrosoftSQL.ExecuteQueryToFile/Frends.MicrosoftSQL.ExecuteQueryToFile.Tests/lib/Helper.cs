@@ -17,7 +17,7 @@ internal static class Helper
         using var connection = new SqlConnection(connString);
         connection.Open();
         var createTable = connection.CreateCommand();
-        createTable.CommandText = $@"IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME='{tableName}') BEGIN CREATE TABLE {tableName} ( Id int, LastName varchar(255), FirstName varchar(255), Salary decimal(6,2), Image Image, TestText VarBinary(MAX)); END";
+        createTable.CommandText = $@"IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME='{tableName}') BEGIN CREATE TABLE {tableName} ( Id int, LastName varchar(255), FirstName varchar(255), Salary decimal(6,2), Image Image, TestText VarBinary(MAX), TestNull Varchar(255)); END";
         createTable.ExecuteNonQuery();
         connection.Close();
     }

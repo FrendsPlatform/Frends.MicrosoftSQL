@@ -16,6 +16,7 @@ public class SqlParameter
 
     /// <summary>
     /// The value of the parameter.
+    /// If value is null, it is changed to DBNull in the Task.
     /// </summary>
     /// <example>FirstName</example>
     public object Value { get; set; }
