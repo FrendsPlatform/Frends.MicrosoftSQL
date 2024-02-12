@@ -38,15 +38,15 @@ public static class MicrosoftSQL
             {
                 foreach (var parameter in input.QueryParameters)
                 {
+                    if (parameter.Value is null)
+                        parameter.Value = DBNull.Value;
+
                     if (parameter.SqlDataType is SqlDataTypes.Auto)
                     {
                         command.Parameters.AddWithValue(parameterName: parameter.Name, value: parameter.Value);
                     }
                     else
                     {
-                        if (parameter.Value is null)
-                            parameter.Value = DBNull.Value;
-
                         var sqlDbType = (SqlDbType)Enum.Parse(typeof(SqlDbType), parameter.SqlDataType.ToString());
                         var commandParameter = command.Parameters.Add(parameter.Name, sqlDbType);
                         commandParameter.Value = parameter.Value;
