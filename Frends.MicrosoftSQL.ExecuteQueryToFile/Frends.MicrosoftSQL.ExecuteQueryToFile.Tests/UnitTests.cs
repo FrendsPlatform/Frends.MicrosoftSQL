@@ -241,4 +241,30 @@ public class UnitTests
 
         Assert.AreEqual(BitConverter.ToString(File.ReadAllBytes(Path.Combine(Path.GetDirectoryName(_destination), "Test_text.txt"))), output.TrimEnd(new char[] { '\r', '\n' }));
     }
+
+    [Test]
+    public async Task ExecuteQueryToFile_WithNULLParameter()
+    {
+        var query = new Input
+        {
+            Query = $"SELECT * FROM {_tableName} WHERE TestNull = @param",
+            QueryParameters = new Definitions.SqlParameter[]
+            {
+                new Definitions.SqlParameter
+                {
+                    Name = "@param",
+                    Value = null,
+                    SqlDataType = SqlDataTypes.VarChar,
+                },
+            },
+            ConnectionString = _connString,
+            OutputFilePath = _destination,
+        };
+
+        await MicrosoftSQL.ExecuteQueryToFile(query, _options, default);
+
+        var output = File.ReadAllText(_destination);
+
+        Assert.IsNotNull(output);
+    }
 }

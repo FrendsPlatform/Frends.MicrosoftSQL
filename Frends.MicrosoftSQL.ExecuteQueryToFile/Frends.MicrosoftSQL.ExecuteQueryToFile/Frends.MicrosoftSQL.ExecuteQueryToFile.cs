@@ -44,6 +44,9 @@ public static class MicrosoftSQL
                     }
                     else
                     {
+                        if (parameter.Value is null)
+                            parameter.Value = DBNull.Value;
+
                         var sqlDbType = (SqlDbType)Enum.Parse(typeof(SqlDbType), parameter.SqlDataType.ToString());
                         var commandParameter = command.Parameters.Add(parameter.Name, sqlDbType);
                         commandParameter.Value = parameter.Value;

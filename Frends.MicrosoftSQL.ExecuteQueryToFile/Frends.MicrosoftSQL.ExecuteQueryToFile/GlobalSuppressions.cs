@@ -9,4 +9,4 @@
 [assembly: SuppressMessage("StyleCop.CSharp.DocumentationRules", "SA1633:File should have header", Justification = "Following Frends guidelines")]
 [assembly: SuppressMessage("StyleCop.CSharp.DocumentationRules", "SA1602:Enumeration items should be documented", Justification = "Following Frends guidelines", Scope = "namespaceanddescendants", Target = "~N:Frends.MicrosoftSQL.ExecuteQueryToFile.Enums")]
 [assembly: SuppressMessage("StyleCop.CSharp.OrderingRules", "SA1200:Using directives should be placed correctly", Justification = "Following Frends guidelines")]
-[assembly: SuppressMessage("StyleCop.CSharp.LayoutRules", "SA1503:Braces should not be omitted", Justification = "Following Frends guidelines", Scope = "namespaceanddescendants", Target = "~N:Frends.MicrosoftSQL.ExecuteQueryToFile.Definitions")]
+[assembly: SuppressMessage("StyleCop.CSharp.LayoutRules", "SA1503:Braces should not be omitted", Justification = "Following Frends guidelines", Scope = "namespaceanddescendants", Target = "~N:Frends.MicrosoftSQL.ExecuteQueryToFile")]
