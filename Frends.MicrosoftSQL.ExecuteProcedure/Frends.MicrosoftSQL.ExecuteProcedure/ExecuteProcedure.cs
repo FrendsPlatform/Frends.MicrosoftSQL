@@ -82,7 +82,7 @@ public class MicrosoftSQL
         Result result;
         object dataObject;
         SqlDataReader dataReader = null;
-        var table = new DataTable();
+        using var table = new DataTable();
 
         try
         {
