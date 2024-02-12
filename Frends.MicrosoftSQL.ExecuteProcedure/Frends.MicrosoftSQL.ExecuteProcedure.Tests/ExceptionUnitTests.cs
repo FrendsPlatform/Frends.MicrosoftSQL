@@ -3,18 +3,24 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Frends.MicrosoftSQL.ExecuteProcedure.Tests;
 
+/// <summary>
+/// docker run -e "ACCEPT_EULA=Y" -e "SA_PASSWORD=Salakala123!" -p 1433:1433 --name sql1 --hostname sql1 -d mcr.microsoft.com/mssql/server:2019-CU18-ubuntu-20.04
+/// with Git bash add winpty to the start of
+/// winpty docker exec -it sql1 "bash"
+/// /opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P "Salakala123!"
+/// Check rows before CleanUp:
+/// SELECT* FROM TestTable
+/// GO
+/// Optional queries:
+/// SELECT Name FROM sys.Databases;
+/// GO
+/// SELECT* FROM INFORMATION_SCHEMA.TABLES;
+/// GO
+/// </summary>
 [TestClass]
 public class ExceptionUnitTests
 {
-    /*
-        docker-compose up -d
-
-        How to use via terminal:
-        docker exec -it sql1 "bash"
-        /opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P "Salakala123!"
-        SELECT * FROM TestTable
-        GO
-   */
+    private static readonly string _connString = Helper.GetInvalidConnectionString();
 
     Input _input = new();
     Options _options = new();
@@ -24,7 +30,7 @@ public class ExceptionUnitTests
     {
         _input = new()
         {
-            ConnectionString = "Server=127.0.0.1,1433;Database=Master;User Id=SA;Password=WrongPassWord",
+            ConnectionString = _connString,
             Execute = "foo",
             ExecuteType = ExecuteTypes.NonQuery,
             Parameters = null,
