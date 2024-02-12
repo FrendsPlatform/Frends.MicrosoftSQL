@@ -152,7 +152,7 @@ DECLARE cur CURSOR
             Parameters = null
         };
 
-        foreach (var options in transactionLevels.Select(e => new Options { SqlTransactionIsolationLevel = e, CommandTimeoutSeconds = 2, ThrowErrorOnFailure = true}))
+        foreach (var options in transactionLevels.Select(e => new Options { SqlTransactionIsolationLevel = e, CommandTimeoutSeconds = 2, ThrowErrorOnFailure = true }))
         {
             // Insert rows
             var insert = await MicrosoftSQL.ExecuteProcedure(inputInsert, options, default);
