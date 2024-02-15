@@ -42,12 +42,16 @@ public class MicrosoftSQL
                 foreach (var parameter in input.Parameters)
                 {
                     if (parameter.SqlDataType is SqlDataTypes.Auto)
-                        command.Parameters.AddWithValue(parameterName: parameter.Name, value: parameter.Value);
+                    {
+                        command.Parameters.AddWithValue(
+                            parameterName: parameter.Name,
+                            value: parameter.Value ?? DBNull.Value);
+                    }
                     else
                     {
                         var sqlDbType = (SqlDbType)Enum.Parse(typeof(SqlDbType), parameter.SqlDataType.ToString());
                         var commandParameter = command.Parameters.Add(parameter.Name, sqlDbType);
-                        commandParameter.Value = parameter.Value;
+                        commandParameter.Value = parameter.Value ?? DBNull.Value;
                     }
                 }
             }
@@ -65,12 +69,10 @@ public class MicrosoftSQL
         }
         catch (Exception ex)
         {
-            var eMsg = $"ExecuteQuery exception: {ex}.";
-
             if (options.ThrowErrorOnFailure)
-                throw new Exception(eMsg);
+                throw new Exception("Error in ExecuteQuery", ex);
 
-            return new Result(false, 0, eMsg, null);
+            return new Result(false, 0, $"Error in ExecuteQuery: {ex}", null);
         }
         finally
         {
@@ -83,7 +85,7 @@ public class MicrosoftSQL
         Result result;
         object dataObject;
         SqlDataReader dataReader = null;
-        var table = new DataTable();
+       using var table = new DataTable();
 
         try
         {

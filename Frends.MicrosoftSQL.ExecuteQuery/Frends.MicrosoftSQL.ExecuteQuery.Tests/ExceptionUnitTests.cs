@@ -60,7 +60,8 @@ public class ExceptionUnitTests
         };
 
         var ex = await Assert.ThrowsExceptionAsync<Exception>(() => MicrosoftSQL.ExecuteQuery(input, options, default));
-        Assert.IsTrue(ex.Message.Contains("Login failed for user 'SA'."));
+        Assert.IsNotNull(ex.InnerException);
+        Assert.IsTrue(ex.InnerException.Message.Contains("Login failed for user 'SA'."));
     }
 
     [TestMethod]
@@ -102,7 +103,8 @@ public class ExceptionUnitTests
         };
 
         var ex = Assert.ThrowsExceptionAsync<Exception>(async () => await MicrosoftSQL.ExecuteQuery(input, options, default));
-        Assert.IsTrue(ex.Result.Message.Contains("System.Data.SqlClient.SqlException (0x80131904): Invalid column name 'Unit'."));
+        Assert.IsNotNull(ex.Result.InnerException);
+        Assert.IsTrue(ex.Result.InnerException.Message.Contains("System.Data.SqlClient.SqlException (0x80131904): Invalid column name 'Unit'."));
     }
 
     [TestMethod]
