@@ -1,6 +1,5 @@
 ﻿namespace Frends.MicrosoftSQL.ExecuteProcedure.Tests;
 
-using System.Data;
 using System.Data.SqlClient;
 
 internal static class Helper

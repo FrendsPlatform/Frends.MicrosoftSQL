@@ -1,7 +1,6 @@
 using Frends.MicrosoftSQL.ExecuteProcedure.Definitions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Data.SqlClient;
-using Newtonsoft.Json.Linq;
 
 namespace Frends.MicrosoftSQL.ExecuteProcedure.Tests;
 
