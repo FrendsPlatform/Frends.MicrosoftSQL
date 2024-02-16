@@ -4,20 +4,24 @@ using System.Data.SqlClient;
 
 namespace Frends.MicrosoftSQL.ExecuteProcedure.Tests;
 
+/// <summary>
+/// docker run -e "ACCEPT_EULA=Y" -e "SA_PASSWORD=Salakala123!" -p 1433:1433 --name sql1 --hostname sql1 -d mcr.microsoft.com/mssql/server:2019-CU18-ubuntu-20.04
+/// with Git bash add winpty to the start of
+/// winpty docker exec -it sql1 "bash"
+/// /opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P "Salakala123!"
+/// Check rows before CleanUp:
+/// SELECT* FROM TestTable
+/// GO
+/// Optional queries:
+/// SELECT Name FROM sys.Databases;
+/// GO
+/// SELECT* FROM INFORMATION_SCHEMA.TABLES;
+/// GO
+/// </summary>
 [TestClass]
 public class ScalarUnitTests
 {
-    /*
-        docker-compose up -d
-
-        How to use via terminal:
-        docker exec -it sql1 "bash"
-        /opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P "Salakala123!"
-        SELECT * FROM TestTable
-        GO
-   */
-
-    private static readonly string _connString = "Server=127.0.0.1,1433;Database=Master;User Id=SA;Password=Salakala123!";
+    private static readonly string _connString = Helper.GetConnectionString();
     private static readonly string _tableName = "TestTable";
 
     [TestInitialize]
@@ -148,21 +152,14 @@ DECLARE cur CURSOR
             Parameters = null
         };
 
-        foreach (var level in transactionLevels)
+        foreach (var options in transactionLevels.Select(e => new Options { SqlTransactionIsolationLevel = e, CommandTimeoutSeconds = 2, ThrowErrorOnFailure = true }))
         {
-            var options = new Options()
-            {
-                SqlTransactionIsolationLevel = level,
-                CommandTimeoutSeconds = 2,
-                ThrowErrorOnFailure = true
-            };
-
             // Insert rows
             var insert = await MicrosoftSQL.ExecuteProcedure(inputInsert, options, default);
             Assert.IsTrue(insert.Success);
             Assert.AreEqual(1, insert.RecordsAffected);
             Assert.IsNull(insert.ErrorMessage);
-            Assert.AreEqual(3, GetRowCount());
+            Assert.AreEqual(3, Helper.GetRowCount(_tableName));
 
             // Select all - Returns 1 because first value (row/column) is ID = 1
             var select = await MicrosoftSQL.ExecuteProcedure(inputSelect, options, default);
@@ -170,7 +167,7 @@ DECLARE cur CURSOR
             Assert.AreEqual(1, select.RecordsAffected);
             Assert.IsNull(select.ErrorMessage);
             Assert.AreEqual(1, (int)select.Data["Value"]);
-            Assert.AreEqual(3, GetRowCount());
+            Assert.AreEqual(3, Helper.GetRowCount(_tableName));
 
             // Select single
             var selectSingle = await MicrosoftSQL.ExecuteProcedure(inputSelectSingle, options, default);
@@ -178,14 +175,14 @@ DECLARE cur CURSOR
             Assert.AreEqual(1, selectSingle.RecordsAffected);
             Assert.IsNull(selectSingle.ErrorMessage);
             Assert.AreEqual("Suku", (string)selectSingle.Data["Value"]);
-            Assert.AreEqual(3, GetRowCount());
+            Assert.AreEqual(3, Helper.GetRowCount(_tableName));
 
             // Update
             var update = await MicrosoftSQL.ExecuteProcedure(inputUpdate, options, default);
             Assert.IsTrue(update.Success);
             Assert.AreEqual(1, update.RecordsAffected);
             Assert.IsNull(update.ErrorMessage);
-            Assert.AreEqual(3, GetRowCount());
+            Assert.AreEqual(3, Helper.GetRowCount(_tableName));
             var checkUpdateResult = await MicrosoftSQL.ExecuteProcedure(inputSelectAfterExecution, options, default);
             Assert.AreEqual("Suku", (string)checkUpdateResult.Data[0]["LastName"]);
             Assert.AreEqual("Etu", (string)checkUpdateResult.Data[0]["FirstName"]);
@@ -193,14 +190,14 @@ DECLARE cur CURSOR
             Assert.AreEqual("Forst", (string)checkUpdateResult.Data[1]["FirstName"]);
             Assert.AreEqual("Hiiri", (string)checkUpdateResult.Data[2]["LastName"]);
             Assert.AreEqual("Mikki", (string)checkUpdateResult.Data[2]["FirstName"]);
-            Assert.AreEqual(3, GetRowCount());
+            Assert.AreEqual(3, Helper.GetRowCount(_tableName));
 
             // Delete
             var delete = await MicrosoftSQL.ExecuteProcedure(inputDelete, options, default);
             Assert.IsTrue(delete.Success);
             Assert.AreEqual(1, delete.RecordsAffected);
             Assert.IsNull(delete.ErrorMessage);
-            Assert.AreEqual(2, GetRowCount());
+            Assert.AreEqual(2, Helper.GetRowCount(_tableName));
             var checkDeleteResult = await MicrosoftSQL.ExecuteProcedure(inputSelectAfterExecution, options, default);
             Assert.AreEqual("Suku", (string)checkDeleteResult.Data[0]["LastName"]);
             Assert.AreEqual("Etu", (string)checkDeleteResult.Data[0]["FirstName"]);
@@ -251,19 +248,7 @@ DECLARE cur CURSOR
         Assert.IsTrue(insert.Success);
         Assert.AreEqual(-1, insert.RecordsAffected);
         Assert.IsNull(insert.ErrorMessage);
-        Assert.IsTrue(((IEnumerable<dynamic>)insert.Data).Any(x => x.Id == 1 && x.LastName == "Suku"));
-    }
-
-    // Simple select query.
-    private static int GetRowCount()
-    {
-        using var connection = new SqlConnection(_connString);
-        connection.Open();
-        var getRows = connection.CreateCommand();
-        getRows.CommandText = $"SELECT COUNT(*) FROM {_tableName}";
-        var count = (int)getRows.ExecuteScalar();
-        connection.Close();
-        connection.Dispose();
-        return count;
+        Assert.AreEqual(1, (int)insert.Data[0]["Id"]);
+        Assert.AreEqual("Suku", (string)insert.Data[0]["LastName"]);
     }
 }

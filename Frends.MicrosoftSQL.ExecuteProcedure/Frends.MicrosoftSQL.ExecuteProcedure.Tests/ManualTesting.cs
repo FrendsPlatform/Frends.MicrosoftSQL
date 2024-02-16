@@ -4,22 +4,24 @@ using System.Data.SqlClient;
 
 namespace Frends.MicrosoftSQL.ExecuteProcedure.Tests;
 
+/// <summary>
+/// docker run -e "ACCEPT_EULA=Y" -e "SA_PASSWORD=Salakala123!" -p 1433:1433 --name sql1 --hostname sql1 -d mcr.microsoft.com/mssql/server:2019-CU18-ubuntu-20.04
+/// with Git bash add winpty to the start of
+/// winpty docker exec -it sql1 "bash"
+/// /opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P "Salakala123!"
+/// Check rows before CleanUp:
+/// SELECT* FROM TestTable
+/// GO
+/// Optional queries:
+/// SELECT Name FROM sys.Databases;
+/// GO
+/// SELECT* FROM INFORMATION_SCHEMA.TABLES;
+/// GO
+/// </summary>
 [TestClass]
 public class ManualTesting
 {
-    /*
-        These tests requires code editing so they must be skipped in workflow.
-
-        docker-compose up -d
-
-        How to use via terminal:
-        docker exec -it sql1 "bash"
-        /opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P "Salakala123!"
-        SELECT * FROM TestTable
-        GO
-   */
-
-    private static readonly string _connString = "Server=127.0.0.1,1433;Database=Master;User Id=SA;Password=Salakala123!";
+    private static readonly string _connString = Helper.GetConnectionString();
     private static readonly string _tableName = "TestTable";
 
     [TestInitialize]
@@ -112,7 +114,7 @@ DECLARE cur CURSOR
         Assert.IsFalse(insert.Success);
         Assert.AreEqual(0, insert.RecordsAffected);
         Assert.IsTrue(insert.ErrorMessage.Contains("ExecuteHandler exception: (If required) transaction rollback completed without exception."));
-        Assert.AreEqual(0, GetRowCount());
+        Assert.AreEqual(0, Helper.GetRowCount(_tableName));
     }
 
     // Use 'throw new Exception();' in HandleExecutionException class.
@@ -138,18 +140,5 @@ DECLARE cur CURSOR
         // Insert rows
         var insert = await Assert.ThrowsExceptionAsync<Exception>(async () => await MicrosoftSQL.ExecuteProcedure(inputInsert, options, default));
         Assert.IsTrue(insert.Message.Contains("ExecuteHandler exception: (If required) transaction rollback completed without exception."));
-    }
-
-    // Simple select query
-    private static int GetRowCount()
-    {
-        using var connection = new SqlConnection(_connString);
-        connection.Open();
-        var getRows = connection.CreateCommand();
-        getRows.CommandText = $"SELECT COUNT(*) FROM {_tableName}";
-        var count = (int)getRows.ExecuteScalar();
-        connection.Close();
-        connection.Dispose();
-        return count;
     }
 }

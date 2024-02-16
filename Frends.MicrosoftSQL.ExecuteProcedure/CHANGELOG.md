@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.2.1] - 2024-02-12
+### Fixed
+- Fixed issue with null parameters by changing them into DBNull.Value.
+### Updated
+- System.Data.SqlClient to version 4.8.6.
+
 ## [1.2.0] - 2024-01-03
 ### Changed
 - [Breaking] ProcedureParameter.Value type to object so that binary data can be used.

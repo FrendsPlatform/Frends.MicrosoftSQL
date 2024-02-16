@@ -59,6 +59,7 @@ public class ProcedureParameter
 
     /// <summary>
     /// The value of the parameter.
+    /// If parameter is null it is changed to DBNull.Value.
     /// </summary>
     /// <example>FirstName</example>
     public object Value { get; set; }

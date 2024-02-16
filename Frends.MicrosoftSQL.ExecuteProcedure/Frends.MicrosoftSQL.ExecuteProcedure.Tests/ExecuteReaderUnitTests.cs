@@ -5,20 +5,24 @@ using System.Data.SqlClient;
 
 namespace Frends.MicrosoftSQL.ExecuteProcedure.Tests;
 
+/// <summary>
+/// docker run -e "ACCEPT_EULA=Y" -e "SA_PASSWORD=Salakala123!" -p 1433:1433 --name sql1 --hostname sql1 -d mcr.microsoft.com/mssql/server:2019-CU18-ubuntu-20.04
+/// with Git bash add winpty to the start of
+/// winpty docker exec -it sql1 "bash"
+/// /opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P "Salakala123!"
+/// Check rows before CleanUp:
+/// SELECT* FROM TestTable
+/// GO
+/// Optional queries:
+/// SELECT Name FROM sys.Databases;
+/// GO
+/// SELECT* FROM INFORMATION_SCHEMA.TABLES;
+/// GO
+/// </summary>
 [TestClass]
 public class ExecuteReaderUnitTests
 {
-    /*
-        docker-compose up -d
-
-        How to use via terminal:
-        docker exec -it sql1 "bash"
-        /opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P "Salakala123!"
-        SELECT * FROM TestTable
-        GO
-   */
-
-    private static readonly string _connString = "Server=127.0.0.1,1433;Database=Master;User Id=SA;Password=Salakala123!";
+    private static readonly string _connString = Helper.GetConnectionString();
     private static readonly string _tableName = "TestTable";
 
     [TestInitialize]
@@ -155,7 +159,7 @@ DECLARE cur CURSOR
             Assert.IsTrue(insert.Success, $"TransactionLevel: {level}.");
             Assert.AreEqual(3, insert.RecordsAffected, $"TransactionLevel: {level}.");
             Assert.IsNull(insert.ErrorMessage, $"TransactionLevel: {level}.");
-            Assert.AreEqual(3, GetRowCount(), $"TransactionLevel: {level}.");
+            Assert.AreEqual(3, Helper.GetRowCount(_tableName), $"TransactionLevel: {level}.");
 
             // Select all
             var select = await MicrosoftSQL.ExecuteProcedure(inputSelect, options, default);
@@ -169,7 +173,7 @@ DECLARE cur CURSOR
             Assert.AreEqual("Forst", (string)select.Data[1]["FirstName"], $"TransactionLevel: {level}.");
             Assert.AreEqual("Hiiri", (string)select.Data[2]["LastName"], $"TransactionLevel: {level}.");
             Assert.AreEqual("Mikki", (string)select.Data[2]["FirstName"], $"TransactionLevel: {level}.");
-            Assert.AreEqual(3, GetRowCount(), $"TransactionLevel: {level}.");
+            Assert.AreEqual(3, Helper.GetRowCount(_tableName), $"TransactionLevel: {level}.");
 
             // Select single
             var selectSingle = await MicrosoftSQL.ExecuteProcedure(inputSelectSingle, options, default);
@@ -179,14 +183,14 @@ DECLARE cur CURSOR
             Assert.AreEqual(typeof(JArray), selectSingle.Data.GetType(), $"TransactionLevel: {level}.");
             Assert.AreEqual("Suku", (string)selectSingle.Data[0]["LastName"], $"TransactionLevel: {level}.");
             Assert.AreEqual("Etu", (string)selectSingle.Data[0]["FirstName"], $"TransactionLevel: {level}.");
-            Assert.AreEqual(3, GetRowCount());
+            Assert.AreEqual(3, Helper.GetRowCount(_tableName));
 
             // Update
             var update = await MicrosoftSQL.ExecuteProcedure(inputUpdate, options, default);
             Assert.IsTrue(update.Success, $"TransactionLevel: {level}.");
             Assert.AreEqual(1, update.RecordsAffected, $"TransactionLevel: {level}.");
             Assert.IsNull(update.ErrorMessage, $"TransactionLevel: {level}.");
-            Assert.AreEqual(3, GetRowCount(), $"TransactionLevel: {level}.");
+            Assert.AreEqual(3, Helper.GetRowCount(_tableName), $"TransactionLevel: {level}.");
             var checkUpdateResult = await MicrosoftSQL.ExecuteProcedure(inputSelect, options, default);
             Assert.AreEqual("Suku", (string)checkUpdateResult.Data[0]["LastName"], $"TransactionLevel: {level}.");
             Assert.AreEqual("Etu", (string)checkUpdateResult.Data[0]["FirstName"], $"TransactionLevel: {level}.");
@@ -194,14 +198,14 @@ DECLARE cur CURSOR
             Assert.AreEqual("Forst", (string)checkUpdateResult.Data[1]["FirstName"], $"TransactionLevel: {level}.");
             Assert.AreEqual("Hiiri", (string)checkUpdateResult.Data[2]["LastName"], $"TransactionLevel: {level}.");
             Assert.AreEqual("Mikki", (string)checkUpdateResult.Data[2]["FirstName"], $"TransactionLevel: {level}.");
-            Assert.AreEqual(3, GetRowCount());
+            Assert.AreEqual(3, Helper.GetRowCount(_tableName));
 
             // Delete
             var delete = await MicrosoftSQL.ExecuteProcedure(inputDelete, options, default);
             Assert.IsTrue(delete.Success, $"TransactionLevel: {level}.");
             Assert.AreEqual(1, delete.RecordsAffected, $"TransactionLevel: {level}.");
             Assert.IsNull(delete.ErrorMessage, $"TransactionLevel: {level}.");
-            Assert.AreEqual(2, GetRowCount(), $"TransactionLevel: {level}.");
+            Assert.AreEqual(2, Helper.GetRowCount(_tableName), $"TransactionLevel: {level}.");
             var checkDeleteResult = await MicrosoftSQL.ExecuteProcedure(inputSelect, options, default);
             Assert.AreEqual("Suku", (string)checkDeleteResult.Data[0]["LastName"], $"TransactionLevel: {level}.");
             Assert.AreEqual("Etu", (string)checkDeleteResult.Data[0]["FirstName"], $"TransactionLevel: {level}.");
@@ -252,7 +256,8 @@ DECLARE cur CURSOR
         Assert.IsTrue(query.Success);
         Assert.AreEqual(-1, query.RecordsAffected);
         Assert.IsNull(query.ErrorMessage);
-        Assert.IsTrue(((IEnumerable<dynamic>)query.Data).Any(x => x.Id == 1 && x.LastName == "Suku"));
+        Assert.AreEqual(1, (int)query.Data[0]["Id"]);
+        Assert.AreEqual("Suku", (string)query.Data[0]["LastName"]);
     }
 
     [TestMethod]
@@ -260,13 +265,13 @@ DECLARE cur CURSOR
     {
         var table = "binarytest";
         var command = $"IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME='{table}') BEGIN CREATE TABLE {table} ( Id int, Data varbinary(MAX)); END";
-        ExecuteNonQuery(command);
+        Helper.ExecuteNonQuery(command);
 
         var binary = File.ReadAllBytes(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "../../../TestData/", "Test_image.png"));
 
         //Insert
         command = $"CREATE PROCEDURE InsertBinaryValues(@binary as varbinary(MAX)) AS INSERT INTO {table} (Id, Data) VALUES (1, @binary)";
-        ExecuteNonQuery(command);
+        Helper.ExecuteNonQuery(command);
 
         var input = new Input
         {
@@ -288,7 +293,7 @@ DECLARE cur CURSOR
 
         //Select single
         command = $"CREATE PROCEDURE SelectSingleBinary AS select * from {table} where Id = 1";
-        ExecuteNonQuery(command);
+        Helper.ExecuteNonQuery(command);
 
         input = new Input
         {
@@ -301,33 +306,9 @@ DECLARE cur CURSOR
         result = await MicrosoftSQL.ExecuteProcedure(input, options, default);
 
         command = $"IF EXISTS(SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = '{table}') BEGIN DROP TABLE IF EXISTS {table}; END";
-        ExecuteNonQuery(command);
+        Helper.ExecuteNonQuery(command);
 
         Assert.IsTrue(result.Success);
         Assert.AreEqual(Convert.ToBase64String(binary), Convert.ToBase64String((byte[])result.Data[0]["Data"]));
-    }
-
-    // Simple select query
-    private static int GetRowCount()
-    {
-        using var connection = new SqlConnection(_connString);
-        connection.Open();
-        var getRows = connection.CreateCommand();
-        getRows.CommandText = $"SELECT COUNT(*) FROM {_tableName}";
-        var count = (int)getRows.ExecuteScalar();
-        connection.Close();
-        connection.Dispose();
-        return count;
-    }
-
-    private static void ExecuteNonQuery(string command)
-    {
-        using var connection = new SqlConnection(_connString);
-        connection.Open();
-        var createTable = connection.CreateCommand();
-        createTable.CommandText = command;
-        createTable.ExecuteNonQuery();
-        connection.Close();
-        connection.Dispose();
     }
 }
