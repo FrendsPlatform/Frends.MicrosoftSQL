@@ -72,10 +72,6 @@ public class MicrosoftSQL
 
             return new Result(false, 0, eMsg, null);
         }
-        finally
-        {
-            SqlConnection.ClearAllPools();
-        }
     }
 
     private static async Task<Result> ExecuteHandler(Input input, Options options, SqlCommand command, CancellationToken cancellationToken)
