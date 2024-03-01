@@ -6,7 +6,7 @@ internal class Helper
 {
     internal static string CreateConnectionString()
     {
-        return "Server=127.0.0.1,1433;Database=Master;User Id=SA;Password=Salakala123!";
+        return "Server=127.0.0.1,1433;Database=Master;User Id=SA;Password=Salakala123!;Encrypt=true;TrustServerCertificate=True;";
     }
 
     internal static int GetRowCount(string connString, string table)
