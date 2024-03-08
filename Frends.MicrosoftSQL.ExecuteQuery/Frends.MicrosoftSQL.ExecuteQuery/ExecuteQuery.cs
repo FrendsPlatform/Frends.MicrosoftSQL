@@ -72,10 +72,6 @@ public class MicrosoftSQL
 
             return new Result(false, 0, eMsg, null);
         }
-        finally
-        {
-            SqlConnection.ClearAllPools();
-        }
     }
 
     private static async Task<Result> ExecuteHandler(Input input, Options options, SqlCommand command, CancellationToken cancellationToken)
@@ -83,7 +79,7 @@ public class MicrosoftSQL
         Result result;
         object dataObject;
         SqlDataReader dataReader = null;
-        var table = new DataTable();
+        using var table = new DataTable();
 
         try
         {
