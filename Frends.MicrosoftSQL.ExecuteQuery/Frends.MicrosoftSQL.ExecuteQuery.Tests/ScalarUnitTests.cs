@@ -1,7 +1,6 @@
 using Frends.MicrosoftSQL.ExecuteQuery.Definitions;
 using Frends.MicrosoftSQL.ExecuteQuery.Tests.Lib;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System.Data.SqlClient;
 
 namespace Frends.MicrosoftSQL.ExecuteQuery.Tests;
 
