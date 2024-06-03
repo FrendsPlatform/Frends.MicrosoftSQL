@@ -3,10 +3,10 @@ using Newtonsoft.Json.Linq;
 using System;
 using System.ComponentModel;
 using System.Data;
-using System.Data.SqlClient;
 using System.Threading;
 using System.Threading.Tasks;
 using IsolationLevel = System.Data.IsolationLevel;
+using Microsoft.Data.SqlClient;
 
 namespace Frends.MicrosoftSQL.ExecuteQuery;
 

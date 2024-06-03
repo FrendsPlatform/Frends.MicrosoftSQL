@@ -10,9 +10,12 @@ on:
 
 jobs:
   build:
-    uses: FrendsPlatform/FrendsTasks/.github/workflows/linux_build_main.yml@main
+    uses: FrendsPlatform/FrendsTasks/.github/workflows/build_main.yml@main
     with:
       workdir: Frends.MicrosoftSQL.ExecuteQuery
-      prebuild_command: docker-compose -f ./Frends.MicrosoftSQL.ExecuteQuery.Tests/docker-compose.yml up -d
+      env_var_name_1: FRENDS_MICROSOFTSQL_CONNSTRING
+      env_var_name_2: FRENDS_MICROSOFTSQL_USERID
     secrets:
       badge_service_api_key: ${{ secrets.BADGE_SERVICE_API_KEY }}
+      env_var_value_1: ${{ secrets.FRENDS_MICROSOFTSQL_CONNSTRING }}
+      env_var_value_2: ${{ secrets.FRENDS_MICROSOFTSQL_USERID }}

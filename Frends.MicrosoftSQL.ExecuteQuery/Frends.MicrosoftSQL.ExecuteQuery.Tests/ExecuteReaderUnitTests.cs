@@ -2,7 +2,7 @@ using Frends.MicrosoftSQL.ExecuteQuery.Definitions;
 using Frends.MicrosoftSQL.ExecuteQuery.Tests.Lib;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Newtonsoft.Json.Linq;
-using System.Data.SqlClient;
+using Microsoft.Data.SqlClient;
 
 namespace Frends.MicrosoftSQL.ExecuteQuery.Tests;
 

@@ -9,6 +9,7 @@ public class ExceptionUnitTests : ExecuteQueryTestBase
 {
     private Input input = new();
     private Options options = new();
+    internal static readonly string _userName = Helper.GetUserName();
 
     [TestInitialize]
     public void SetUp()
@@ -32,7 +33,7 @@ public class ExceptionUnitTests : ExecuteQueryTestBase
         input.ConnectionString = Helper.GetInvalidConnectionString();
 
         var ex = await Assert.ThrowsExceptionAsync<Exception>(() => MicrosoftSQL.ExecuteQuery(input, options, default));
-        Assert.IsTrue(ex.Message.Contains("Login failed for user 'SA'."));
+        Assert.IsTrue(ex.Message.Contains($"Login failed for user '{_userName}'."));
     }
 
     [TestMethod]
@@ -40,10 +41,9 @@ public class ExceptionUnitTests : ExecuteQueryTestBase
     {
         options.ThrowErrorOnFailure = false;
         input.ConnectionString = Helper.GetInvalidConnectionString();
-
         var result = await MicrosoftSQL.ExecuteQuery(input, options, default);
         Assert.IsFalse(result.Success);
-        Assert.IsTrue(result.ErrorMessage.Contains("Login failed for user 'SA'."));
+        Assert.IsTrue(result.ErrorMessage.Contains($"Login failed for user '{_userName}'."));
         Assert.AreEqual(0, result.RecordsAffected);
     }
 
@@ -54,7 +54,7 @@ public class ExceptionUnitTests : ExecuteQueryTestBase
         input.ExecuteType = ExecuteTypes.NonQuery;
 
         var ex = Assert.ThrowsExceptionAsync<Exception>(async () => await MicrosoftSQL.ExecuteQuery(input, options, default));
-        Assert.IsTrue(ex.Result.Message.Contains("System.Data.SqlClient.SqlException (0x80131904): Invalid column name 'Unit'."));
+        Assert.IsTrue(ex.Result.Message.Contains("Microsoft.Data.SqlClient.SqlException (0x80131904): Invalid column name 'Unit'."));
     }
 
     [TestMethod]
@@ -67,6 +67,6 @@ public class ExceptionUnitTests : ExecuteQueryTestBase
 
         var result = await MicrosoftSQL.ExecuteQuery(input, options, default);
         Assert.IsFalse(result.Success);
-        Assert.IsTrue(result.ErrorMessage.Contains("System.Data.SqlClient.SqlException (0x80131904): Invalid column name 'Unit'."));
+        Assert.IsTrue(result.ErrorMessage.Contains("Microsoft.Data.SqlClient.SqlException (0x80131904): Invalid column name 'Unit'."));
     }
 }
