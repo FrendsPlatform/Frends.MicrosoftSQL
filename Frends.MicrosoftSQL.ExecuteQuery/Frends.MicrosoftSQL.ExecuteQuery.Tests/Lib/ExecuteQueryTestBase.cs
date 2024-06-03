@@ -16,7 +16,7 @@ public class ExecuteQueryTestBase
         var root = Directory.GetCurrentDirectory();
         string projDir = Directory.GetParent(root).Parent.Parent.FullName;
         DotEnv.Load(options: new DotEnvOptions(envFilePaths: new[] { $"{projDir}/.env.local" }));
-        using var connection = new Microsoft.Data.SqlClient.SqlConnection(_connString);
+        using var connection = new SqlConnection(_connString);
         connection.Open();
         var createTable = connection.CreateCommand();
         createTable.CommandText = $@"IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME='{_tableName}') BEGIN CREATE TABLE {_tableName} ( Id int, LastName varchar(255), FirstName varchar(255) ); END";
