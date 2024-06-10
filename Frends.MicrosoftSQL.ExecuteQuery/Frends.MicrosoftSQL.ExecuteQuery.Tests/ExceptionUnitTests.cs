@@ -9,7 +9,6 @@ public class ExceptionUnitTests : ExecuteQueryTestBase
 {
     private Input input = new();
     private Options options = new();
-    internal static readonly string _userName = Helper.GetUserName();
 
     [TestInitialize]
     public void SetUp()
@@ -33,7 +32,7 @@ public class ExceptionUnitTests : ExecuteQueryTestBase
         input.ConnectionString = Helper.GetInvalidConnectionString();
 
         var ex = await Assert.ThrowsExceptionAsync<Exception>(() => MicrosoftSQL.ExecuteQuery(input, options, default));
-        Assert.IsTrue(ex.Message.Contains($"Login failed for user '{_userName}'."));
+        Assert.IsTrue(ex.Message.Contains("Login failed for user 'SA'."));
     }
 
     [TestMethod]
@@ -41,9 +40,10 @@ public class ExceptionUnitTests : ExecuteQueryTestBase
     {
         options.ThrowErrorOnFailure = false;
         input.ConnectionString = Helper.GetInvalidConnectionString();
+
         var result = await MicrosoftSQL.ExecuteQuery(input, options, default);
         Assert.IsFalse(result.Success);
-        Assert.IsTrue(result.ErrorMessage.Contains($"Login failed for user '{_userName}'."));
+        Assert.IsTrue(result.ErrorMessage.Contains("Login failed for user 'SA'."));
         Assert.AreEqual(0, result.RecordsAffected);
     }
 

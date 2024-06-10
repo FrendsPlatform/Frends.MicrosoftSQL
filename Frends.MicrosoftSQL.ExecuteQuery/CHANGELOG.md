@@ -1,10 +1,5 @@
 # Changelog
 
-## [1.2.2] - 2024-06-03
-### Changed
-- Changed the library from System.Data.SqlClient to Microsoft.Data.SqlClient 
-- Added environment variables for secrets
-
 ## [1.2.1] - 2024-03-01
 ### Changed
 - Removed finally block from the Task so that the SQLConnection pool is not touched after every call to the ExecuteQuery method.
