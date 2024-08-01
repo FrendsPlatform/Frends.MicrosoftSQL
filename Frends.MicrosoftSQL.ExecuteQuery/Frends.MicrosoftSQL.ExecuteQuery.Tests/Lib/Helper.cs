@@ -1,5 +1,4 @@
 ﻿using Microsoft.Data.SqlClient;
-using System.Text.RegularExpressions;
 
 namespace Frends.MicrosoftSQL.ExecuteQuery.Tests.Lib;
 
