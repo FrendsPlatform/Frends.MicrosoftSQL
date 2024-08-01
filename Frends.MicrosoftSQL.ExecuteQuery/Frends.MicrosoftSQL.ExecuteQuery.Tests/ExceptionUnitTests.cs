@@ -54,7 +54,7 @@ public class ExceptionUnitTests : ExecuteQueryTestBase
         input.ExecuteType = ExecuteTypes.NonQuery;
 
         var ex = Assert.ThrowsExceptionAsync<Exception>(async () => await MicrosoftSQL.ExecuteQuery(input, options, default));
-        Assert.IsTrue(ex.Result.Message.Contains("System.Data.SqlClient.SqlException (0x80131904): Invalid column name 'Unit'."));
+        Assert.IsTrue(ex.Result.Message.Contains("Microsoft.Data.SqlClient.SqlException (0x80131904): Invalid column name 'Unit'."));
     }
 
     [TestMethod]
@@ -67,6 +67,6 @@ public class ExceptionUnitTests : ExecuteQueryTestBase
 
         var result = await MicrosoftSQL.ExecuteQuery(input, options, default);
         Assert.IsFalse(result.Success);
-        Assert.IsTrue(result.ErrorMessage.Contains("System.Data.SqlClient.SqlException (0x80131904): Invalid column name 'Unit'."));
+        Assert.IsTrue(result.ErrorMessage.Contains("Microsoft.Data.SqlClient.SqlException (0x80131904): Invalid column name 'Unit'."));
     }
 }
