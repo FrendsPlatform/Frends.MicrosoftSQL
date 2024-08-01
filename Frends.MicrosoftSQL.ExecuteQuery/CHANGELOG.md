@@ -1,5 +1,9 @@
 # Changelog
 
+## [2.0.0] - 2024-08-01
+### Changed
+- [Breaking] The task now uses Microsoft.Data.SqlClient instead of System.Data.SqlClient.
+
 ## [1.2.1] - 2024-03-01
 ### Changed
 - Removed finally block from the Task so that the SQLConnection pool is not touched after every call to the ExecuteQuery method.
