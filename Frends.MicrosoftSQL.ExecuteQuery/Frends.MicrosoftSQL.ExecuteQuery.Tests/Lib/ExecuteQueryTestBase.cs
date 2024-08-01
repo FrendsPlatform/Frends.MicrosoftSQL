@@ -1,6 +1,5 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Microsoft.Data.SqlClient;
-using dotenv.net;
 
 namespace Frends.MicrosoftSQL.ExecuteQuery.Tests.Lib;
 
