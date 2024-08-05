@@ -1,6 +1,6 @@
 using Frends.MicrosoftSQL.BulkInsert.Definitions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System.Data.SqlClient;
+using Microsoft.Data.SqlClient;
 
 namespace Frends.MicrosoftSQL.BulkInsert.Tests;
 
@@ -32,8 +32,8 @@ public class UnitTests
                   },
                   {
                     ""Id"": 3,
-                    ""Firstname"": ""Först"",
-                    ""Lastname"": ""Lääst""
+                    ""Firstname"": ""Fï¿½rst"",
+                    ""Lastname"": ""Lï¿½ï¿½st""
                   }
                 ]";
     readonly Input _input = new()
