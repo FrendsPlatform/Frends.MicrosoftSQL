@@ -5,13 +5,13 @@ using Newtonsoft.Json.Converters;
 using System;
 using System.ComponentModel;
 using System.Data;
-using System.Data.SqlClient;
 using System.Dynamic;
 using System.Reflection;
 using System.Runtime.Loader;
 using System.Threading;
 using System.Threading.Tasks;
 using IsolationLevel = System.Data.IsolationLevel;
+using Microsoft.Data.SqlClient;
 
 namespace Frends.MicrosoftSQL.BatchOperation;
 

@@ -1,6 +1,6 @@
 using Frends.MicrosoftSQL.BatchOperation.Definitions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System.Data.SqlClient;
+using Microsoft.Data.SqlClient;
 
 namespace Frends.MicrosoftSQL.BatchOperation.Tests;
 
