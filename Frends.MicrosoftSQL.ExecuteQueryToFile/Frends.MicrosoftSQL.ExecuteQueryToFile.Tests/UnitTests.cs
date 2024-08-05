@@ -2,11 +2,11 @@ namespace Frends.MicrosoftSQL.ExecuteQueryToFile.Tests;
 
 using System;
 using System.Data;
-using System.Data.SqlClient;
 using System.IO;
 using System.Threading.Tasks;
 using Frends.MicrosoftSQL.ExecuteQueryToFile.Definitions;
 using Frends.MicrosoftSQL.ExecuteQueryToFile.Enums;
+using Microsoft.Data.SqlClient;
 using NUnit.Framework;
 
 /// <summary>
@@ -55,13 +55,13 @@ public class UnitTests
 
         Helper.CreateTestTable(_connString, _tableName);
 
-        var parameters = new System.Data.SqlClient.SqlParameter[]
+        var parameters = new Microsoft.Data.SqlClient.SqlParameter[]
         {
-            new System.Data.SqlClient.SqlParameter("@Hash", SqlDbType.VarBinary)
+            new Microsoft.Data.SqlClient.SqlParameter("@Hash", SqlDbType.VarBinary)
             {
                 Value = File.ReadAllBytes(Path.Combine(Path.GetDirectoryName(_destination), "Test_image.png")),
             },
-            new System.Data.SqlClient.SqlParameter("@TestText", SqlDbType.VarBinary)
+            new Microsoft.Data.SqlClient.SqlParameter("@TestText", SqlDbType.VarBinary)
             {
                 Value = File.ReadAllBytes(Path.Combine(Path.GetDirectoryName(_destination), "Test_text.txt")),
             },

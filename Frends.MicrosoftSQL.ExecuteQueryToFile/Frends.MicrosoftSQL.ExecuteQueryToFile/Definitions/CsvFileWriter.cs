@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data.Common;
-using System.Data.SqlClient;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -12,6 +11,7 @@ using System.Threading.Tasks;
 using CsvHelper;
 using CsvHelper.Configuration;
 using Frends.MicrosoftSQL.ExecuteQueryToFile.Enums;
+using Microsoft.Data.SqlClient;
 
 namespace Frends.MicrosoftSQL.ExecuteQueryToFile.Definitions;
 
