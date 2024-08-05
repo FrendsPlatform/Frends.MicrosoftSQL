@@ -1,6 +1,6 @@
 # Changelog
 
-## [2.0.0] - 2024-08-01
+## [2.0.0] - 2024-08-05
 ### Changed
 - [Breaking] The task now uses Microsoft.Data.SqlClient instead of System.Data.SqlClient.
 
