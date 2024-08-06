@@ -16,7 +16,7 @@ using Microsoft.Data.SqlClient;
 namespace Frends.MicrosoftSQL.BatchOperation;
 
 /// <summary>
-/// MicrosoftSQL Task.
+/// MicrosoftSQL BatchOperation Task.
 /// </summary>
 public class MicrosoftSQL
 {
