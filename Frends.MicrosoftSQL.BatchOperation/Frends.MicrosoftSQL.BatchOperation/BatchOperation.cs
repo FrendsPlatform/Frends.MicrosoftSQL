@@ -78,7 +78,7 @@ public class MicrosoftSQL
                                 commandType: CommandType.Text,
                                 transaction: transaction)
                             .ConfigureAwait(false);
-            
+
             if (transaction != null)
                 await transaction.CommitAsync(cancellationToken);
 

@@ -19,7 +19,7 @@ public class UnitTests
 
     private static readonly string _connString = "Server=127.0.0.1,1433;Database=Master;User Id=SA;Password=Salakala123!;TrustServerCertificate=True";
     private static readonly string _tableName = "TestTable";
-    
+
     [TestInitialize]
     public void Init()
     {
@@ -46,7 +46,7 @@ public class UnitTests
 
     [TestMethod]
     public async Task TestBatchOperation()
-    { 
+    {
         var transactionLevels = new List<SqlTransactionIsolationLevel>() {
             SqlTransactionIsolationLevel.Unspecified,
             SqlTransactionIsolationLevel.Serializable,
