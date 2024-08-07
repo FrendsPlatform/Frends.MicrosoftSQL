@@ -9,7 +9,7 @@ internal static class Helper
     {
         var user = "SA";
         var pwd = "Salakala123!";
-        return $"Server=127.0.0.1,1433;Database=Master;User Id={user};Password={pwd}";
+        return $"Server=127.0.0.1,1433;Database=Master;User Id={user};Password={pwd};TrustServerCertificate=True";
     }
 
     internal static void CreateTestTable(string connString, string tableName)
