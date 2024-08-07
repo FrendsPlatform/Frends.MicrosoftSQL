@@ -17,7 +17,7 @@ public class UnitTests
         GO
    */
 
-    private static readonly string _connString = "Server=127.0.0.1,1433;Database=Master;User Id=SA;Password=Salakala123!";
+    private static readonly string _connString = "Server=127.0.0.1,1433;Database=Master;User Id=SA;Password=Salakala123!;TrustServerCertificate=True";
     private static readonly string _tableName = "TestTable";
     private static readonly string _json = @"[
                   {
@@ -69,7 +69,7 @@ public class UnitTests
 
     [TestMethod]
     public async Task TestBulkInsert_FireTriggers()
-    { 
+    {
         var transactionLevels = new List<SqlTransactionIsolationLevel>() {
             SqlTransactionIsolationLevel.Unspecified,
             SqlTransactionIsolationLevel.Serializable,
@@ -102,7 +102,7 @@ public class UnitTests
 
             await MicrosoftSQL.BulkInsert(_input, options, default);
             Assert.AreEqual(6, GetRowCount());
-            
+
             CleanUp();
         }
     }

@@ -30,7 +30,7 @@ public class ExceptionUnitTests
     {
         var input = new Input()
         {
-            ConnectionString = "Server=127.0.0.1,1433;Database=Master;User Id=SA;Password=WrongPassWord",
+            ConnectionString = "Server=127.0.0.1,1433;Database=Master;User Id=SA;Password=WrongPassWord;TrustServerCertificate=True",
             TableName = _tableName,
             InputData = _json
         };
@@ -52,7 +52,7 @@ public class ExceptionUnitTests
     {
         var input = new Input()
         {
-            ConnectionString = "Server=127.0.0.1,1433;Database=Master;User Id=SA;Password=WrongPassWord",
+            ConnectionString = "Server=127.0.0.1,1433;Database=Master;User Id=SA;Password=WrongPassWord;TrustServerCertificate=True",
             TableName = _tableName,
             InputData = _json
         };
