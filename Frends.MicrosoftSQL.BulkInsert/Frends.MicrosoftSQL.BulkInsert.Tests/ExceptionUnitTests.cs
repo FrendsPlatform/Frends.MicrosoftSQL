@@ -74,7 +74,6 @@ public class ExceptionUnitTests
     [TestMethod]
     public async Task TestBulkInsert_ExecuteHandler_Exception()
     {
-        // Arrange
         var input = new Input
         {
             InputData = _json,
@@ -91,11 +90,8 @@ public class ExceptionUnitTests
             NotifyAfter = 1
         };
 
-        // Act
         var ex = await Assert.ThrowsExceptionAsync<Exception>(() => MicrosoftSQL.BulkInsert(input, options, CancellationToken.None));
-        Console.WriteLine("Actual exception message: " + ex.Message);
 
-        // Assert
         Assert.IsNotNull(ex.InnerException);
         Assert.IsTrue(ex.InnerException.Message.Contains("BulkInsert exception: 'Options.SqlTransactionIsolationLevel = None', so there was no transaction rollback."));
     }
