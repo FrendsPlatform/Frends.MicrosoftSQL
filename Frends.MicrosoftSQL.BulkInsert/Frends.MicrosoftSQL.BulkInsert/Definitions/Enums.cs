@@ -3,7 +3,7 @@
 /// <summary>
 /// SqlTransactionIsolationLevels
 /// </summary>
-public enum SqlTransactionIsolationLevel 
+public enum SqlTransactionIsolationLevel
 {
     /// <summary>
     /// A different isolation level than the one specified is being used, but the level cannot be determined.
