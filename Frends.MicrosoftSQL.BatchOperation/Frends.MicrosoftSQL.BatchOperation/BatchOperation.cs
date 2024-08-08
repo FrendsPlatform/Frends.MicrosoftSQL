@@ -5,18 +5,18 @@ using Newtonsoft.Json.Converters;
 using System;
 using System.ComponentModel;
 using System.Data;
-using System.Data.SqlClient;
 using System.Dynamic;
 using System.Reflection;
 using System.Runtime.Loader;
 using System.Threading;
 using System.Threading.Tasks;
 using IsolationLevel = System.Data.IsolationLevel;
+using Microsoft.Data.SqlClient;
 
 namespace Frends.MicrosoftSQL.BatchOperation;
 
 /// <summary>
-/// MicrosoftSQL Task.
+/// MicrosoftSQL BatchOperation Task.
 /// </summary>
 public class MicrosoftSQL
 {
@@ -78,7 +78,7 @@ public class MicrosoftSQL
                                 commandType: CommandType.Text,
                                 transaction: transaction)
                             .ConfigureAwait(false);
-            
+
             if (transaction != null)
                 await transaction.CommitAsync(cancellationToken);
 

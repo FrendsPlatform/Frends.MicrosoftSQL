@@ -1,6 +1,6 @@
 using Frends.MicrosoftSQL.BatchOperation.Definitions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System.Data.SqlClient;
+using Microsoft.Data.SqlClient;
 
 namespace Frends.MicrosoftSQL.BatchOperation.Tests;
 
@@ -17,9 +17,9 @@ public class UnitTests
         GO
    */
 
-    private static readonly string _connString = "Server=127.0.0.1,1433;Database=Master;User Id=SA;Password=Salakala123!";
+    private static readonly string _connString = "Server=127.0.0.1,1433;Database=Master;User Id=SA;Password=Salakala123!;TrustServerCertificate=True";
     private static readonly string _tableName = "TestTable";
-    
+
     [TestInitialize]
     public void Init()
     {
@@ -46,7 +46,7 @@ public class UnitTests
 
     [TestMethod]
     public async Task TestBatchOperation()
-    { 
+    {
         var transactionLevels = new List<SqlTransactionIsolationLevel>() {
             SqlTransactionIsolationLevel.Unspecified,
             SqlTransactionIsolationLevel.Serializable,
