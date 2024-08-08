@@ -1,6 +1,6 @@
 using Frends.MicrosoftSQL.BulkInsert.Definitions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System.Data.SqlClient;
+using Microsoft.Data.SqlClient;
 
 namespace Frends.MicrosoftSQL.BulkInsert.Tests;
 
@@ -17,7 +17,7 @@ public class UnitTests
         GO
    */
 
-    private static readonly string _connString = "Server=127.0.0.1,1433;Database=Master;User Id=SA;Password=Salakala123!";
+    private static readonly string _connString = "Server=127.0.0.1,1433;Database=Master;User Id=SA;Password=Salakala123!;TrustServerCertificate=True";
     private static readonly string _tableName = "TestTable";
     private static readonly string _json = @"[
                   {
@@ -32,8 +32,8 @@ public class UnitTests
                   },
                   {
                     ""Id"": 3,
-                    ""Firstname"": ""Först"",
-                    ""Lastname"": ""Lääst""
+                    ""Firstname"": ""Fï¿½rst"",
+                    ""Lastname"": ""Lï¿½ï¿½st""
                   }
                 ]";
     readonly Input _input = new()
@@ -69,7 +69,7 @@ public class UnitTests
 
     [TestMethod]
     public async Task TestBulkInsert_FireTriggers()
-    { 
+    {
         var transactionLevels = new List<SqlTransactionIsolationLevel>() {
             SqlTransactionIsolationLevel.Unspecified,
             SqlTransactionIsolationLevel.Serializable,
@@ -102,7 +102,7 @@ public class UnitTests
 
             await MicrosoftSQL.BulkInsert(_input, options, default);
             Assert.AreEqual(6, GetRowCount());
-            
+
             CleanUp();
         }
     }
