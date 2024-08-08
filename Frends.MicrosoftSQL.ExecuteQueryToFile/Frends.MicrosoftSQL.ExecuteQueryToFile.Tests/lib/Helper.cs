@@ -1,7 +1,7 @@
 ﻿namespace Frends.MicrosoftSQL.ExecuteQueryToFile.Tests;
 
 using System.Data;
-using System.Data.SqlClient;
+using Microsoft.Data.SqlClient;
 
 internal static class Helper
 {
@@ -9,7 +9,7 @@ internal static class Helper
     {
         var user = "SA";
         var pwd = "Salakala123!";
-        return $"Server=127.0.0.1,1433;Database=Master;User Id={user};Password={pwd}";
+        return $"Server=127.0.0.1,1433;Database=Master;User Id={user};Password={pwd};TrustServerCertificate=True";
     }
 
     internal static void CreateTestTable(string connString, string tableName)
@@ -22,7 +22,7 @@ internal static class Helper
         connection.Close();
     }
 
-    internal static void InsertTestData(string connString, string commandText, System.Data.SqlClient.SqlParameter[] parameters = null)
+    internal static void InsertTestData(string connString, string commandText, Microsoft.Data.SqlClient.SqlParameter[] parameters = null)
     {
         using var sqlConnection = new SqlConnection(connString);
         sqlConnection.Open();

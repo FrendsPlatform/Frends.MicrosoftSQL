@@ -3,11 +3,11 @@
 using System;
 using System.ComponentModel;
 using System.Data;
-using System.Data.SqlClient;
 using System.Threading;
 using System.Threading.Tasks;
 using Frends.MicrosoftSQL.ExecuteQueryToFile.Definitions;
 using Frends.MicrosoftSQL.ExecuteQueryToFile.Enums;
+using Microsoft.Data.SqlClient;
 
 /// <summary>
 /// Main class of the Task.
