@@ -16,6 +16,7 @@ public class ExceptionUnitTests
          GO
     */
 
+    private static readonly string _connString = "Server=127.0.0.1,1433;Database=Master;User Id=SA;Password=WrongPassWord;TrustServerCertificate=True";
     private static readonly string _tableName = "TestTable";
     private static readonly string _json = @"[
                   {
@@ -30,7 +31,7 @@ public class ExceptionUnitTests
     {
         var input = new Input()
         {
-            ConnectionString = "Server=127.0.0.1,1433;Database=Master;User Id=SA;Password=WrongPassWord",
+            ConnectionString = _connString,
             TableName = _tableName,
             InputData = _json
         };
@@ -52,7 +53,7 @@ public class ExceptionUnitTests
     {
         var input = new Input()
         {
-            ConnectionString = "Server=127.0.0.1,1433;Database=Master;User Id=SA;Password=WrongPassWord",
+            ConnectionString = _connString,
             TableName = _tableName,
             InputData = _json
         };
@@ -68,5 +69,30 @@ public class ExceptionUnitTests
         Assert.IsFalse(result.Success);
         Assert.IsTrue(result.ErrorMessage.Contains("Login failed for user 'SA'."));
         Assert.AreEqual(0, result.Count);
+    }
+
+    [TestMethod]
+    public async Task TestBulkInsert_ExecuteHandler_Exception()
+    {
+        var input = new Input
+        {
+            InputData = _json,
+            ConnectionString = "Server=127.0.0.1,1433;Database=Master;User Id=SA;Password=Salakala123!;TrustServerCertificate=True",
+            TableName = "InvalidTable"
+        };
+
+        var options = new Options
+        {
+            ConvertEmptyPropertyValuesToNull = false,
+            ThrowErrorOnFailure = true,
+            SqlTransactionIsolationLevel = SqlTransactionIsolationLevel.None,
+            CommandTimeoutSeconds = 60,
+            NotifyAfter = 1
+        };
+
+        var ex = await Assert.ThrowsExceptionAsync<Exception>(() => MicrosoftSQL.BulkInsert(input, options, CancellationToken.None));
+
+        Assert.IsNotNull(ex.InnerException);
+        Assert.IsTrue(ex.InnerException.Message.Contains("BulkInsert exception: 'Options.SqlTransactionIsolationLevel = None', so there was no transaction rollback."));
     }
 }

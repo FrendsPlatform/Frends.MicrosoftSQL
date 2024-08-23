@@ -3,12 +3,12 @@ using Newtonsoft.Json.Linq;
 using System;
 using System.ComponentModel;
 using System.Data;
-using System.Data.SqlClient;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.Loader;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Data.SqlClient;
 
 namespace Frends.MicrosoftSQL.BulkInsert;
 
