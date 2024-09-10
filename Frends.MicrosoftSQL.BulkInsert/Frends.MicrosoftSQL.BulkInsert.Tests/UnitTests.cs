@@ -303,6 +303,84 @@ public class UnitTests
         }
     }
 
+    [TestMethod]
+    public async Task TestBulkInsert_NotifyAfterZero()
+    {
+        var transactionLevels = new List<SqlTransactionIsolationLevel>() {
+            SqlTransactionIsolationLevel.Unspecified,
+            SqlTransactionIsolationLevel.Serializable,
+            SqlTransactionIsolationLevel.None,
+            SqlTransactionIsolationLevel.ReadUncommitted,
+            SqlTransactionIsolationLevel.ReadCommitted
+        };
+
+        foreach (var transactionLevel in transactionLevels)
+        {
+            Init();
+
+            var options = new Options()
+            {
+                SqlTransactionIsolationLevel = transactionLevel,
+                CommandTimeoutSeconds = 60,
+                FireTriggers = false,
+                KeepIdentity = false,
+                NotifyAfter = 0,
+                ConvertEmptyPropertyValuesToNull = false,
+                KeepNulls = true,
+                TableLock = false,
+            };
+
+            var result = await MicrosoftSQL.BulkInsert(_input, options, default);
+            Assert.IsTrue(result.Success);
+            Assert.AreEqual(0, result.Count);
+            Assert.AreEqual(3, GetRowCount());
+
+            await MicrosoftSQL.BulkInsert(_input, options, default);
+            Assert.AreEqual(6, GetRowCount());
+
+            CleanUp();
+        }
+    }
+
+    [TestMethod]
+    public async Task TestBulkInsert_NotifyAfterOne()
+    {
+        var transactionLevels = new List<SqlTransactionIsolationLevel>() {
+            SqlTransactionIsolationLevel.Unspecified,
+            SqlTransactionIsolationLevel.Serializable,
+            SqlTransactionIsolationLevel.None,
+            SqlTransactionIsolationLevel.ReadUncommitted,
+            SqlTransactionIsolationLevel.ReadCommitted
+        };
+
+        foreach (var transactionLevel in transactionLevels)
+        {
+            Init();
+
+            var options = new Options()
+            {
+                SqlTransactionIsolationLevel = transactionLevel,
+                CommandTimeoutSeconds = 60,
+                FireTriggers = false,
+                KeepIdentity = false,
+                NotifyAfter = 1,
+                ConvertEmptyPropertyValuesToNull = false,
+                KeepNulls = true,
+                TableLock = false,
+            };
+
+            var result = await MicrosoftSQL.BulkInsert(_input, options, default);
+            Assert.IsTrue(result.Success);
+            Assert.AreEqual(3, result.Count);
+            Assert.AreEqual(3, GetRowCount());
+
+            await MicrosoftSQL.BulkInsert(_input, options, default);
+            Assert.AreEqual(6, GetRowCount());
+
+            CleanUp();
+        }
+    }
+
     private static int GetRowCount()
     {
         using var connection = new SqlConnection(_connString);

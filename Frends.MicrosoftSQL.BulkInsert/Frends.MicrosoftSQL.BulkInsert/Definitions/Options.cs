@@ -16,9 +16,10 @@ public class Options
 
     /// <summary>
     /// Defines the number of rows to be processed before generating a notification event. 
-    /// If the number of rows is unknown, NotifyAfter is dynamically set to 10% of the total row count, with a minimum value of 1.
-    /// Notification events can be used for error handling to see approximately which row the error occurred.
-    /// Default value 0 = There won't be any notifications until the task is completed and Result.Count will be 0.
+    /// The default value of 0 will set NotifyAfter dynamically to 10% of the total row count, with a minimum value of 1.
+    /// A value of -1 means there won't be any notifications until the task is completed, and Result.Count will be 0.
+    /// Setting a value greater than the total number of rows can cause Result.Count to be 0.
+    /// Notification events can be used for error handling to see approximately which row the error occurred at.
     /// </summary>
     /// <example>0</example>
     public int NotifyAfter { get; set; }

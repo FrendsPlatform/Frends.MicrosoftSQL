@@ -122,9 +122,16 @@ public class MicrosoftSQL
                 sqlBulkCopy.DestinationTableName = tableName;
                 sqlBulkCopy.SqlRowsCopied += (s, e) => rowsCopied = e.RowsCopied;
 
-                // Calculate the number of rows and set value for NotifyAfter
-                var rowCount = dataSet.Tables[0].Rows.Count;
-                sqlBulkCopy.NotifyAfter = rowCount > 0 ? Math.Max(1, rowCount / 10) : 1;
+                if (options.NotifyAfter == 0)
+                {
+                    // Calculate the number of rows and set value for NotifyAfter
+                    var rowCount = dataSet.Tables[0].Rows.Count;
+                    sqlBulkCopy.NotifyAfter = rowCount > 0 ? Math.Max(1, rowCount / 10) : 1;
+                }
+                if (options.NotifyAfter > 0)
+                    sqlBulkCopy.NotifyAfter = options.NotifyAfter;
+                else
+                    sqlBulkCopy.NotifyAfter = 0;
 
                 await sqlBulkCopy.WriteToServerAsync(dataSet.Tables[0], cancellationToken).ConfigureAwait(false);
             }
