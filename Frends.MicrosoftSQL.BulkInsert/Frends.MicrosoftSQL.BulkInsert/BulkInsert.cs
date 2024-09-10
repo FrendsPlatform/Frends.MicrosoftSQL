@@ -1,4 +1,5 @@
 ﻿using Frends.MicrosoftSQL.BulkInsert.Definitions;
+using Microsoft.Data.SqlClient;
 using Newtonsoft.Json.Linq;
 using System;
 using System.ComponentModel;
@@ -8,7 +9,6 @@ using System.Reflection;
 using System.Runtime.Loader;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.Data.SqlClient;
 
 namespace Frends.MicrosoftSQL.BulkInsert;
 

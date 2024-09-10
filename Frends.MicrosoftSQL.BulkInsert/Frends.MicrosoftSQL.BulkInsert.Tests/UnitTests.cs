@@ -1,6 +1,6 @@
 using Frends.MicrosoftSQL.BulkInsert.Definitions;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Microsoft.Data.SqlClient;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Frends.MicrosoftSQL.BulkInsert.Tests;
 
@@ -206,7 +206,7 @@ public class UnitTests
                 CommandTimeoutSeconds = 60,
                 FireTriggers = false,
                 KeepIdentity = false,
-                NotifyAfter = new Random().Next(0, 1001),   
+                NotifyAfter = new Random().Next(0, 1001),
                 ConvertEmptyPropertyValuesToNull = false,
                 KeepNulls = true,
                 TableLock = false,
