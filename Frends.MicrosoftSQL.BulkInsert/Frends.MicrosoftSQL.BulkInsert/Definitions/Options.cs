@@ -15,10 +15,10 @@ public class Options
     public int CommandTimeoutSeconds { get; set; }
 
     /// <summary>
-    /// Defines the number of rows to be processed before generating a notification event. Range: 0 - 'count of rows to be processed'
-    /// Notification event can be used for error handling to see approximately which row the error happened.
-    /// Default value 0 = There won't be any notifications until the task is completed.
-    /// 10 = The counter is updated after every 10 rows or when every row has been processed.
+    /// Defines the number of rows to be processed before generating a notification event. 
+    /// If the number of rows is unknown, NotifyAfter is dynamically set to 10% of the total row count, with a minimum value of 1.
+    /// Notification events can be used for error handling to see approximately which row the error occurred.
+    /// Default value 0 = There won't be any notifications until the task is completed and Result.Count will be 0.
     /// </summary>
     /// <example>0</example>
     public int NotifyAfter { get; set; }
