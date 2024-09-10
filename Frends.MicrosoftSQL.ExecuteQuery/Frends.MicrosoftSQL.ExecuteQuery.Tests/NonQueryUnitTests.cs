@@ -135,8 +135,6 @@ public class NonQueryUnitTests : ExecuteQueryTestBase
     [TestMethod]
     public async Task TestExecuteQuery_DBNullValues()
     {
-        
-
         var options = new Options()
         {
             SqlTransactionIsolationLevel = SqlTransactionIsolationLevel.Default,

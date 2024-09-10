@@ -44,7 +44,7 @@ public class MicrosoftSQL
                     if (parameter.Value == null)
                     {
                         command.Parameters.AddWithValue(parameterName: parameter.Name, value: DBNull.Value);
-                    }  
+                    }
                     else if (parameter.Value.GetType() == typeof(JValue))
                     {
                         if (((JToken)parameter.Value).Type == JTokenType.Null)
