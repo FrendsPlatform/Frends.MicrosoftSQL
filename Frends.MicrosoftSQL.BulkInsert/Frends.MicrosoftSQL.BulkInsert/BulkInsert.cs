@@ -128,7 +128,7 @@ public class MicrosoftSQL
                     var rowCount = dataSet.Tables[0].Rows.Count;
                     sqlBulkCopy.NotifyAfter = rowCount > 0 ? Math.Max(1, rowCount / 10) : 1;
                 }
-                if (options.NotifyAfter > 0)
+                else if (options.NotifyAfter > 0)
                     sqlBulkCopy.NotifyAfter = options.NotifyAfter;
                 else
                     sqlBulkCopy.NotifyAfter = 0;

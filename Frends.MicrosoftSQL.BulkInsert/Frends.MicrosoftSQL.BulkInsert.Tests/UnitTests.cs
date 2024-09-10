@@ -89,7 +89,7 @@ public class UnitTests
                 CommandTimeoutSeconds = 60,
                 FireTriggers = true,
                 KeepIdentity = false,
-                NotifyAfter = new Random().Next(0, 1001),
+                NotifyAfter = 0,
                 ConvertEmptyPropertyValuesToNull = false,
                 KeepNulls = false,
                 TableLock = false,
@@ -128,7 +128,7 @@ public class UnitTests
                 CommandTimeoutSeconds = 60,
                 FireTriggers = false,
                 KeepIdentity = true,
-                NotifyAfter = new Random().Next(0, 1001),
+                NotifyAfter = 0,
                 ConvertEmptyPropertyValuesToNull = false,
                 KeepNulls = false,
                 TableLock = false,
@@ -167,7 +167,7 @@ public class UnitTests
                 CommandTimeoutSeconds = 60,
                 FireTriggers = false,
                 KeepIdentity = false,
-                NotifyAfter = new Random().Next(0, 1001),
+                NotifyAfter = 0,
                 ConvertEmptyPropertyValuesToNull = true,
                 KeepNulls = false,
                 TableLock = false,
@@ -206,7 +206,7 @@ public class UnitTests
                 CommandTimeoutSeconds = 60,
                 FireTriggers = false,
                 KeepIdentity = false,
-                NotifyAfter = new Random().Next(0, 1001),
+                NotifyAfter = 0,
                 ConvertEmptyPropertyValuesToNull = false,
                 KeepNulls = true,
                 TableLock = false,
@@ -245,7 +245,7 @@ public class UnitTests
                 CommandTimeoutSeconds = 60,
                 FireTriggers = false,
                 KeepIdentity = false,
-                NotifyAfter = new Random().Next(0, 1001),
+                NotifyAfter = 0,
                 ConvertEmptyPropertyValuesToNull = false,
                 KeepNulls = false,
                 TableLock = true,
@@ -285,7 +285,7 @@ public class UnitTests
                 CommandTimeoutSeconds = 60,
                 FireTriggers = true,
                 KeepIdentity = true,
-                NotifyAfter = new Random().Next(0, 1001),
+                NotifyAfter = 0,
                 ConvertEmptyPropertyValuesToNull = true,
                 KeepNulls = true,
                 TableLock = true,
@@ -324,7 +324,46 @@ public class UnitTests
                 CommandTimeoutSeconds = 60,
                 FireTriggers = false,
                 KeepIdentity = false,
-                NotifyAfter = 0,
+                NotifyAfter = -1,
+                ConvertEmptyPropertyValuesToNull = false,
+                KeepNulls = true,
+                TableLock = false,
+            };
+
+            var result = await MicrosoftSQL.BulkInsert(_input, options, default);
+            Assert.IsTrue(result.Success);
+            Assert.AreEqual(0, result.Count);
+            Assert.AreEqual(3, GetRowCount());
+
+            await MicrosoftSQL.BulkInsert(_input, options, default);
+            Assert.AreEqual(6, GetRowCount());
+
+            CleanUp();
+        }
+    }
+
+    [TestMethod]
+    public async Task TestBulkInsert_NotifyAfterTooMuch()
+    {
+        var transactionLevels = new List<SqlTransactionIsolationLevel>() {
+            SqlTransactionIsolationLevel.Unspecified,
+            SqlTransactionIsolationLevel.Serializable,
+            SqlTransactionIsolationLevel.None,
+            SqlTransactionIsolationLevel.ReadUncommitted,
+            SqlTransactionIsolationLevel.ReadCommitted
+        };
+
+        foreach (var transactionLevel in transactionLevels)
+        {
+            Init();
+
+            var options = new Options()
+            {
+                SqlTransactionIsolationLevel = transactionLevel,
+                CommandTimeoutSeconds = 60,
+                FireTriggers = false,
+                KeepIdentity = false,
+                NotifyAfter = 4,
                 ConvertEmptyPropertyValuesToNull = false,
                 KeepNulls = true,
                 TableLock = false,
