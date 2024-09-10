@@ -11,7 +11,6 @@ You can install the Task via Frends UI Task View.
 
 ## Building
 
-
 Rebuild the project
 
 `dotnet build`
@@ -19,7 +18,8 @@ Rebuild the project
 Run tests
 
  Create a simple SQL server to docker:
- `docker-compose up`
+ `cd Frends.MicrosoftSQL.ExecuteQuery.Tests`
+ `docker-compose up -d`
  
 `dotnet test`
 

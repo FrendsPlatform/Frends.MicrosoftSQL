@@ -1,6 +1,7 @@
 using Frends.MicrosoftSQL.ExecuteQuery.Definitions;
 using Frends.MicrosoftSQL.ExecuteQuery.Tests.Lib;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Newtonsoft.Json.Linq;
 
 namespace Frends.MicrosoftSQL.ExecuteQuery.Tests;
 
@@ -129,5 +130,63 @@ public class NonQueryUnitTests : ExecuteQueryTestBase
 
             CleanUp();
         }
+    }
+
+    [TestMethod]
+    public async Task TestExecuteQuery_DBNullValues()
+    {
+        
+
+        var options = new Options()
+        {
+            SqlTransactionIsolationLevel = SqlTransactionIsolationLevel.Default,
+            CommandTimeoutSeconds = 30,
+            ThrowErrorOnFailure = true
+        };
+
+        var inputInsert = new Input()
+        {
+            ConnectionString = _connString,
+            Query = $@"INSERT INTO {_tableName} VALUES (1, @Last, @First)",
+            ExecuteType = ExecuteTypes.NonQuery,
+            Parameters = new QueryParameter[]
+            {
+                new() {
+                    Name = "@Last",
+                    Value = null,
+                    SqlDataType = SqlDataTypes.Auto
+                },
+                new() {
+                    Name = "@First",
+                    Value = "Mikki",
+                    SqlDataType = SqlDataTypes.Auto
+                }
+            }
+        };
+
+        var result = await MicrosoftSQL.ExecuteQuery(inputInsert, options, default);
+        Assert.IsTrue(result.Success);
+        Console.WriteLine($"Success {result.Success}");
+
+        var jToken = new JObject(
+            new JProperty("Etu", "Mikki")
+            );
+
+        inputInsert.Parameters = new QueryParameter[]
+            {
+                new() {
+                    Name = "@Last",
+                    Value = jToken["Suku"],
+                    SqlDataType = SqlDataTypes.Auto
+                },
+                new() {
+                    Name = "@First",
+                    Value = jToken["Etu"],
+                    SqlDataType = SqlDataTypes.Auto
+                }
+            };
+
+        result = await MicrosoftSQL.ExecuteQuery(inputInsert, options, default);
+        Assert.IsTrue(result.Success);
     }
 }
