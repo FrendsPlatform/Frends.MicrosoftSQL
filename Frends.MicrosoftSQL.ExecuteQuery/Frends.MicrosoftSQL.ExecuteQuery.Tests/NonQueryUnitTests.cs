@@ -142,7 +142,7 @@ public class NonQueryUnitTests : ExecuteQueryTestBase
             ThrowErrorOnFailure = true
         };
 
-        var inputInsert = new Input()
+        var input = new Input()
         {
             ConnectionString = _connString,
             Query = $@"INSERT INTO {_tableName} VALUES (1, @Last, @First)",
@@ -162,15 +162,20 @@ public class NonQueryUnitTests : ExecuteQueryTestBase
             }
         };
 
-        var result = await MicrosoftSQL.ExecuteQuery(inputInsert, options, default);
+        var result = await MicrosoftSQL.ExecuteQuery(input, options, default);
         Assert.IsTrue(result.Success);
-        Console.WriteLine($"Success {result.Success}");
+
+        input.Query = $"SELECT * FROM {_tableName}";
+        input.ExecuteType = ExecuteTypes.Auto;
+        var selectResult = await MicrosoftSQL.ExecuteQuery(input, options, default);
+        Assert.AreEqual(null, (string)selectResult.Data[0]["LastName"]);
+        Assert.AreEqual("Mikki", (string)selectResult.Data[0]["FirstName"]);
 
         var jToken = new JObject(
             new JProperty("Etu", "Mikki")
             );
 
-        inputInsert.Parameters = new QueryParameter[]
+        input.Parameters = new QueryParameter[]
             {
                 new() {
                     Name = "@Last",
@@ -184,7 +189,13 @@ public class NonQueryUnitTests : ExecuteQueryTestBase
                 }
             };
 
-        result = await MicrosoftSQL.ExecuteQuery(inputInsert, options, default);
+        result = await MicrosoftSQL.ExecuteQuery(input, options, default);
         Assert.IsTrue(result.Success);
+
+        input.Query = $"SELECT * FROM {_tableName}";
+        input.ExecuteType = ExecuteTypes.Auto;
+        selectResult = await MicrosoftSQL.ExecuteQuery(input, options, default);
+        Assert.AreEqual(null, (string)selectResult.Data[0]["LastName"]);
+        Assert.AreEqual("Mikki", (string)selectResult.Data[0]["FirstName"]);
     }
 }
