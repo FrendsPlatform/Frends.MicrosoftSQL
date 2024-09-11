@@ -1,5 +1,10 @@
 # Changelog
 
+## [2.1.0] - 2024-09-10
+### Fixed
+- Fixed how null values are handled by setting them as DBNull.Value.
+- Fixed how JValue parameters are handled by adding a check for those values and assigning ToString() method on the values.
+
 ## [2.0.0] - 2024-08-01
 ### Changed
 - [Breaking] The task now uses Microsoft.Data.SqlClient instead of System.Data.SqlClient.

@@ -41,13 +41,26 @@ public class MicrosoftSQL
             {
                 foreach (var parameter in input.Parameters)
                 {
-                    if (parameter.SqlDataType is SqlDataTypes.Auto)
-                        command.Parameters.AddWithValue(parameterName: parameter.Name, value: parameter.Value);
+                    if (parameter.Value == null)
+                    {
+                        command.Parameters.AddWithValue(parameterName: parameter.Name, value: DBNull.Value);
+                    }
+                    else if (parameter.Value.GetType() == typeof(JValue))
+                    {
+                        if (((JToken)parameter.Value).Type == JTokenType.Null)
+                            command.Parameters.AddWithValue(parameterName: parameter.Name, value: DBNull.Value);
+                        else
+                            command.Parameters.AddWithValue(parameterName: parameter.Name, value: parameter.Value.ToString());
+                    }
+                    else if (parameter.SqlDataType is SqlDataTypes.Auto)
+                    {
+                        command.Parameters.AddWithValue(parameterName: parameter.Name, value: parameter.Value ?? DBNull.Value);
+                    }
                     else
                     {
                         var sqlDbType = (SqlDbType)Enum.Parse(typeof(SqlDbType), parameter.SqlDataType.ToString());
                         var commandParameter = command.Parameters.Add(parameter.Name, sqlDbType);
-                        commandParameter.Value = parameter.Value;
+                        commandParameter.Value = parameter.Value ?? DBNull.Value;
                     }
                 }
             }
