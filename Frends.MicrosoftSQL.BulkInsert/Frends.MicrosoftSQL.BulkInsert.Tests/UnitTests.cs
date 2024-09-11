@@ -1,6 +1,6 @@
 using Frends.MicrosoftSQL.BulkInsert.Definitions;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Microsoft.Data.SqlClient;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Frends.MicrosoftSQL.BulkInsert.Tests;
 
@@ -89,7 +89,7 @@ public class UnitTests
                 CommandTimeoutSeconds = 60,
                 FireTriggers = true,
                 KeepIdentity = false,
-                NotifyAfter = 1,
+                NotifyAfter = 0,
                 ConvertEmptyPropertyValuesToNull = false,
                 KeepNulls = false,
                 TableLock = false,
@@ -128,7 +128,7 @@ public class UnitTests
                 CommandTimeoutSeconds = 60,
                 FireTriggers = false,
                 KeepIdentity = true,
-                NotifyAfter = 1,
+                NotifyAfter = 0,
                 ConvertEmptyPropertyValuesToNull = false,
                 KeepNulls = false,
                 TableLock = false,
@@ -167,7 +167,7 @@ public class UnitTests
                 CommandTimeoutSeconds = 60,
                 FireTriggers = false,
                 KeepIdentity = false,
-                NotifyAfter = 1,
+                NotifyAfter = 0,
                 ConvertEmptyPropertyValuesToNull = true,
                 KeepNulls = false,
                 TableLock = false,
@@ -206,7 +206,7 @@ public class UnitTests
                 CommandTimeoutSeconds = 60,
                 FireTriggers = false,
                 KeepIdentity = false,
-                NotifyAfter = 1,
+                NotifyAfter = 0,
                 ConvertEmptyPropertyValuesToNull = false,
                 KeepNulls = true,
                 TableLock = false,
@@ -245,7 +245,7 @@ public class UnitTests
                 CommandTimeoutSeconds = 60,
                 FireTriggers = false,
                 KeepIdentity = false,
-                NotifyAfter = 1,
+                NotifyAfter = 0,
                 ConvertEmptyPropertyValuesToNull = false,
                 KeepNulls = false,
                 TableLock = true,
@@ -285,10 +285,127 @@ public class UnitTests
                 CommandTimeoutSeconds = 60,
                 FireTriggers = true,
                 KeepIdentity = true,
-                NotifyAfter = 1,
+                NotifyAfter = 0,
                 ConvertEmptyPropertyValuesToNull = true,
                 KeepNulls = true,
                 TableLock = true,
+            };
+
+            var result = await MicrosoftSQL.BulkInsert(_input, options, default);
+            Assert.IsTrue(result.Success);
+            Assert.AreEqual(3, result.Count);
+            Assert.AreEqual(3, GetRowCount());
+
+            await MicrosoftSQL.BulkInsert(_input, options, default);
+            Assert.AreEqual(6, GetRowCount());
+
+            CleanUp();
+        }
+    }
+
+    [TestMethod]
+    public async Task TestBulkInsert_NotifyAfterZero()
+    {
+        var transactionLevels = new List<SqlTransactionIsolationLevel>() {
+            SqlTransactionIsolationLevel.Unspecified,
+            SqlTransactionIsolationLevel.Serializable,
+            SqlTransactionIsolationLevel.None,
+            SqlTransactionIsolationLevel.ReadUncommitted,
+            SqlTransactionIsolationLevel.ReadCommitted
+        };
+
+        foreach (var transactionLevel in transactionLevels)
+        {
+            Init();
+
+            var options = new Options()
+            {
+                SqlTransactionIsolationLevel = transactionLevel,
+                CommandTimeoutSeconds = 60,
+                FireTriggers = false,
+                KeepIdentity = false,
+                NotifyAfter = -1,
+                ConvertEmptyPropertyValuesToNull = false,
+                KeepNulls = true,
+                TableLock = false,
+            };
+
+            var result = await MicrosoftSQL.BulkInsert(_input, options, default);
+            Assert.IsTrue(result.Success);
+            Assert.AreEqual(0, result.Count);
+            Assert.AreEqual(3, GetRowCount());
+
+            await MicrosoftSQL.BulkInsert(_input, options, default);
+            Assert.AreEqual(6, GetRowCount());
+
+            CleanUp();
+        }
+    }
+
+    [TestMethod]
+    public async Task TestBulkInsert_NotifyAfterTooMuch()
+    {
+        var transactionLevels = new List<SqlTransactionIsolationLevel>() {
+            SqlTransactionIsolationLevel.Unspecified,
+            SqlTransactionIsolationLevel.Serializable,
+            SqlTransactionIsolationLevel.None,
+            SqlTransactionIsolationLevel.ReadUncommitted,
+            SqlTransactionIsolationLevel.ReadCommitted
+        };
+
+        foreach (var transactionLevel in transactionLevels)
+        {
+            Init();
+
+            var options = new Options()
+            {
+                SqlTransactionIsolationLevel = transactionLevel,
+                CommandTimeoutSeconds = 60,
+                FireTriggers = false,
+                KeepIdentity = false,
+                NotifyAfter = 4,
+                ConvertEmptyPropertyValuesToNull = false,
+                KeepNulls = true,
+                TableLock = false,
+            };
+
+            var result = await MicrosoftSQL.BulkInsert(_input, options, default);
+            Assert.IsTrue(result.Success);
+            Assert.AreEqual(0, result.Count);
+            Assert.AreEqual(3, GetRowCount());
+
+            await MicrosoftSQL.BulkInsert(_input, options, default);
+            Assert.AreEqual(6, GetRowCount());
+
+            CleanUp();
+        }
+    }
+
+    [TestMethod]
+    public async Task TestBulkInsert_NotifyAfterOne()
+    {
+        var transactionLevels = new List<SqlTransactionIsolationLevel>() {
+            SqlTransactionIsolationLevel.Unspecified,
+            SqlTransactionIsolationLevel.Serializable,
+            SqlTransactionIsolationLevel.None,
+            SqlTransactionIsolationLevel.ReadUncommitted,
+            SqlTransactionIsolationLevel.ReadCommitted
+        };
+
+        foreach (var transactionLevel in transactionLevels)
+        {
+            Init();
+
+            var options = new Options()
+            {
+                SqlTransactionIsolationLevel = transactionLevel,
+                CommandTimeoutSeconds = 60,
+                FireTriggers = false,
+                KeepIdentity = false,
+                NotifyAfter = 1,
+                ConvertEmptyPropertyValuesToNull = false,
+                KeepNulls = true,
+                TableLock = false,
             };
 
             var result = await MicrosoftSQL.BulkInsert(_input, options, default);

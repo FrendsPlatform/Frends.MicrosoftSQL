@@ -1,5 +1,9 @@
 # Changelog
 
+## [2.2.0] - 2024-09-10
+### Changed
+- Updated Options.NotifyAfter property to be set dynamically based on the total row count, with a minimum value of 1, ensuring rowsCopied is updated correctly.
+
 ## [2.1.0] - 2024-08-26
 ### Changed
 - Updated Newtonsoft.Json to the latest version 13.0.3.

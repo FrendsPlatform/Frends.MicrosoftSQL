@@ -1,4 +1,5 @@
 ﻿using Frends.MicrosoftSQL.BulkInsert.Definitions;
+using Microsoft.Data.SqlClient;
 using Newtonsoft.Json.Linq;
 using System;
 using System.ComponentModel;
@@ -8,7 +9,6 @@ using System.Reflection;
 using System.Runtime.Loader;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.Data.SqlClient;
 
 namespace Frends.MicrosoftSQL.BulkInsert;
 
@@ -121,18 +121,28 @@ public class MicrosoftSQL
                 sqlBulkCopy.BulkCopyTimeout = options.CommandTimeoutSeconds;
                 sqlBulkCopy.DestinationTableName = tableName;
                 sqlBulkCopy.SqlRowsCopied += (s, e) => rowsCopied = e.RowsCopied;
-                sqlBulkCopy.NotifyAfter = options.NotifyAfter;
+
+                if (options.NotifyAfter == 0)
+                {
+                    // Calculate the number of rows and set value for NotifyAfter
+                    var rowCount = dataSet.Tables[0].Rows.Count;
+                    sqlBulkCopy.NotifyAfter = rowCount > 0 ? Math.Max(1, rowCount / 10) : 1;
+                }
+                else if (options.NotifyAfter > 0)
+                    sqlBulkCopy.NotifyAfter = options.NotifyAfter;
+                else
+                    sqlBulkCopy.NotifyAfter = 0;
 
                 await sqlBulkCopy.WriteToServerAsync(dataSet.Tables[0], cancellationToken).ConfigureAwait(false);
-
-                return rowsCopied;
             }
         }
         catch (Exception ex)
         {
-            var notifyRange = rowsCopied + (options.NotifyAfter - 1);
-            throw new Exception($"ExecuteHandler exception, procecced row count between: {rowsCopied} and {notifyRange} (see Options.NotifyAfter). {ex}");
+            var notifyRange = rowsCopied + (sqlBulkCopy.NotifyAfter - 1);
+            throw new Exception($"ExecuteHandler exception, processed row count between: {rowsCopied} and {notifyRange} (see NotifyAfter). {ex}");
         }
+
+        return rowsCopied;
     }
 
     private static void SetEmptyDataRowsToNull(DataSet dataSet)
