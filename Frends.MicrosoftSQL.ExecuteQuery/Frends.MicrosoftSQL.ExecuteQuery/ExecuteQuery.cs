@@ -7,6 +7,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using IsolationLevel = System.Data.IsolationLevel;
 using Microsoft.Data.SqlClient;
+using Microsoft.SqlServer.Types;
 
 namespace Frends.MicrosoftSQL.ExecuteQuery;
 
@@ -92,7 +93,6 @@ public class MicrosoftSQL
         Result result;
         object dataObject;
         SqlDataReader dataReader = null;
-        using var table = new DataTable();
 
         try
         {
@@ -102,8 +102,7 @@ public class MicrosoftSQL
                     if (input.Query.ToLower().StartsWith("select"))
                     {
                         dataReader = await command.ExecuteReaderAsync(cancellationToken).ConfigureAwait(false);
-                        table.Load(dataReader);
-                        result = new Result(true, dataReader.RecordsAffected, null, JToken.FromObject(table));
+                        result = new Result(true, dataReader.RecordsAffected, null, await LoadData(dataReader, cancellationToken));
                         await dataReader.CloseAsync();
                         break;
                     }
@@ -116,12 +115,16 @@ public class MicrosoftSQL
                     break;
                 case ExecuteTypes.Scalar:
                     dataObject = await command.ExecuteScalarAsync(cancellationToken).ConfigureAwait(false);
+
+                    // JToken.FromObject() method can't handle SqlGeography typed objects so we convert it into string.
+                    if (dataObject != null && (dataObject.GetType() == typeof(SqlGeography) || dataObject.GetType() == typeof(SqlGeometry)))
+                        dataObject = dataObject.ToString();
+
                     result = new Result(true, 1, null, JToken.FromObject(new { Value = dataObject }));
                     break;
                 case ExecuteTypes.ExecuteReader:
                     dataReader = await command.ExecuteReaderAsync(cancellationToken).ConfigureAwait(false);
-                    table.Load(dataReader);
-                    result = new Result(true, dataReader.RecordsAffected, null, JToken.FromObject(table));
+                    result = new Result(true, dataReader.RecordsAffected, null, await LoadData(dataReader, cancellationToken));
                     await dataReader.CloseAsync();
                     break;
                 default:
@@ -165,6 +168,43 @@ public class MicrosoftSQL
                     return new Result(false, 0, $"ExecuteHandler exception: (If required) transaction rollback completed without exception. {ex}.", null);
             }
         }
+        finally
+        {
+            if (dataReader != null && !dataReader.IsClosed)
+                await dataReader.CloseAsync();
+        }
+    }
+
+    private static async Task<JToken> LoadData(SqlDataReader reader, CancellationToken cancellationToken)
+    {
+        var table = new JArray();
+        while (reader.HasRows)
+        {
+            while (await reader.ReadAsync(cancellationToken))
+            {
+                var row = new JObject();
+                for (var i = 0; i < reader.FieldCount; i++)
+                {
+                    object fieldValue = reader.GetValue(i);
+                    object value;
+                    if (fieldValue == DBNull.Value)
+                        value = null;
+                    else if (fieldValue is SqlGeography geography)
+                        value = geography.ToString();
+                    else if (fieldValue is SqlGeometry geometry)
+                        value = geometry.ToString();
+                    else
+                        value = fieldValue;
+
+                    row.Add(new JProperty(reader.GetName(i), value));
+                }
+
+                table.Add(row);
+            }
+            await reader.NextResultAsync(cancellationToken).ConfigureAwait(false);
+        }
+
+        return table;
     }
 
     private static IsolationLevel GetIsolationLevel(Options options)

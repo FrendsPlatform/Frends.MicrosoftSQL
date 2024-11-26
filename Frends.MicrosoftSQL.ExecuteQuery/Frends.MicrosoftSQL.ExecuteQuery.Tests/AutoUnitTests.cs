@@ -132,4 +132,63 @@ public class AutoUnitTests : ExecuteQueryTestBase
             CleanUp();
         }
     }
+
+    [TestMethod]
+    public async Task TestWithGeographyData()
+    {
+        var table = "geographytest";
+
+        var options = new Options()
+        {
+            SqlTransactionIsolationLevel = SqlTransactionIsolationLevel.None,
+            CommandTimeoutSeconds = 2,
+            ThrowErrorOnFailure = true
+        };
+
+        var input = new Input
+        {
+            ConnectionString = _connString,
+            Query = $"IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME='{table}') BEGIN CREATE TABLE {table} ( Id int IDENTITY(1, 1), GeogCol1 geography, GeogCol2 AS GeogCol1.STAsText()); END",
+            ExecuteType = ExecuteTypes.Auto,
+            Parameters = null
+        };
+
+        try
+        {
+            var create = await MicrosoftSQL.ExecuteQuery(input, options, default);
+            Assert.IsTrue(create.Success, "Create table");
+
+            input.Query = $"INSERT INTO {table} (GeogCol1) VALUES (geography::STGeomFromText('LINESTRING(-122.360 47.656, -122.343 47.656 )', 4326));";
+
+            var insert1 = await MicrosoftSQL.ExecuteQuery(input, options, default);
+            Assert.IsTrue(insert1.Success, "First insert");
+
+            input.Query = $"INSERT INTO {table} (GeogCol1) VALUES(geography::STGeomFromText('POLYGON((-122.358 47.653 , -122.348 47.649, -122.348 47.658, -122.358 47.658, -122.358 47.653))', 4326));";
+
+            var insert2 = await MicrosoftSQL.ExecuteQuery(input, options, default);
+            Assert.IsTrue(insert2.Success, "Second insert");
+
+            input.Query = $"SELECT * From {table}";
+
+            var select = await MicrosoftSQL.ExecuteQuery(input, options, default);
+            Assert.IsTrue(select.Success, "Select");
+            Assert.AreEqual(typeof(JArray), select.Data.GetType());
+            Assert.AreEqual(2, select.Data.Count);
+
+            // Verify first row (LINESTRING)
+            Assert.IsNotNull(select.Data[0]["GeogCol1"]);
+            Assert.IsTrue(select.Data[0]["GeogCol2"].ToString().StartsWith("LINESTRING"));
+
+            // Verify second row (POLYGON)
+            Assert.IsNotNull(select.Data[1]["GeogCol1"]);
+            Assert.IsTrue(select.Data[1]["GeogCol2"].ToString().StartsWith("POLYGON"));
+        }
+        finally
+        {
+            input.Query = $"DROP TABLE {table}";
+
+            var drop = await MicrosoftSQL.ExecuteQuery(input, options, default);
+            Assert.IsTrue(drop.Success, "Drop");
+        }
+    }
 }
