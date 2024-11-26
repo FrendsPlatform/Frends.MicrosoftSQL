@@ -118,7 +118,7 @@ public class MicrosoftSQL
                     dataObject = await command.ExecuteScalarAsync(cancellationToken).ConfigureAwait(false);
 
                     // JToken.FromObject() method can't handle SqlGeography typed objects so we convert it into string.
-                    if (dataObject != null && dataObject.GetType() == typeof(SqlGeography))
+                    if (dataObject != null && (dataObject.GetType() == typeof(SqlGeography) || dataObject.GetType() == typeof(SqlGeometry)))
                         dataObject = dataObject.ToString();
 
                     result = new Result(true, 1, null, JToken.FromObject(new { Value = dataObject }));
@@ -187,6 +187,8 @@ public class MicrosoftSQL
                         value = null;
                     else if (fieldValue is SqlGeography geography)
                         value = geography.ToString();
+                    else if (fieldValue is SqlGeometry geometry)
+                        value = geometry.ToString();
                     else
                         value = fieldValue;
 

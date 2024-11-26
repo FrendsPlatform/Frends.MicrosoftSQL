@@ -2,8 +2,8 @@
 
 ## [2.2.0] - 2024-11-26
 ### Added
-- Added method to form JToken from the SqlDataReader so that SqlGeography typed objects can be handled.
-- Fixed how Scalar handles the data so that SqlGeography typed objects can be handled.
+- Added method to form JToken from the SqlDataReader so that SqlGeography and SqlGeometry typed objects can be handled.
+- Fixed how Scalar handles the data so that SqlGeography and SqlGeometry typed objects can be handled.
 - Added Microsoft.SqlServer.Types version 160.1000.6 as dependency.
 
 ## [2.1.0] - 2024-09-10
