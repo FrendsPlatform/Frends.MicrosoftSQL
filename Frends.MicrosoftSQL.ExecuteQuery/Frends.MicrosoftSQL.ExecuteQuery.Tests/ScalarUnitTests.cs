@@ -1,6 +1,7 @@
 using Frends.MicrosoftSQL.ExecuteQuery.Definitions;
 using Frends.MicrosoftSQL.ExecuteQuery.Tests.Lib;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Newtonsoft.Json.Linq;
 
 namespace Frends.MicrosoftSQL.ExecuteQuery.Tests;
 
@@ -151,29 +152,37 @@ public class ScalarUnitTests : ExecuteQueryTestBase
             Parameters = null
         };
 
-        var create = await MicrosoftSQL.ExecuteQuery(input, options, default);
-        Assert.IsTrue(create.Success, "Create table");
+        try
+        {
+            var create = await MicrosoftSQL.ExecuteQuery(input, options, default);
+            Assert.IsTrue(create.Success, "Create table");
 
-        input.Query = $"INSERT INTO {table} (GeogCol1) VALUES (geography::STGeomFromText('LINESTRING(-122.360 47.656, -122.343 47.656 )', 4326));";
+            input.Query = $"INSERT INTO {table} (GeogCol1) VALUES (geography::STGeomFromText('LINESTRING(-122.360 47.656, -122.343 47.656 )', 4326));";
 
-        var insert1 = await MicrosoftSQL.ExecuteQuery(input, options, default);
-        Assert.IsTrue(insert1.Success, "First insert");
+            var insert1 = await MicrosoftSQL.ExecuteQuery(input, options, default);
+            Assert.IsTrue(insert1.Success, "First insert");
 
-        input.Query = $"INSERT INTO {table} (GeogCol1) VALUES(geography::STGeomFromText('POLYGON((-122.358 47.653 , -122.348 47.649, -122.348 47.658, -122.358 47.658, -122.358 47.653))', 4326));";
+            input.Query = $"INSERT INTO {table} (GeogCol1) VALUES(geography::STGeomFromText('POLYGON((-122.358 47.653 , -122.348 47.649, -122.348 47.658, -122.358 47.658, -122.358 47.653))', 4326));";
 
-        var insert2 = await MicrosoftSQL.ExecuteQuery(input, options, default);
-        Assert.IsTrue(insert2.Success, "Second insert");
+            var insert2 = await MicrosoftSQL.ExecuteQuery(input, options, default);
+            Assert.IsTrue(insert2.Success, "Second insert");
 
-        input.Query = $"SELECT GeogCol1 From {table}";
-        input.ExecuteType = ExecuteTypes.Scalar;
+            input.Query = $"SELECT GeogCol1 From {table}";
+            input.ExecuteType = ExecuteTypes.Scalar;
 
-        var select = await MicrosoftSQL.ExecuteQuery(input, options, default);
-        Assert.IsTrue(select.Success, "Select");
+            var select = await MicrosoftSQL.ExecuteQuery(input, options, default);
+            Assert.IsTrue(select.Success, "Select");
+            Assert.IsNotNull(select.Data["Value"], "Selected data should not be null");
+            Assert.IsInstanceOfType(select.Data["Value"], typeof(JValue), "Geography data should be converted to string");
+            Assert.IsTrue(((string)select.Data["Value"]).StartsWith("LINESTRING"), "First row should be a LINESTRING");
+        }
+        finally
+        {
+            input.Query = $"DROP TABLE {table}";
+            input.ExecuteType = ExecuteTypes.Auto;
 
-        input.Query = $"DROP TABLE {table}";
-        input.ExecuteType = ExecuteTypes.Auto;
-
-        var drop = await MicrosoftSQL.ExecuteQuery(input, options, default);
-        Assert.IsTrue(drop.Success, "Drop");
+            var drop = await MicrosoftSQL.ExecuteQuery(input, options, default);
+            Assert.IsTrue(drop.Success, "Drop");
+        }
     }
 }

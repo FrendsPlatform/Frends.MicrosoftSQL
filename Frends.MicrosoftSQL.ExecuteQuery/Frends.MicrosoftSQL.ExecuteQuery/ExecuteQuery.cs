@@ -181,13 +181,14 @@ public class MicrosoftSQL
                 var row = new JObject();
                 for (var i = 0; i < reader.FieldCount; i++)
                 {
-                    dynamic value;
-                    if (reader.GetValue(i).GetType() == typeof(DBNull))
+                    object fieldValue = reader.GetValue(i);
+                    object value;
+                    if (fieldValue == DBNull.Value)
                         value = null;
-                    else if (reader.GetValue(i).GetType() == typeof(SqlGeography))
-                        value = reader.GetValue(i).ToString();
+                    else if (fieldValue is SqlGeography geography)
+                        value = geography.ToString();
                     else
-                        value = reader.GetValue(i);
+                        value = fieldValue;
 
                     row.Add(new JProperty(reader.GetName(i), value));
                 }

@@ -145,7 +145,7 @@ public class AutoUnitTests : ExecuteQueryTestBase
             ThrowErrorOnFailure = true
         };
 
-        var createInput = new Input
+        var input = new Input
         {
             ConnectionString = _connString,
             Query = $"IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME='{table}') BEGIN CREATE TABLE {table} ( Id int IDENTITY(1, 1), GeogCol1 geography, GeogCol2 AS GeogCol1.STAsText()); END",
@@ -153,51 +153,42 @@ public class AutoUnitTests : ExecuteQueryTestBase
             Parameters = null
         };
 
-        var create = await MicrosoftSQL.ExecuteQuery(createInput, options, default);
-        Assert.IsTrue(create.Success, "Create table");
-
-        var insert1Input = new Input
+        try
         {
-            ConnectionString = _connString,
-            Query = $"INSERT INTO {table} (GeogCol1) VALUES (geography::STGeomFromText('LINESTRING(-122.360 47.656, -122.343 47.656 )', 4326));",
-            ExecuteType = ExecuteTypes.Auto,
-            Parameters = null
-        };
+            var create = await MicrosoftSQL.ExecuteQuery(input, options, default);
+            Assert.IsTrue(create.Success, "Create table");
 
-        var insert1 = await MicrosoftSQL.ExecuteQuery(insert1Input, options, default);
-        Assert.IsTrue(insert1.Success, "First insert");
+            input.Query = $"INSERT INTO {table} (GeogCol1) VALUES (geography::STGeomFromText('LINESTRING(-122.360 47.656, -122.343 47.656 )', 4326));";
 
-        var insert2Input = new Input
+            var insert1 = await MicrosoftSQL.ExecuteQuery(input, options, default);
+            Assert.IsTrue(insert1.Success, "First insert");
+
+            input.Query = $"INSERT INTO {table} (GeogCol1) VALUES(geography::STGeomFromText('POLYGON((-122.358 47.653 , -122.348 47.649, -122.348 47.658, -122.358 47.658, -122.358 47.653))', 4326));";
+
+            var insert2 = await MicrosoftSQL.ExecuteQuery(input, options, default);
+            Assert.IsTrue(insert2.Success, "Second insert");
+
+            input.Query = $"SELECT * From {table}";
+
+            var select = await MicrosoftSQL.ExecuteQuery(input, options, default);
+            Assert.IsTrue(select.Success, "Select");
+            Assert.AreEqual(typeof(JArray), select.Data.GetType());
+            Assert.AreEqual(2, select.Data.Count);
+
+            // Verify first row (LINESTRING)
+            Assert.IsNotNull(select.Data[0]["GeogCol1"]);
+            Assert.IsTrue(select.Data[0]["GeogCol2"].ToString().StartsWith("LINESTRING"));
+
+            // Verify second row (POLYGON)
+            Assert.IsNotNull(select.Data[1]["GeogCol1"]);
+            Assert.IsTrue(select.Data[1]["GeogCol2"].ToString().StartsWith("POLYGON"));
+        }
+        finally
         {
-            ConnectionString = _connString,
-            Query = $"INSERT INTO {table} (GeogCol1) VALUES(geography::STGeomFromText('POLYGON((-122.358 47.653 , -122.348 47.649, -122.348 47.658, -122.358 47.658, -122.358 47.653))', 4326));",
-            ExecuteType = ExecuteTypes.Auto,
-            Parameters = null
-        };
+            input.Query = $"DROP TABLE {table}";
 
-        var insert2 = await MicrosoftSQL.ExecuteQuery(insert2Input, options, default);
-        Assert.IsTrue(insert2.Success, "Second insert");
-
-        var selectInput = new Input
-        {
-            ConnectionString = _connString,
-            Query = $"SELECT * From {table}",
-            ExecuteType = ExecuteTypes.Auto,
-            Parameters = null
-        };
-
-        var select = await MicrosoftSQL.ExecuteQuery(selectInput, options, default);
-        Assert.IsTrue(select.Success, "Select");
-
-        var dropInput = new Input
-        {
-            ConnectionString = _connString,
-            Query = $"DROP TABLE {table}",
-            ExecuteType = ExecuteTypes.Auto,
-            Parameters = null
-        };
-
-        var drop = await MicrosoftSQL.ExecuteQuery(dropInput, options, default);
-        Assert.IsTrue(drop.Success, "Drop");
+            var drop = await MicrosoftSQL.ExecuteQuery(input, options, default);
+            Assert.IsTrue(drop.Success, "Drop");
+        }
     }
 }
