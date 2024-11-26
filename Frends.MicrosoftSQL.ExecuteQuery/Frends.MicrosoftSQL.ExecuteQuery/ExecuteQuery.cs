@@ -93,7 +93,6 @@ public class MicrosoftSQL
         Result result;
         object dataObject;
         SqlDataReader dataReader = null;
-        using var table = new DataTable();
 
         try
         {
@@ -168,6 +167,11 @@ public class MicrosoftSQL
                 else
                     return new Result(false, 0, $"ExecuteHandler exception: (If required) transaction rollback completed without exception. {ex}.", null);
             }
+        }
+        finally
+        {
+            if (dataReader != null && !dataReader.IsClosed)
+                await dataReader.CloseAsync();
         }
     }
 
