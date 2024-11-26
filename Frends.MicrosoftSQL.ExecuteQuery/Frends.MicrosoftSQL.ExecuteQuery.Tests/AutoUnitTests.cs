@@ -132,4 +132,72 @@ public class AutoUnitTests : ExecuteQueryTestBase
             CleanUp();
         }
     }
+
+    [TestMethod]
+    public async Task TestWithGeographyData()
+    {
+        var table = "geographytest";
+
+        var options = new Options()
+        {
+            SqlTransactionIsolationLevel = SqlTransactionIsolationLevel.None,
+            CommandTimeoutSeconds = 2,
+            ThrowErrorOnFailure = true
+        };
+
+        var createInput = new Input
+        {
+            ConnectionString = _connString,
+            Query = $"IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME='{table}') BEGIN CREATE TABLE {table} ( Id int IDENTITY(1, 1), GeogCol1 geography, GeogCol2 AS GeogCol1.STAsText()); END",
+            ExecuteType = ExecuteTypes.Auto,
+            Parameters = null
+        };
+
+        var create = await MicrosoftSQL.ExecuteQuery(createInput, options, default);
+        Assert.IsTrue(create.Success, "Create table");
+
+        var insert1Input = new Input
+        {
+            ConnectionString = _connString,
+            Query = $"INSERT INTO {table} (GeogCol1) VALUES (geography::STGeomFromText('LINESTRING(-122.360 47.656, -122.343 47.656 )', 4326));",
+            ExecuteType = ExecuteTypes.Auto,
+            Parameters = null
+        };
+
+        var insert1 = await MicrosoftSQL.ExecuteQuery(insert1Input, options, default);
+        Assert.IsTrue(insert1.Success, "First insert");
+
+        var insert2Input = new Input
+        {
+            ConnectionString = _connString,
+            Query = $"INSERT INTO {table} (GeogCol1) VALUES(geography::STGeomFromText('POLYGON((-122.358 47.653 , -122.348 47.649, -122.348 47.658, -122.358 47.658, -122.358 47.653))', 4326));",
+            ExecuteType = ExecuteTypes.Auto,
+            Parameters = null
+        };
+
+        var insert2 = await MicrosoftSQL.ExecuteQuery(insert2Input, options, default);
+        Assert.IsTrue(insert2.Success, "Second insert");
+
+        var selectInput = new Input
+        {
+            ConnectionString = _connString,
+            Query = $"SELECT * From {table}",
+            ExecuteType = ExecuteTypes.Auto,
+            Parameters = null
+        };
+
+        var select = await MicrosoftSQL.ExecuteQuery(selectInput, options, default);
+        Assert.IsTrue(select.Success, "Select");
+
+        var dropInput = new Input
+        {
+            ConnectionString = _connString,
+            Query = $"DROP TABLE {table}",
+            ExecuteType = ExecuteTypes.Auto,
+            Parameters = null
+        };
+
+        var drop = await MicrosoftSQL.ExecuteQuery(dropInput, options, default);
+        Assert.IsTrue(drop.Success, "Drop");
+    }
 }
