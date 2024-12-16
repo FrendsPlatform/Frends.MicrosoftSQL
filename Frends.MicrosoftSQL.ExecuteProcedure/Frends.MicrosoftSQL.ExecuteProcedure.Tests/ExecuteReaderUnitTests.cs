@@ -344,10 +344,9 @@ DECLARE cur CURSOR
 
         command = $"CREATE PROCEDURE SelectGeography AS select * from {table}";
         Helper.ExecuteNonQuery(command);
-        
+
         try
         {
-            
             input.Execute = "InsertGeography";
 
             var result = await MicrosoftSQL.ExecuteProcedure(input, options, default);
@@ -376,8 +375,11 @@ DECLARE cur CURSOR
         }
         finally
         {
-            command = $"DROP TABLE {table}";
-            Helper.ExecuteNonQuery(command);
+            Helper.ExecuteNonQuery("IF OBJECT_ID('InsertGeography') IS NOT NULL DROP PROCEDURE InsertGeography");
+            Helper.ExecuteNonQuery("IF OBJECT_ID('InsertGeometry') IS NOT NULL DROP PROCEDURE InsertGeometry");
+            Helper.ExecuteNonQuery("IF OBJECT_ID('SelectGeography') IS NOT NULL DROP PROCEDURE SelectGeography");
+            
+            Helper.ExecuteNonQuery($"DROP TABLE {table}");
         }
     }
 }
