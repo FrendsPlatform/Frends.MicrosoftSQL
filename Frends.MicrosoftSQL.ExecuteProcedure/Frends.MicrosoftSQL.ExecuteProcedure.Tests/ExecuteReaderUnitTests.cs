@@ -311,4 +311,73 @@ DECLARE cur CURSOR
         Assert.IsTrue(result.Success);
         Assert.AreEqual(Convert.ToBase64String(binary), Convert.ToBase64String((byte[])result.Data[0]["Data"]));
     }
+
+    [TestMethod]
+    public async Task TestWithGeographyData()
+    {
+        var table = "geographytest";
+
+        var options = new Options()
+        {
+            SqlTransactionIsolationLevel = SqlTransactionIsolationLevel.None,
+            CommandTimeoutSeconds = 30,
+            ThrowErrorOnFailure = true
+        };
+
+        var input = new Input
+        {
+            ConnectionString = _connString,
+            Execute = "",
+            ExecuteType = ExecuteTypes.NonQuery,
+            Parameters = null
+        };
+
+        // Create new table
+        var command = $"IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME='{table}') BEGIN CREATE TABLE {table} ( Id int IDENTITY(1, 1), GeogCol1 geography, GeogCol2 AS GeogCol1.STAsText()); END";
+        Helper.ExecuteNonQuery(command);
+
+        command = $"CREATE PROCEDURE InsertGeography AS INSERT INTO {table} (GeogCol1) VALUES (geography::STGeomFromText('LINESTRING(-122.360 47.656, -122.343 47.656 )', 4326));";
+        Helper.ExecuteNonQuery(command);
+
+        command = $"CREATE PROCEDURE InsertGeometry AS INSERT INTO {table} (GeogCol1) VALUES(geography::STGeomFromText('POLYGON((-122.358 47.653 , -122.348 47.649, -122.348 47.658, -122.358 47.658, -122.358 47.653))', 4326));";
+        Helper.ExecuteNonQuery(command);
+
+        command = $"CREATE PROCEDURE SelectGeography AS select * from {table}";
+        Helper.ExecuteNonQuery(command);
+        
+        try
+        {
+            
+            input.Execute = "InsertGeography";
+
+            var result = await MicrosoftSQL.ExecuteProcedure(input, options, default);
+            Assert.IsTrue(result.Success, "First insert");
+
+            input.Execute = "InsertGeometry";
+
+            result = await MicrosoftSQL.ExecuteProcedure(input, options, default);
+            Assert.IsTrue(result.Success, "Second insert");
+
+            input.Execute = "SelectGeography";
+            input.ExecuteType = ExecuteTypes.ExecuteReader;
+
+            result = await MicrosoftSQL.ExecuteProcedure(input, options, default);
+            Assert.IsTrue(result.Success, "Select");
+            Assert.AreEqual(typeof(JArray), result.Data.GetType());
+            Assert.AreEqual(2, result.Data.Count);
+
+            // Verify first row (LINESTRING)
+            Assert.IsNotNull(result.Data[0]["GeogCol1"]);
+            Assert.IsTrue(result.Data[0]["GeogCol2"].ToString().StartsWith("LINESTRING"));
+
+            // Verify second row (POLYGON)
+            Assert.IsNotNull(result.Data[1]["GeogCol1"]);
+            Assert.IsTrue(result.Data[1]["GeogCol2"].ToString().StartsWith("POLYGON"));
+        }
+        finally
+        {
+            command = $"DROP TABLE {table}";
+            Helper.ExecuteNonQuery(command);
+        }
+    }
 }
