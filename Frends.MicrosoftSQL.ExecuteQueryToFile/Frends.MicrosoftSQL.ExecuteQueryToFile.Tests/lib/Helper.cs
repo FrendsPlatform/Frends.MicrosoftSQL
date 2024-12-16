@@ -12,17 +12,22 @@ internal static class Helper
         return $"Server=127.0.0.1,1433;Database=Master;User Id={user};Password={pwd};TrustServerCertificate=True";
     }
 
-    internal static void CreateTestTable(string connString, string tableName)
+    internal static void CreateTestTable(string connString, string tableName, string query = null)
     {
         using var connection = new SqlConnection(connString);
         connection.Open();
         var createTable = connection.CreateCommand();
-        createTable.CommandText = $@"IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME='{tableName}') BEGIN CREATE TABLE {tableName} ( Id int, LastName varchar(255), FirstName varchar(255), Salary decimal(6,2), Image Image, TestText VarBinary(MAX), TestNull Varchar(255)); END";
+
+        if (query == null)
+            createTable.CommandText = $@"IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME='{tableName}') BEGIN CREATE TABLE {tableName} ( Id int, LastName varchar(255), FirstName varchar(255), Salary decimal(6,2), Image Image, TestText VarBinary(MAX), TestNull Varchar(255)); END";
+        else
+            createTable.CommandText = query;
+
         createTable.ExecuteNonQuery();
         connection.Close();
     }
 
-    internal static void InsertTestData(string connString, string commandText, Microsoft.Data.SqlClient.SqlParameter[] parameters = null)
+    internal static void ExecuteNonQuery(string connString, string commandText, SqlParameter[] parameters = null)
     {
         using var sqlConnection = new SqlConnection(connString);
         sqlConnection.Open();

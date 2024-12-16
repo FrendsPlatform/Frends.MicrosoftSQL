@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Frends.MicrosoftSQL.ExecuteQueryToFile.Definitions;
 using Frends.MicrosoftSQL.ExecuteQueryToFile.Enums;
 using Microsoft.Data.SqlClient;
+using Newtonsoft.Json.Linq;
 using NUnit.Framework;
 
 /// <summary>
@@ -67,7 +68,7 @@ public class UnitTests
             },
         };
 
-        Helper.InsertTestData(_connString, $"Insert into {_tableName} (Id, LastName, FirstName, Salary, Image, TestText) values (1,'Meikalainen','Matti',1523.25, {parameters[0].ParameterName}, {parameters[1].ParameterName});", parameters);
+        Helper.ExecuteNonQuery(_connString, $"Insert into {_tableName} (Id, LastName, FirstName, Salary, Image, TestText) values (1,'Meikalainen','Matti',1523.25, {parameters[0].ParameterName}, {parameters[1].ParameterName});", parameters);
     }
 
     [TearDown]
@@ -266,5 +267,40 @@ public class UnitTests
         var output = File.ReadAllText(_destination);
 
         Assert.IsNotNull(output);
+    }
+
+    [Test]
+    public async Task ExecuteQueryToFile_TestWithGeographyData()
+    {
+        var table = "geographytest";
+        var query = $"IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME='{table}') BEGIN CREATE TABLE {table} ( Id int IDENTITY(1, 1), GeogCol1 geography, GeogCol2 AS GeogCol1.STAsText()); END";
+
+        Helper.CreateTestTable(_connString, table, query);
+
+        Helper.ExecuteNonQuery(_connString, $"INSERT INTO {table} (GeogCol1) VALUES (geography::STGeomFromText('LINESTRING(-122.360 47.656, -122.343 47.656 )', 4326));");
+        Helper.ExecuteNonQuery(_connString, $"INSERT INTO {table} (GeogCol1) VALUES(geography::STGeomFromText('POLYGON((-122.358 47.653 , -122.348 47.649, -122.348 47.658, -122.358 47.658, -122.358 47.653))', 4326));");
+
+        var input = new Input
+        {
+            ConnectionString = _connString,
+            Query = $"SELECT * From {table}",
+            OutputFilePath = _destination,
+        };
+
+        try
+        {
+            input.Query = $"SELECT * From {table}";
+
+            var select = await MicrosoftSQL.ExecuteQueryToFile(input, _options, default);
+
+            var output = File.ReadAllLines(_destination);
+            Assert.AreEqual(2, output.Length);
+            Assert.IsTrue(output[0].Split(";")[1].StartsWith("LINESTRING"));
+            Assert.IsTrue(output[1].Split(";")[1].StartsWith("POLYGON"));
+        }
+        finally
+        {
+            Helper.ExecuteNonQuery(_connString, $"DROP TABLE {table}");
+        }
     }
 }
