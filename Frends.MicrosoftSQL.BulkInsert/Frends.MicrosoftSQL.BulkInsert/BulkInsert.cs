@@ -1,12 +1,11 @@
 ﻿using Frends.MicrosoftSQL.BulkInsert.Definitions;
 using Microsoft.Data.SqlClient;
+using Microsoft.IdentityModel.Abstractions;
 using Newtonsoft.Json.Linq;
 using System;
 using System.ComponentModel;
 using System.Data;
 using System.Linq;
-using System.Reflection;
-using System.Runtime.Loader;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -17,15 +16,6 @@ namespace Frends.MicrosoftSQL.BulkInsert;
 /// </summary>
 public class MicrosoftSQL
 {
-    /// Mem cleanup.
-    static MicrosoftSQL()
-    {
-        var currentAssembly = Assembly.GetExecutingAssembly();
-        var currentContext = AssemblyLoadContext.GetLoadContext(currentAssembly);
-        if (currentContext != null)
-            currentContext.Unloading += OnPluginUnloadingRequested;
-    }
-
     /// <summary>
     /// Execute bulk insert JSON data to Microsoft SQL Server.
     /// [Documentation](https://tasks.frends.com/tasks/frends-tasks/Frends.MicrosoftSQL.BulkInsert)
@@ -57,7 +47,7 @@ public class MicrosoftSQL
             {
                 try
                 {
-                    var result = await ExecuteHandler(options, input.TableName, dataSet, new SqlBulkCopy(connection, GetSqlBulkCopyOptions(options), null), cancellationToken);
+                    var result = await ExecuteHandler(options, input, dataSet, new SqlBulkCopy(connection, GetSqlBulkCopyOptions(options), null), cancellationToken);
                     return new Result(true, result, null);
                 }
                 catch (Exception ex)
@@ -74,7 +64,7 @@ public class MicrosoftSQL
 
             try
             {
-                var result = await ExecuteHandler(options, input.TableName, dataSet, new SqlBulkCopy(connection, GetSqlBulkCopyOptions(options), transaction), cancellationToken);
+                var result = await ExecuteHandler(options, input, dataSet, new SqlBulkCopy(connection, GetSqlBulkCopyOptions(options), transaction), cancellationToken);
                 await transaction.CommitAsync(cancellationToken);
                 return new Result(true, result, null);
             }
@@ -111,15 +101,27 @@ public class MicrosoftSQL
         }
     }
 
-    private static async Task<long> ExecuteHandler(Options options, string tableName, DataSet dataSet, SqlBulkCopy sqlBulkCopy, CancellationToken cancellationToken)
+    private static async Task<long> ExecuteHandler(Options options, Input input, DataSet dataSet, SqlBulkCopy sqlBulkCopy, CancellationToken cancellationToken)
     {
         var rowsCopied = 0L;
+
+        if (input.ColumnMapping == ColumnMapping.JsonPropertyNames)
+        {
+            foreach (var column in dataSet.Tables[0].Columns)
+                sqlBulkCopy.ColumnMappings.Add(new SqlBulkCopyColumnMapping(column.ToString(), column.ToString()));
+        }
+        else if (input.ColumnMapping == ColumnMapping.ManualColumnMapping)
+        {
+            foreach (var column in JObject.Parse(input.ManualColumnMapping).Properties())
+                sqlBulkCopy.ColumnMappings.Add(new SqlBulkCopyColumnMapping(column.Name, column.Name));
+        }
+
         try
         {
             using (sqlBulkCopy)
             {
                 sqlBulkCopy.BulkCopyTimeout = options.CommandTimeoutSeconds;
-                sqlBulkCopy.DestinationTableName = tableName;
+                sqlBulkCopy.DestinationTableName = input.TableName;
                 sqlBulkCopy.SqlRowsCopied += (s, e) => rowsCopied = e.RowsCopied;
 
                 if (options.NotifyAfter == 0)
@@ -188,10 +190,5 @@ public class MicrosoftSQL
             SqlTransactionIsolationLevel.Snapshot => IsolationLevel.Snapshot,
             _ => IsolationLevel.ReadCommitted,
         };
-    }
-
-    private static void OnPluginUnloadingRequested(AssemblyLoadContext obj)
-    {
-        obj.Unloading -= OnPluginUnloadingRequested;
     }
 }

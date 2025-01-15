@@ -1,6 +1,8 @@
 using Frends.MicrosoftSQL.BulkInsert.Definitions;
 using Microsoft.Data.SqlClient;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Microsoft.SqlServer.Types;
+using Newtonsoft.Json.Linq;
 
 namespace Frends.MicrosoftSQL.BulkInsert.Tests;
 
@@ -417,6 +419,64 @@ public class UnitTests
             Assert.AreEqual(6, GetRowCount());
 
             CleanUp();
+        }
+    }
+
+    [TestMethod]
+    public async Task TestBulkInsert_ColumnMapping()
+    {
+        var columnMappings = new List<ColumnMapping>()
+        {
+            ColumnMapping.JsonPropertyOrder,
+            ColumnMapping.JsonPropertyNames,
+            ColumnMapping.ManualColumnMapping
+        };
+
+        var options = new Options()
+        {
+            SqlTransactionIsolationLevel = SqlTransactionIsolationLevel.ReadCommitted,
+            CommandTimeoutSeconds = 60,
+            FireTriggers = false,
+            KeepIdentity = true,
+            NotifyAfter = 0,
+            ConvertEmptyPropertyValuesToNull = true,
+            KeepNulls = false,
+            TableLock = false,
+        };
+
+        var json = @"[
+                  {
+                    ""Id"": 1,
+                    ""FirstName"": ""Etu"",
+                    ""LastName"": ""Suku""
+                  },
+                  {
+                    ""Id"": 2,
+                    ""LastName"": ""Suku"",
+                    ""FirstName"": ""Etu""
+                  },
+                  {
+                    ""FirstName"": ""First"",
+                    ""LastName"": ""Last"",
+                    ""Id"": 3
+                  }
+                ]";
+
+        var manualMapping = @"{ ""Id"":""Id"", ""FirstName"": ""FirstName"", ""LastName"": ""LastName"" }";
+
+        foreach (var columnMapping in columnMappings)
+        {
+            var input = new Input
+            {
+                ConnectionString = _connString,
+                TableName = _tableName,
+                InputData = json,
+                ColumnMapping = columnMapping,
+                ManualColumnMapping = manualMapping
+            };
+
+            var result = await MicrosoftSQL.BulkInsert(input, options, default);
+            Assert.IsTrue(result.Success);
         }
     }
 
