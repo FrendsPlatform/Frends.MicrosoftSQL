@@ -1,8 +1,6 @@
 using Frends.MicrosoftSQL.BulkInsert.Definitions;
 using Microsoft.Data.SqlClient;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Microsoft.SqlServer.Types;
-using Newtonsoft.Json.Linq;
 
 namespace Frends.MicrosoftSQL.BulkInsert.Tests;
 
