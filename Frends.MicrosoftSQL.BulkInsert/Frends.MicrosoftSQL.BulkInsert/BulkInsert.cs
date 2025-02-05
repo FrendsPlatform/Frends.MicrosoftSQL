@@ -105,7 +105,12 @@ public class MicrosoftSQL
     {
         var rowsCopied = 0L;
 
-        if (input.ColumnMapping == ColumnMapping.JsonPropertyNames)
+        
+        if (input.ColumnMapping == ColumnMapping.JsonPropertyOrder)
+        {
+            // ColumnMapping.JsonPropertyOrder is default and is already being handled by SqlBulkCopy.
+        }
+        else if (input.ColumnMapping == ColumnMapping.JsonPropertyNames)
         {
             foreach (var column in dataSet.Tables[0].Columns)
                 sqlBulkCopy.ColumnMappings.Add(new SqlBulkCopyColumnMapping(column.ToString(), column.ToString()));

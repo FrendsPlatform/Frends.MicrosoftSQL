@@ -1,7 +1,7 @@
 ﻿namespace Frends.MicrosoftSQL.BulkInsert.Definitions;
 
 /// <summary>
-/// SqlTransactionIsolationLevels
+/// Selection of column mapping options for bulk insert.
 /// </summary>
 public enum ColumnMapping
 {

@@ -31,6 +31,7 @@ public class Input
 
     /// <summary>
     /// Column mapping JSON for manual column mapping.
+    /// JSON property cannot be a nested one. Only top level properties are supported.
     /// </summary>
     /// <example>
     /// {

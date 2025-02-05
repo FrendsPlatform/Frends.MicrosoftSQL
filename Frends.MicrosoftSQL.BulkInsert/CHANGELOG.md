@@ -2,8 +2,8 @@
 
 ## [3.0.0] - 2025-01-15
 ### Added
-- Added column mapping feature which allows user to select from JsonPropertyNames, JsonPropertyOrder and ManualColumnMapping options how the column mapping is handled in bulk insert.
-- Added parameters ColumnMapping and ManualColumnMapping.
+- [Breaking] Added parameters ColumnMapping and ManualColumnMapping.
+- Added column mapping feature which allows user to select from JsonPropertyNames, JsonPropertyOrder and ManualColumnMapping options how the column mapping is handled in bulk insert. Default behavior will remain the same JsonPropertyOrder.
 
 ## [2.2.0] - 2024-09-10
 ### Changed
