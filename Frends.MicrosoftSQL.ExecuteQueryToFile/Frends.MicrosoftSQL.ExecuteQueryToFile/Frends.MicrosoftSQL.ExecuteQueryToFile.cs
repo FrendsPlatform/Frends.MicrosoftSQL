@@ -1,19 +1,32 @@
-﻿namespace Frends.MicrosoftSQL.ExecuteQueryToFile;
-
-using System;
+﻿using System;
 using System.ComponentModel;
 using System.Data;
+using System.Reflection;
+using System.Runtime.Loader;
 using System.Threading;
 using System.Threading.Tasks;
 using Frends.MicrosoftSQL.ExecuteQueryToFile.Definitions;
 using Frends.MicrosoftSQL.ExecuteQueryToFile.Enums;
 using Microsoft.Data.SqlClient;
 
+namespace Frends.MicrosoftSQL.ExecuteQueryToFile;
+
 /// <summary>
 /// Main class of the Task.
 /// </summary>
 public static class MicrosoftSQL
 {
+    static MicrosoftSQL()
+    {
+        var currentAssembly = Assembly.GetExecutingAssembly();
+        var currentContext = AssemblyLoadContext.GetLoadContext(currentAssembly);
+
+        if (currentContext != null)
+        {
+            currentContext.Unloading += OnPluginUnloadingRequested;
+        }
+    }
+
     /// <summary>
     /// Frends Task for executing Microsoft SQL queries into a file.
     /// [Documentation](https://tasks.frends.com/tasks/frends-tasks/Frends.MicrosoftSQL.ExecuteQueryToFile).
@@ -25,6 +38,7 @@ public static class MicrosoftSQL
     public static async Task<Result> ExecuteQueryToFile([PropertyTab] Input input, [PropertyTab] Options options, CancellationToken cancellationToken)
     {
         Result result = new();
+
         using (var sqlConnection = new SqlConnection(input.ConnectionString))
         {
             await sqlConnection.OpenAsync(cancellationToken);
@@ -59,10 +73,16 @@ public static class MicrosoftSQL
                 case ReturnFormat.CSV:
                     var csvWriter = new CsvFileWriter(command, input, options.CsvOptions);
                     result = await csvWriter.SaveQueryToCSV(cancellationToken);
+
                     break;
             }
         }
 
         return result;
+    }
+
+    private static void OnPluginUnloadingRequested(AssemblyLoadContext obj)
+    {
+        obj.Unloading -= OnPluginUnloadingRequested;
     }
 }

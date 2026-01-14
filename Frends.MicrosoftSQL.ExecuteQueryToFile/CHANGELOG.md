@@ -1,5 +1,9 @@
 # Changelog
 
+## [2.2.0] - 2026-01-14
+### Fixed
+- Fix unloading assembly
+
 ## [2.1.0] - 2024-12-16
 ### Added
 - Added Microsoft.SqlServer.Types dependency so that SqlGeography and SqlGeometry typed objects can be handled.
