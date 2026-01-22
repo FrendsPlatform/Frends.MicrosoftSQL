@@ -42,14 +42,14 @@ public class MicrosoftSQL
         try
         {
             using var connection = new SqlConnection(input.ConnectionString);
-            await connection.OpenAsync(cancellationToken);
+            await connection.OpenAsync(cancellationToken).ConfigureAwait(false);
             if (options.SqlTransactionIsolationLevel is not SqlTransactionIsolationLevel.None)
             {
                 using var transaction = connection.BeginTransaction(GetIsolationLevel(options));
-                return await ExecuteHandler(input, options, connection, transaction, cancellationToken);
+                return await ExecuteHandler(input, options, connection, transaction, cancellationToken).ConfigureAwait(false);
             }
             else
-                return await ExecuteHandler(input, options, connection, null, cancellationToken);
+                return await ExecuteHandler(input, options, connection, null, cancellationToken).ConfigureAwait(false);
         }
         catch (Exception ex)
         {
@@ -80,7 +80,7 @@ public class MicrosoftSQL
                             .ConfigureAwait(false);
 
             if (transaction != null)
-                await transaction.CommitAsync(cancellationToken);
+                await transaction.CommitAsync(cancellationToken).ConfigureAwait(false);
 
             return new Result(true, affectedRows, null);
         }
@@ -97,7 +97,7 @@ public class MicrosoftSQL
             {
                 try
                 {
-                    await transaction.RollbackAsync(cancellationToken);
+                    await transaction.RollbackAsync(cancellationToken).ConfigureAwait(false);
                 }
                 catch (Exception rollbackEx)
                 {
