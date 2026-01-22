@@ -40,7 +40,7 @@ internal class CsvFileWriter
         {
             writer.NewLine = Options.GetLineBreakAsString();
 
-            var reader = await SqlCommand.ExecuteReaderAsync(cancellationToken);
+            var reader = await SqlCommand.ExecuteReaderAsync(cancellationToken).ConfigureAwait(false);
             output = DataReaderToCsv(reader, csvFile, Options, cancellationToken);
 
             csvFile.Flush();
@@ -67,6 +67,7 @@ internal class CsvFileWriter
         // Second part removed any leading numbers or underscoress.
         var rgx = new Regex("[^a-zA-Z0-9_-]|^[0-9_]+");
         header = rgx.Replace(header, string.Empty);
+
         return header.ToLower();
     }
 
@@ -76,6 +77,7 @@ internal class CsvFileWriter
         {
             if (dotnetType == typeof(string)) return "\"\"";
             if (dotnetType == typeof(DateTime) && options.AddQuotesToDates) return "\"\"";
+
             return string.Empty;
         }
 
@@ -87,8 +89,10 @@ internal class CsvFileWriter
             str = str.Replace("\r\n", " ");
             str = str.Replace("\r", " ");
             str = str.Replace("\n", " ");
+
             if (options.AddQuotesToStrings)
                 return $"\"{str}\"";
+
             return str;
         }
 
@@ -101,7 +105,9 @@ internal class CsvFileWriter
                 "date" => dateTime.ToString(options.DateFormat, CultureInfo.InvariantCulture),
                 _ => dateTime.ToString(options.DateTimeFormat, CultureInfo.InvariantCulture),
             };
+
             if (options.AddQuotesToDates) return $"\"{output}\"";
+
             return output;
         }
 
@@ -128,6 +134,7 @@ internal class CsvFileWriter
     {
         // Write header and remember column indexes to include.
         var columnIndexesToInclude = new List<int>();
+
         for (var i = 0; i < reader.FieldCount; i++)
         {
             var columnName = reader.GetName(i);
@@ -153,6 +160,7 @@ internal class CsvFileWriter
         if (options.IncludeHeadersInOutput) csvWriter.NextRecord();
 
         int count = 0;
+
         while (reader.Read())
         {
             foreach (var columnIndex in columnIndexesToInclude)
