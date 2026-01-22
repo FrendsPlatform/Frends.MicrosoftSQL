@@ -12,4 +12,5 @@ public enum FileEncoding
     Unicode,
     Other,
 }
+
 #pragma warning restore CS1591 // Self-explanatory
