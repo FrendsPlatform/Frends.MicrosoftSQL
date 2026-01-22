@@ -32,7 +32,7 @@ public class MicrosoftSQL
         using var connection = new SqlConnection(input.ConnectionString);
         try
         {
-            await connection.OpenAsync(cancellationToken);
+            await connection.OpenAsync(cancellationToken).ConfigureAwait(false);
 
             using var command = connection.CreateCommand();
             command.CommandTimeout = options.CommandTimeoutSeconds;
@@ -58,12 +58,12 @@ public class MicrosoftSQL
             }
 
             if (options.SqlTransactionIsolationLevel is SqlTransactionIsolationLevel.None)
-                result = await ExecuteHandler(input, options, command, cancellationToken);
+                result = await ExecuteHandler(input, options, command, cancellationToken).ConfigureAwait(false);
             else
             {
                 using var transaction = connection.BeginTransaction(GetIsolationLevel(options.SqlTransactionIsolationLevel));
                 command.Transaction = transaction;
-                result = await ExecuteHandler(input, options, command, cancellationToken);
+                result = await ExecuteHandler(input, options, command, cancellationToken).ConfigureAwait(false);
             }
 
             return result;
@@ -104,22 +104,22 @@ public class MicrosoftSQL
                     break;
                 case ExecuteTypes.ExecuteReader:
                     dataReader = await command.ExecuteReaderAsync(cancellationToken).ConfigureAwait(false);
-                    result = new Result(true, dataReader.RecordsAffected, null, await LoadData(dataReader, cancellationToken));
-                    await dataReader.CloseAsync();
+                    result = new Result(true, dataReader.RecordsAffected, null, await LoadData(dataReader, cancellationToken).ConfigureAwait(false));
+                    await dataReader.CloseAsync().ConfigureAwait(false);
                     break;
                 default:
                     throw new NotSupportedException();
             }
 
             if (command.Transaction != null)
-                await command.Transaction.CommitAsync(cancellationToken);
+                await command.Transaction.CommitAsync(cancellationToken).ConfigureAwait(false);
 
             return result;
         }
         catch (Exception ex)
         {
             if (dataReader != null && !dataReader.IsClosed)
-                await dataReader.CloseAsync();
+                await dataReader.CloseAsync().ConfigureAwait(false);
 
             return HandleExecutionException(ex, options, command);
         }
@@ -130,7 +130,7 @@ public class MicrosoftSQL
         var table = new JArray();
         while (reader.HasRows)
         {
-            while (await reader.ReadAsync(cancellationToken))
+            while (await reader.ReadAsync(cancellationToken).ConfigureAwait(false))
             {
                 var row = new JObject();
                 for (var i = 0; i < reader.FieldCount; i++)
