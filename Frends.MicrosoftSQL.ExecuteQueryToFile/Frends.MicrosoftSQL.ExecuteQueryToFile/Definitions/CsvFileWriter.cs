@@ -15,7 +15,7 @@ using Microsoft.Data.SqlClient;
 
 namespace Frends.MicrosoftSQL.ExecuteQueryToFile.Definitions;
 
-internal class CsvFileWriter
+internal class CsvFileWriter : IAsyncDisposable
 {
     internal CsvFileWriter(SqlCommand sqlCommand, Input input, CsvOptions options)
     {
@@ -30,31 +30,27 @@ internal class CsvFileWriter
 
     private CsvOptions Options { get; set; }
 
-    public async Task<Result> SaveQueryToCSV(CancellationToken cancellationToken)
+    public async ValueTask DisposeAsync()
     {
-        var output = 0;
+        if (SqlCommand != null) await SqlCommand.DisposeAsync();
+    }
+
+    public async Task<Result> SaveQueryToCsv(CancellationToken cancellationToken)
+    {
         var encoding = GetEncoding(Options.FileEncoding, Options.EnableBom, Options.EncodingInString);
-
-        using (var writer = new StreamWriter(Input.OutputFilePath, false, encoding))
-        using (var csvFile = CreateCsvWriter(Options.GetFieldDelimiterAsString(), writer))
-        {
-            writer.NewLine = Options.GetLineBreakAsString();
-
-            var reader = await SqlCommand.ExecuteReaderAsync(cancellationToken);
-            output = DataReaderToCsv(reader, csvFile, Options, cancellationToken);
-
-            csvFile.Flush();
-        }
+        await using var writer = new StreamWriter(Input.OutputFilePath, false, encoding);
+        await using var csvFile = CreateCsvWriter(Options.GetFieldDelimiterAsString(), writer);
+        writer.NewLine = Options.GetLineBreakAsString();
+        var reader = await SqlCommand.ExecuteReaderAsync(cancellationToken).ConfigureAwait(false);
+        var output = DataReaderToCsv(reader, csvFile, Options, cancellationToken);
+        await csvFile.FlushAsync().ConfigureAwait(false);
 
         return new Result(output, Input.OutputFilePath, Path.GetFileName(Input.OutputFilePath));
     }
 
     private static CsvWriter CreateCsvWriter(string delimiter, TextWriter writer)
     {
-        var csvOptions = new CsvConfiguration(CultureInfo.InvariantCulture)
-        {
-            Delimiter = delimiter,
-        };
+        var csvOptions = new CsvConfiguration(CultureInfo.InvariantCulture) { Delimiter = delimiter, };
 
         return new CsvWriter(writer, csvOptions);
     }
@@ -63,10 +59,11 @@ internal class CsvFileWriter
     {
         if (!forceSpecialFormatting) return header;
 
-        // First part of regex removes all non-alphanumeric ('_' also allowed) chars from the whole string.
-        // Second part removed any leading numbers or underscoress.
+        // The first part of regex removes all non-alphanumeric ('_' also allowed) chars from the whole string.
+        // The second part removed any leading numbers or underscores.
         var rgx = new Regex("[^a-zA-Z0-9_-]|^[0-9_]+");
         header = rgx.Replace(header, string.Empty);
+
         return header.ToLower();
     }
 
@@ -76,6 +73,7 @@ internal class CsvFileWriter
         {
             if (dotnetType == typeof(string)) return "\"\"";
             if (dotnetType == typeof(DateTime) && options.AddQuotesToDates) return "\"\"";
+
             return string.Empty;
         }
 
@@ -87,8 +85,10 @@ internal class CsvFileWriter
             str = str.Replace("\r\n", " ");
             str = str.Replace("\r", " ");
             str = str.Replace("\n", " ");
+
             if (options.AddQuotesToStrings)
                 return $"\"{str}\"";
+
             return str;
         }
 
@@ -101,7 +101,9 @@ internal class CsvFileWriter
                 "date" => dateTime.ToString(options.DateFormat, CultureInfo.InvariantCulture),
                 _ => dateTime.ToString(options.DateTimeFormat, CultureInfo.InvariantCulture),
             };
+
             if (options.AddQuotesToDates) return $"\"{output}\"";
+
             return output;
         }
 
@@ -126,8 +128,9 @@ internal class CsvFileWriter
         CsvOptions options,
         CancellationToken cancellationToken)
     {
-        // Write header and remember column indexes to include.
+        // Write a header and remember column indexes to include it.
         var columnIndexesToInclude = new List<int>();
+
         for (var i = 0; i < reader.FieldCount; i++)
         {
             var columnName = reader.GetName(i);
@@ -153,6 +156,7 @@ internal class CsvFileWriter
         if (options.IncludeHeadersInOutput) csvWriter.NextRecord();
 
         int count = 0;
+
         while (reader.Read())
         {
             foreach (var columnIndex in columnIndexesToInclude)
@@ -172,7 +176,10 @@ internal class CsvFileWriter
         return count;
     }
 
-    private static Encoding GetEncoding(FileEncoding optionsFileEncoding, bool optionsEnableBom, string optionsEncodingInString)
+    private static Encoding GetEncoding(
+        FileEncoding optionsFileEncoding,
+        bool optionsEnableBom,
+        string optionsEncodingInString)
     {
         return optionsFileEncoding switch
         {

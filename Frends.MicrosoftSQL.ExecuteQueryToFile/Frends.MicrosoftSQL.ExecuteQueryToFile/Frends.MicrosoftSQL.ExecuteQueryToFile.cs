@@ -1,8 +1,6 @@
 ﻿using System;
 using System.ComponentModel;
 using System.Data;
-using System.Reflection;
-using System.Runtime.Loader;
 using System.Threading;
 using System.Threading.Tasks;
 using Frends.MicrosoftSQL.ExecuteQueryToFile.Definitions;
@@ -16,17 +14,6 @@ namespace Frends.MicrosoftSQL.ExecuteQueryToFile;
 /// </summary>
 public static class MicrosoftSQL
 {
-    static MicrosoftSQL()
-    {
-        var currentAssembly = Assembly.GetExecutingAssembly();
-        var currentContext = AssemblyLoadContext.GetLoadContext(currentAssembly);
-
-        if (currentContext != null)
-        {
-            currentContext.Unloading += OnPluginUnloadingRequested;
-        }
-    }
-
     /// <summary>
     /// Frends Task for executing Microsoft SQL queries into a file.
     /// [Documentation](https://tasks.frends.com/tasks/frends-tasks/Frends.MicrosoftSQL.ExecuteQueryToFile).
@@ -35,54 +22,51 @@ public static class MicrosoftSQL
     /// <param name="options">Options parameters.</param>
     /// <param name="cancellationToken">Cancellation token given by Frends.</param>
     /// <returns>Object { int EntriesWritten, string Path, string FileName }</returns>
-    public static async Task<Result> ExecuteQueryToFile([PropertyTab] Input input, [PropertyTab] Options options, CancellationToken cancellationToken)
+    public static async Task<Result> ExecuteQueryToFile(
+        [PropertyTab] Input input,
+        [PropertyTab] Options options,
+        CancellationToken cancellationToken)
     {
         Result result = new();
 
-        using (var sqlConnection = new SqlConnection(input.ConnectionString))
+        await using var sqlConnection = new SqlConnection(input.ConnectionString);
+        await sqlConnection.OpenAsync(cancellationToken).ConfigureAwait(false);
+
+        await using var command = sqlConnection.CreateCommand();
+        command.CommandTimeout = options.TimeoutSeconds;
+        command.CommandText = input.Query;
+        command.CommandType = CommandType.Text;
+
+        if (input.QueryParameters != null)
         {
-            await sqlConnection.OpenAsync(cancellationToken);
-
-            using var command = sqlConnection.CreateCommand();
-            command.CommandTimeout = options.TimeoutSeconds;
-            command.CommandText = input.Query;
-            command.CommandType = CommandType.Text;
-
-            if (input.QueryParameters != null)
+            foreach (var parameter in input.QueryParameters)
             {
-                foreach (var parameter in input.QueryParameters)
+                parameter.Value ??= DBNull.Value;
+
+                if (parameter.SqlDataType is SqlDataTypes.Auto)
                 {
-                    if (parameter.Value is null)
-                        parameter.Value = DBNull.Value;
-
-                    if (parameter.SqlDataType is SqlDataTypes.Auto)
-                    {
-                        command.Parameters.AddWithValue(parameterName: parameter.Name, value: parameter.Value);
-                    }
-                    else
-                    {
-                        var sqlDbType = (SqlDbType)Enum.Parse(typeof(SqlDbType), parameter.SqlDataType.ToString());
-                        var commandParameter = command.Parameters.Add(parameter.Name, sqlDbType);
-                        commandParameter.Value = parameter.Value;
-                    }
+                    command.Parameters.AddWithValue(parameterName: parameter.Name, value: parameter.Value);
                 }
-            }
-
-            switch (options.ReturnFormat)
-            {
-                case ReturnFormat.CSV:
-                    var csvWriter = new CsvFileWriter(command, input, options.CsvOptions);
-                    result = await csvWriter.SaveQueryToCSV(cancellationToken);
-
-                    break;
+                else
+                {
+                    var sqlDbType = (SqlDbType)Enum.Parse(typeof(SqlDbType), parameter.SqlDataType.ToString());
+                    var commandParameter = command.Parameters.Add(parameter.Name, sqlDbType);
+                    commandParameter.Value = parameter.Value;
+                }
             }
         }
 
-        return result;
-    }
+        switch (options.ReturnFormat)
+        {
+            case ReturnFormat.CSV:
+                {
+                    await using var csvWriter = new CsvFileWriter(command, input, options.CsvOptions);
+                    result = await csvWriter.SaveQueryToCsv(cancellationToken).ConfigureAwait(false);
 
-    private static void OnPluginUnloadingRequested(AssemblyLoadContext obj)
-    {
-        obj.Unloading -= OnPluginUnloadingRequested;
+                    break;
+                }
+        }
+
+        return result;
     }
 }
