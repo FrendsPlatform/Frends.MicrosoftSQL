@@ -47,7 +47,7 @@ public class MicrosoftSQL
             {
                 try
                 {
-                    var result = await ExecuteHandler(options, input, dataSet, new SqlBulkCopy(connection, GetSqlBulkCopyOptions(options), null), cancellationToken);
+                    var result = await ExecuteHandler(options, input, dataSet, new SqlBulkCopy(connection, GetSqlBulkCopyOptions(options), null), cancellationToken).ConfigureAwait(false);
                     return new Result(true, result, null);
                 }
                 catch (Exception ex)
@@ -64,15 +64,15 @@ public class MicrosoftSQL
 
             try
             {
-                var result = await ExecuteHandler(options, input, dataSet, new SqlBulkCopy(connection, GetSqlBulkCopyOptions(options), transaction), cancellationToken);
-                await transaction.CommitAsync(cancellationToken);
+                var result = await ExecuteHandler(options, input, dataSet, new SqlBulkCopy(connection, GetSqlBulkCopyOptions(options), transaction), cancellationToken).ConfigureAwait(false);
+                await transaction.CommitAsync(cancellationToken).ConfigureAwait(false);
                 return new Result(true, result, null);
             }
             catch (Exception ex)
             {
                 try
                 {
-                    await transaction.RollbackAsync(cancellationToken);
+                    await transaction.RollbackAsync(cancellationToken).ConfigureAwait(false);
                 }
                 catch (Exception rollbackEx)
                 {
