@@ -161,7 +161,7 @@ internal class CsvFileWriter
                 var dbTypeName = reader.GetDataTypeName(columnIndex);
                 var dotnetType = reader.GetFieldType(columnIndex);
                 var formattedValue = FormatDbValue(value, dbTypeName, dotnetType, options);
-                csvWriter.WriteField(formattedValue, false);
+                csvWriter .WriteField(formattedValue, false);
                 cancellationToken.ThrowIfCancellationRequested();
             }
 
