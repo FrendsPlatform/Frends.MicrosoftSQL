@@ -37,10 +37,10 @@ internal class CsvFileWriter
 
         using (var writer = new StreamWriter(Input.OutputFilePath, false, encoding))
         using (var csvFile = CreateCsvWriter(Options.GetFieldDelimiterAsString(), writer))
+        using (var reader = await SqlCommand.ExecuteReaderAsync(cancellationToken).ConfigureAwait(false))
         {
             writer.NewLine = Options.GetLineBreakAsString();
 
-            var reader = await SqlCommand.ExecuteReaderAsync(cancellationToken).ConfigureAwait(false);
             output = DataReaderToCsv(reader, csvFile, Options, cancellationToken);
 
             csvFile.Flush();
