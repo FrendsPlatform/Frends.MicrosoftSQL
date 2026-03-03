@@ -1,5 +1,9 @@
 # Changelog
 
+## [2.3.0] - 2026-01-30
+### Fixed
+- Fixed an issue that was causing problems with Frends processes' cleanup and assembly unloading.
+
 ## [2.2.0] - 2026-01-22
 
 ### Changed
