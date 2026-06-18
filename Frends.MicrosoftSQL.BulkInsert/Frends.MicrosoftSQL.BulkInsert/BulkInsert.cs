@@ -187,13 +187,17 @@ public class MicrosoftSQL
     private static void SetEmptyDataRowsToNull(DataSet dataSet)
     {
         foreach (var table in dataSet.Tables.Cast<DataTable>())
-        foreach (var row in table.Rows.Cast<DataRow>())
-        foreach (var column in row.ItemArray)
-            if (column.ToString() == string.Empty)
+        {
+            foreach (var row in table.Rows.Cast<DataRow>())
             {
-                var index = Array.IndexOf(row.ItemArray, column);
-                row[index] = null;
+                foreach (var column in row.ItemArray)
+                    if (column.ToString() == string.Empty)
+                    {
+                        var index = Array.IndexOf(row.ItemArray, column);
+                        row[index] = null;
+                    }
             }
+        }
     }
 
     private static SqlBulkCopyOptions GetSqlBulkCopyOptions(Options options)
