@@ -1,5 +1,11 @@
 # Changelog
 
+## [3.2.0] - 2026-06-18
+
+### Changed
+
+- Update documentation.
+
 ## [3.1.0] - 2026-01-22
 
 ### Changed
