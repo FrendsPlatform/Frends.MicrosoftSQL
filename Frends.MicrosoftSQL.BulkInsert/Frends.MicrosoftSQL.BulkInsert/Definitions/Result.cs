@@ -13,6 +13,7 @@ public class Result
 
     /// <summary>
     /// Number of processed rows.
+    /// In case of failure it shows notified number of processed rows. Approximation logic is defined by Options.NotifyAfter
     /// </summary>
     /// <example>100</example>
     public long Count { get; private set; }

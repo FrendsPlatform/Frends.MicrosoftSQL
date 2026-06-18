@@ -5,6 +5,7 @@
 ### Changed
 
 - In successful execution, Result.Count will show number of all rows.
+- In case of failure, Result.Count will show estimated number of rows copied before the failure.
 
 ## [3.2.0] - 2026-06-18
 
