@@ -12,8 +12,7 @@ public class Result
     public bool Success { get; private set; }
 
     /// <summary>
-    /// Number of processed rows reported by SqlBulkCopy notifications.
-    /// The value is approximate and can be rounded down to the nearest NotifyAfter interval (or 0 if no notification is raised).
+    /// Number of processed rows.
     /// </summary>
     /// <example>100</example>
     public long Count { get; private set; }

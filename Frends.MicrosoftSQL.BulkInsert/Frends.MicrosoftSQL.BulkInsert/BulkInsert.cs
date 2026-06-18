@@ -104,6 +104,7 @@ public class MicrosoftSQL
     private static async Task<long> ExecuteHandler(Options options, Input input, DataSet dataSet, SqlBulkCopy sqlBulkCopy, CancellationToken cancellationToken)
     {
         var rowsCopied = 0L;
+        var totalRows = dataSet.Tables[0].Rows.Count;
 
         // JsonPropertyOrder is handled implicitly (default behavior) by not adding any column mappings,
         // which means the columns will be mapped based on their order in the input JSON.
@@ -126,16 +127,12 @@ public class MicrosoftSQL
                 sqlBulkCopy.DestinationTableName = input.TableName;
                 sqlBulkCopy.SqlRowsCopied += (s, e) => rowsCopied = e.RowsCopied;
 
-                if (options.NotifyAfter == 0)
+                sqlBulkCopy.NotifyAfter = options.NotifyAfter switch
                 {
-                    // Calculate the number of rows and set value for NotifyAfter
-                    var rowCount = dataSet.Tables[0].Rows.Count;
-                    sqlBulkCopy.NotifyAfter = rowCount > 0 ? Math.Max(1, rowCount / 10) : 1;
-                }
-                else if (options.NotifyAfter > 0)
-                    sqlBulkCopy.NotifyAfter = options.NotifyAfter;
-                else
-                    sqlBulkCopy.NotifyAfter = 0;
+                    0 => totalRows > 0 ? Math.Max(1, totalRows / 10) : 1,
+                    > 0 => options.NotifyAfter,
+                    _ => 0,
+                };
 
                 await sqlBulkCopy.WriteToServerAsync(dataSet.Tables[0], cancellationToken).ConfigureAwait(false);
             }
@@ -146,7 +143,8 @@ public class MicrosoftSQL
             throw new Exception($"ExecuteHandler exception, processed row count between: {rowsCopied} and {notifyRange} (see NotifyAfter). {ex}");
         }
 
-        return rowsCopied;
+        //If code goes up to here, it means all rows were inserted.
+        return totalRows;
     }
 
     private static void SetEmptyDataRowsToNull(DataSet dataSet)

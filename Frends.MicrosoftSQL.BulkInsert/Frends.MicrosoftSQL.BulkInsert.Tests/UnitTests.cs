@@ -332,7 +332,7 @@ public class UnitTests
 
             var result = await MicrosoftSQL.BulkInsert(_input, options, default);
             Assert.IsTrue(result.Success);
-            Assert.AreEqual(0, result.Count);
+            Assert.AreEqual(3, result.Count);
             Assert.AreEqual(3, GetRowCount());
 
             await MicrosoftSQL.BulkInsert(_input, options, default);
@@ -371,7 +371,7 @@ public class UnitTests
 
             var result = await MicrosoftSQL.BulkInsert(_input, options, default);
             Assert.IsTrue(result.Success);
-            Assert.AreEqual(0, result.Count);
+            Assert.AreEqual(3, result.Count);
             Assert.AreEqual(3, GetRowCount());
 
             await MicrosoftSQL.BulkInsert(_input, options, default);
