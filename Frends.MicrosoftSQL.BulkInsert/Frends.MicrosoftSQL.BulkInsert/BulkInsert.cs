@@ -190,12 +190,11 @@ public class MicrosoftSQL
         {
             foreach (var row in table.Rows.Cast<DataRow>())
             {
-                foreach (var column in row.ItemArray)
-                    if (column.ToString() == string.Empty)
-                    {
-                        var index = Array.IndexOf(row.ItemArray, column);
-                        row[index] = null;
-                    }
+                for (var i = 0; i < row.ItemArray.Length; i++)
+                {
+                    if (row[i] is string value && value.Length == 0)
+                        row[i] = DBNull.Value;
+                }
             }
         }
     }

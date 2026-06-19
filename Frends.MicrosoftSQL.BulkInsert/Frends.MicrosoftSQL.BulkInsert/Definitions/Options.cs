@@ -20,7 +20,6 @@ public class Options
     /// A value of -1 means there won't be any notifications until the task is completed.
     /// Setting a value greater than the total number of rows can cause notification response to be 0.
     /// Notification events can be used for error handling to see approximately which row the error occurred at.
-    /// Notified value is useful for error handling and show approximately which row the error occured at
     /// </summary>
     /// <example>0</example>
     public int NotifyAfter { get; set; }
