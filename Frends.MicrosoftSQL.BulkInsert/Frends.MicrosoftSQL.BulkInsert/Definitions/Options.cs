@@ -15,10 +15,10 @@ public class Options
     public int CommandTimeoutSeconds { get; set; }
 
     /// <summary>
-    /// Defines the number of rows to be processed before generating a notification event. 
+    /// Defines the number of rows to be processed before generating a notification event.
     /// The default value of 0 will set NotifyAfter dynamically to 10% of the total row count, with a minimum value of 1.
-    /// A value of -1 means there won't be any notifications until the task is completed, and Result.Count will be 0.
-    /// Setting a value greater than the total number of rows can cause Result.Count to be 0.
+    /// A value of -1 means there won't be any notifications until the task is completed.
+    /// Setting a value greater than the total number of rows can cause notification response to be 0.
     /// Notification events can be used for error handling to see approximately which row the error occurred at.
     /// </summary>
     /// <example>0</example>
@@ -46,7 +46,7 @@ public class Options
     public bool TableLock { get; set; }
 
     /// <summary>
-    /// Preserve null values in the destination table regardless of the settings for default values. 
+    /// Preserve null values in the destination table regardless of the settings for default values.
     /// When not specified, null values are replaced by default values where applicable.
     /// </summary>
     /// <example>false</example>
