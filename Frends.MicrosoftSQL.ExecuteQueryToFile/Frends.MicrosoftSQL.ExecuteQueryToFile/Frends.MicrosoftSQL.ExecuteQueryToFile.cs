@@ -65,6 +65,13 @@ public static class MicrosoftSQL
 
                     break;
                 }
+
+            case ReturnFormat.JSON:
+                {
+                    await using var jsonWriter = new JsonFileWriter(command, input, options.JsonOptions);
+                    result = await jsonWriter.SaveQueryToJson(cancellationToken).ConfigureAwait(false);
+                    break;
+                }
         }
 
         return result;

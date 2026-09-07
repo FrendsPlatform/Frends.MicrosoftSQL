@@ -28,4 +28,10 @@ public class Options
     /// </summary>
     [UIHint(nameof(ReturnFormat), "", ReturnFormat.CSV)]
     public CsvOptions CsvOptions { get; set; }
+
+    /// <summary>
+    /// Json options.
+    /// </summary>
+    [UIHint(nameof(ReturnFormat), "", ReturnFormat.JSON)]
+    public JsonOptions JsonOptions { get; set; } = new JsonOptions();
 }

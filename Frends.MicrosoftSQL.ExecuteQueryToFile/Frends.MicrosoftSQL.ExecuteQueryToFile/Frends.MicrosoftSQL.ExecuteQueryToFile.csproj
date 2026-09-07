@@ -3,7 +3,7 @@
     <PropertyGroup>
         <TargetFramework>net6.0</TargetFramework>
         <LangVersion>Latest</LangVersion>
-        <Version>2.3.0</Version>
+        <Version>2.4.0</Version>
         <Authors>Frends</Authors>
         <Copyright>Frends</Copyright>
         <Company>Frends</Company>
@@ -17,7 +17,6 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <None Include="..\.editorconfig" Link=".editorconfig"/>
         <None Include="FrendsTaskMetadata.json" Pack="true" PackagePath="/">
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </None>
@@ -30,12 +29,12 @@
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="Microsoft.Data.SqlClient" Version="5.2.1"/>
-        <PackageReference Include="Microsoft.CSharp" Version="4.7.0"/>
-        <PackageReference Include="System.ComponentModel.Annotations" Version="4.7.0"/>
-        <PackageReference Include="Newtonsoft.Json" Version="13.0.3"/>
-        <PackageReference Include="CsvHelper" Version="30.0.1"/>
-        <PackageReference Include="Microsoft.SqlServer.Types" Version="160.1000.6"/>
+        <PackageReference Include="Microsoft.Data.SqlClient" Version="5.2.1" />
+        <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
+        <PackageReference Include="System.ComponentModel.Annotations" Version="4.7.0" />
+        <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+        <PackageReference Include="CsvHelper" Version="30.0.1" />
+        <PackageReference Include="Microsoft.SqlServer.Types" Version="160.1000.6" />
     </ItemGroup>
 
     <ItemGroup>
