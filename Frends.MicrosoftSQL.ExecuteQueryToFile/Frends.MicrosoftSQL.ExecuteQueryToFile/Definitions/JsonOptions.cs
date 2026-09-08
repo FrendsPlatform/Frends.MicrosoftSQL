@@ -40,6 +40,14 @@ public class JsonOptions
     public string TimeFormat { get; set; } = @"hh\:mm\:ss\.fff";
 
     /// <summary>
+    /// Format for SQL datetimeoffset columns (mapped to DateTimeOffset in .NET).
+    /// Default: ISO 8601 round-trip format preserving the UTC offset.
+    /// </summary>
+    /// <example>0</example>
+    [DefaultValue(0)]
+    public string DateTimeOffsetFormat { get; set; } = "O";
+
+    /// <summary>
     /// When true, SQL NULL values for string columns are written as empty strings instead of JSON null.
     /// Non-string types such as numbers and booleans are always written as JSON null regardless of this setting.
     /// </summary>

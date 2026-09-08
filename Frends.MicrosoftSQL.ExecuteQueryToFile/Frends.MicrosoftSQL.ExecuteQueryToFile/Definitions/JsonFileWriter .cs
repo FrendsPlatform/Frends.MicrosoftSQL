@@ -167,7 +167,7 @@ internal class JsonFileWriter : IAsyncDisposable
         }
 
         if (type == typeof(DateTimeOffset))
-            return ((DateTimeOffset)value).ToString(Options.DateTimeFormat, CultureInfo.InvariantCulture);
+            return ((DateTimeOffset)value).ToString(Options.DateTimeOffsetFormat, CultureInfo.InvariantCulture);
 
         if (type == typeof(TimeSpan))
             return ((TimeSpan)value).ToString(Options.TimeFormat, CultureInfo.InvariantCulture);
@@ -192,16 +192,14 @@ internal class JsonFileWriter : IAsyncDisposable
 
         await using var binaryStream = reader.GetStream(columnIndex);
 
-        await jsonWriter.WriteRawAsync("\"", cancellationToken).ConfigureAwait(false);
+        await jsonWriter.WriteRawValueAsync("\"", cancellationToken).ConfigureAwait(false);
 
         var inputBuffer = new byte[InputChunkSize];
 
         var outputBuffer = new char[((InputChunkSize / 3) + 1) * 4];
 
         int bytesRead;
-        while ((bytesRead = await binaryStream
-                   .ReadAsync(inputBuffer, 0, InputChunkSize, cancellationToken)
-                   .ConfigureAwait(false)) > 0)
+        while ((bytesRead = await ReadChunkAsync(binaryStream, inputBuffer, cancellationToken).ConfigureAwait(false)) > 0)
         {
             int charsWritten = Convert.ToBase64CharArray(
                 inputBuffer, 0, bytesRead, outputBuffer, 0);
@@ -228,5 +226,21 @@ internal class JsonFileWriter : IAsyncDisposable
         }
 
         return schema;
+    }
+
+    private static async Task<int> ReadChunkAsync(Stream stream, byte[] buffer, CancellationToken cancellationToken)
+    {
+        int total = 0;
+        while (total < buffer.Length)
+        {
+            int read = await stream
+                .ReadAsync(buffer, total, buffer.Length - total, cancellationToken)
+                .ConfigureAwait(false);
+            if (read == 0)
+                break;
+            total += read;
+        }
+
+        return total;
     }
 }
