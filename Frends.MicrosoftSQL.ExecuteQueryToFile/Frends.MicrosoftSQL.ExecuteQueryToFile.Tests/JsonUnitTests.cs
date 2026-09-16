@@ -1,6 +1,4 @@
-﻿namespace Frends.MicrosoftSQL.ExecuteQueryToFile.Tests;
-
-using System;
+﻿using System;
 using System.Data;
 using System.Diagnostics;
 using System.IO;
@@ -12,6 +10,8 @@ using Microsoft.Data.SqlClient;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using NUnit.Framework;
+
+namespace Frends.MicrosoftSQL.ExecuteQueryToFile.Tests;
 
 [TestFixture]
 public class JsonUnitTests
