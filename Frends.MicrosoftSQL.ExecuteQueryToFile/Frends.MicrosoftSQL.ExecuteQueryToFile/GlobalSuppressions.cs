@@ -10,3 +10,4 @@
 [assembly: SuppressMessage("StyleCop.CSharp.DocumentationRules", "SA1602:Enumeration items should be documented", Justification = "Following Frends guidelines", Scope = "namespaceanddescendants", Target = "~N:Frends.MicrosoftSQL.ExecuteQueryToFile.Enums")]
 [assembly: SuppressMessage("StyleCop.CSharp.OrderingRules", "SA1200:Using directives should be placed correctly", Justification = "Following Frends guidelines")]
 [assembly: SuppressMessage("StyleCop.CSharp.LayoutRules", "SA1503:Braces should not be omitted", Justification = "Following Frends guidelines", Scope = "namespaceanddescendants", Target = "~N:Frends.MicrosoftSQL.ExecuteQueryToFile")]
+[assembly: SuppressMessage("StyleCop.CSharp.OrderingRules", "SA1204:StaticElementsMustAppearBeforeInstanceElements", Justification = "Static helper methods are placed after the instance methods they support for readability.", Scope = "namespaceanddescendants", Target = "~N:Frends.MicrosoftSQL.ExecuteQueryToFile")]

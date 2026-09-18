@@ -1,9 +1,10 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 
-[assembly: SuppressMessage("StyleCop.CSharp.DocumentationRules", "SA1600:Elements should be documented", Justification = "Following Frends documentation guidelines", Scope = "namespaceanddescendants", Target = "~N:Frends.MicrosoftSQL.ExecuteQueryToFile.Tests")]
-[assembly: SuppressMessage("StyleCop.CSharp.DocumentationRules", "SA1633:File should have header", Justification = "Following Frends documentation guidelines", Scope = "namespaceanddescendants", Target = "~N:Frends.MicrosoftSQL.ExecuteQueryToFile.Tests")]
-[assembly: SuppressMessage("StyleCop.CSharp.DocumentationRules", "SA1633:File should have header", Justification = "Following Frends documentation guidelines")]
-[assembly: SuppressMessage("StyleCop.CSharp.NamingRules", "SA1309:Field names should not begin with underscore", Justification = "Following Frends documentation guidelines", Scope = "namespaceanddescendants", Target = "~N:Frends.MicrosoftSQL.ExecuteQueryToFile.Tests")]
+[assembly: SuppressMessage("StyleCop.CSharp.SpecialRules", "SA0001::XmlCommentAnalysisDisabled", Justification = "Following Frends documentation guidelines")]
+[assembly: SuppressMessage("StyleCop.CSharp.ReadabilityRules", "SA1101:PrefixLocalCallsWithThis", Justification = "Following Frends documentation guidelines")]
+[assembly: SuppressMessage("StyleCop.CSharp.OrderingRules", "SA1200:UsingDirectivesMustBePlacedWithinNamespace", Justification = "Following Frends documentation guidelines")]
+[assembly: SuppressMessage("StyleCop.CSharp.LayoutRules", "SA1503:BracesMustNotBeOmitted", Justification = "Following Frends documentation guidelines")]
+[assembly: SuppressMessage("StyleCop.CSharp.DocumentationRules", "SA1600:ElementsMustBeDocumented", Justification = "Documentation checked by custom analyzers")]
+[assembly: SuppressMessage("StyleCop.CSharp.DocumentationRules", "SA1633:FileMustHaveHeader", Justification = "Following Frends documentation guidelines")]
 [assembly: SuppressMessage("StyleCop.CSharp.DocumentationRules", "SA1629:Documentation text should end with a period", Justification = "Following Frends documentation guidelines", Scope = "namespaceanddescendants", Target = "~N:Frends.MicrosoftSQL.ExecuteQueryToFile.Tests")]
-[assembly: SuppressMessage("StyleCop.CSharp.ReadabilityRules", "SA1101:Prefix local calls with this", Justification = "Following Frends documentation guidelines", Scope = "namespaceanddescendants", Target = "~N:Frends.MicrosoftSQL.ExecuteQueryToFile.Tests")]
-[assembly: SuppressMessage("StyleCop.CSharp.LayoutRules", "SA1503:Braces should not be omitted", Justification = "Following latest .Net6 langVersion", Scope = "member", Target = "~M:Frends.MicrosoftSQL.ExecuteQueryToFile.Tests.Helper.CreateTestTable(System.String,System.String,System.String)")]
+[assembly: SuppressMessage("StyleCop.CSharp.NamingRules", "SA1309:Field names should not begin with underscore", Justification = "Following Frends documentation guidelines", Scope = "namespaceanddescendants", Target = "~N:Frends.MicrosoftSQL.ExecuteQueryToFile.Tests")]

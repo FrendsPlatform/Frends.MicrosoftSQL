@@ -7,7 +7,6 @@ using System.Threading.Tasks;
 using Frends.MicrosoftSQL.ExecuteQueryToFile.Definitions;
 using Frends.MicrosoftSQL.ExecuteQueryToFile.Enums;
 using Microsoft.Data.SqlClient;
-using Newtonsoft.Json.Linq;
 using NUnit.Framework;
 
 /// <summary>

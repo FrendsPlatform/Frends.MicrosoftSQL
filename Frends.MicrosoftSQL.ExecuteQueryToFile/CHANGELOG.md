@@ -1,5 +1,9 @@
 # Changelog
 
+## [2.4.0] - 2026-09-07
+### Added
+- Added JSON output support to the ExecuteQueryToFile method, allowing SQL query results to be streamed directly to a JSON file.
+
 ## [2.3.0] - 2026-01-30
 ### Fixed
 - Fixed an issue that was causing problems with Frends processes' cleanup and assembly unloading.
