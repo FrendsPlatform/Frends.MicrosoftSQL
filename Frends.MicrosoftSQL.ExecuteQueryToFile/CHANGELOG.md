@@ -1,5 +1,9 @@
 # Changelog
 
+## [2.5.0] - 2026-10-16
+### Fixed
+- Fixed default JsonOptions.TimeFormat format to Text from Expression.
+
 ## [2.4.0] - 2026-09-07
 ### Added
 - Added JSON output support to the ExecuteQueryToFile method, allowing SQL query results to be streamed directly to a JSON file.

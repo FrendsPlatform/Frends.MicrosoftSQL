@@ -35,9 +35,9 @@ public class JsonOptions
     /// Format for SQL time columns (mapped to TimeSpan in .NET).
     /// Default: ISO 8601 time (HH:mm:ss.fff).
     /// </summary>
-    /// <example>hh\:mm\:ss\.fff</example>
-    [DefaultValue(@"hh\:mm\:ss\.fff")]
-    public string TimeFormat { get; set; } = @"hh\:mm\:ss\.fff";
+    /// <example>hh:mm:ss.fff</example>
+    [DefaultValue("\"hh:mm:ss.fff\"")]
+    public string TimeFormat { get; set; } = "hh:mm:ss.fff";
 
     /// <summary>
     /// Format for SQL datetimeoffset columns (mapped to DateTimeOffset in .NET).
