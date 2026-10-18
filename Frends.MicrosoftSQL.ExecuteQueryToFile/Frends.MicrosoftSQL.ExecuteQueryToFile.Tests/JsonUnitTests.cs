@@ -36,7 +36,7 @@ public class JsonUnitTests
                 JsonOutputMode = JsonOutputMode.Indented,
                 DateFormat = "yyyy-MM-dd",
                 DateTimeFormat = "yyyy-MM-ddTHH:mm:ss.fff",
-                TimeFormat = @"hh\:mm\:ss\.fff",
+                TimeFormat = "hh:mm:ss.fff",
                 HandleNullAsEmpty = false,
                 FileBufferSize = 65536,
             },
