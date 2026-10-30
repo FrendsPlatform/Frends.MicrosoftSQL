@@ -7,6 +7,7 @@ public class Result
 {
     internal Result(int entriesWritten, string path, string name)
     {
+        Success = true;
         EntriesWritten = entriesWritten;
         Path = path;
         FileName = name;
@@ -15,6 +16,12 @@ public class Result
     internal Result()
     {
     }
+
+    /// <summary>
+    /// Indicates whether the task completed successfully.
+    /// </summary>
+    /// <example>true</example>
+    public bool Success { get; private set; }
 
     /// <summary>
     /// Amount of entries written.
@@ -33,4 +40,10 @@ public class Result
     /// </summary>
     /// <example>test.csv</example>
     public string FileName { get; set; }
+
+    /// <summary>
+    /// Error message generated when the task fails.
+    /// </summary>
+    /// <example>Login failed for user 'sqluser'.</example>
+    public string Error { get; private set; }
 }

@@ -30,11 +30,20 @@ internal class CsvFileWriter : IAsyncDisposable
 
     private CsvOptions Options { get; set; }
 
+    /// <summary>
+    /// Releases the SQL command resources.
+    /// </summary>
+    /// <returns>A task that represents the asynchronous dispose operation.</returns>
     public async ValueTask DisposeAsync()
     {
         if (SqlCommand != null) await SqlCommand.DisposeAsync();
     }
 
+    /// <summary>
+    /// Executes the SQL query and writes the result to a CSV file.
+    /// </summary>
+    /// <param name="cancellationToken">Token used to cancel query execution.</param>
+    /// <returns>The number of entries written and the output file information.</returns>
     public async Task<Result> SaveQueryToCsv(CancellationToken cancellationToken)
     {
         var encoding = GetEncoding(Options.FileEncoding, Options.EnableBom, Options.EncodingInString);

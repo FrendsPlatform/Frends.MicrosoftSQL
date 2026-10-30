@@ -1,13 +1,17 @@
 ﻿namespace Frends.MicrosoftSQL.ExecuteQueryToFile.Enums;
 
-#pragma warning disable CS1591 // Self-explanatory
 /// <summary>
 /// Enumeration for output format.
 /// </summary>
 public enum ReturnFormat
 {
+    /// <summary>
+    /// Writes the query result as a CSV file.
+    /// </summary>
     CSV,
+
+    /// <summary>
+    /// Writes the query result as a JSON file.
+    /// </summary>
     JSON,
 }
-
-#pragma warning restore CS1591 // Self-explanatory

@@ -1,5 +1,10 @@
 # Changelog
 
+## [2.6.0] - 2026-10-30
+### Changed
+- Added success and error fields to the task result and failure-related options.
+- Updated the task and tests to target .NET 8.
+
 ## [2.5.0] - 2026-10-16
 ### Fixed
 - Fixed default JsonOptions.TimeFormat format to Text from Expression.

@@ -27,20 +27,24 @@ public sealed class ColumnSchema
     /// <summary>
     /// Gets the zero-based ordinal position of the column in the result set.
     /// </summary>
+    /// <example>0</example>
     public int Index { get; }
 
     /// <summary>
     /// Gets the name of the column.
     /// </summary>
+    /// <example>CustomerId</example>
     public string Name { get; }
 
     /// <summary>
     /// Gets the .NET type of the column.
     /// </summary>
+    /// <example>System.Int32</example>
     public Type DotnetType { get; }
 
     /// <summary>
     /// Gets the database type name of the column.
     /// </summary>
+    /// <example>int</example>
     public string DbTypeName { get; }
 }

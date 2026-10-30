@@ -21,7 +21,7 @@ public static class MicrosoftSQL
     /// <param name="input">Input parameters.</param>
     /// <param name="options">Options parameters.</param>
     /// <param name="cancellationToken">Cancellation token given by Frends.</param>
-    /// <returns>Object { int EntriesWritten, string Path, string FileName }</returns>
+    /// <returns>object { bool Success, int EntriesWritten, string Path, string FileName, string Error }</returns>
     public static async Task<Result> ExecuteQueryToFile(
         [PropertyTab] Input input,
         [PropertyTab] Options options,
