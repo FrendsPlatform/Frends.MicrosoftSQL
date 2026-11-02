@@ -1,4 +1,5 @@
-using Frends.MicrosoftSQL.BulkInsert.Definitions;
+﻿using Frends.MicrosoftSQL.BulkInsert.Definitions;
+using Microsoft.Data.SqlClient;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Frends.MicrosoftSQL.BulkInsert.Tests;
@@ -16,9 +17,9 @@ public class ExceptionUnitTests
          GO
     */
 
-    private static readonly string _connString = "Server=127.0.0.1,1433;Database=Master;User Id=SA;Password=WrongPassWord;TrustServerCertificate=True";
-    private static readonly string _tableName = "TestTable";
-    private static readonly string _json = @"[
+    private static readonly string ConnString = "Server=127.0.0.1,1433;Database=Master;User Id=SA;Password=WrongPassWord;TrustServerCertificate=True";
+    private static readonly string TableName = "TestTable";
+    private static readonly string Json = @"[
                   {
                     ""Id"": 1,
                     ""Firstname"": ""Etu"",
@@ -31,21 +32,20 @@ public class ExceptionUnitTests
     {
         var input = new Input()
         {
-            ConnectionString = _connString,
-            TableName = _tableName,
-            InputData = _json
+            ConnectionString = ConnString,
+            TableName = TableName,
+            InputData = Json,
         };
 
         var options = new Options()
         {
             SqlTransactionIsolationLevel = SqlTransactionIsolationLevel.ReadCommitted,
             CommandTimeoutSeconds = 60,
-            ThrowErrorOnFailure = true
+            ThrowErrorOnFailure = true,
         };
 
-        var ex = await Assert.ThrowsExceptionAsync<Exception>(() => MicrosoftSQL.BulkInsert(input, options, default));
-        Assert.IsNotNull(ex.InnerException);
-        Assert.IsTrue(ex.InnerException.Message.Contains("Login failed for user 'SA'."));
+        var ex = await Assert.ThrowsExceptionAsync<SqlException>(() => MicrosoftSQL.BulkInsert(input, options, default));
+        Assert.IsTrue(ex.Message.Contains("Login failed for user 'SA'."));
     }
 
     [TestMethod]
@@ -53,21 +53,21 @@ public class ExceptionUnitTests
     {
         var input = new Input()
         {
-            ConnectionString = _connString,
-            TableName = _tableName,
-            InputData = _json
+            ConnectionString = ConnString,
+            TableName = TableName,
+            InputData = Json,
         };
 
         var options = new Options()
         {
             SqlTransactionIsolationLevel = SqlTransactionIsolationLevel.ReadCommitted,
             CommandTimeoutSeconds = 2,
-            ThrowErrorOnFailure = false
+            ThrowErrorOnFailure = false,
         };
 
         var result = await MicrosoftSQL.BulkInsert(input, options, default);
         Assert.IsFalse(result.Success);
-        Assert.IsTrue(result.ErrorMessage.Contains("Login failed for user 'SA'."));
+        Assert.IsTrue(result.Error.Message.Contains("Login failed for user 'SA'."));
         Assert.AreEqual(0, result.Count);
     }
 
@@ -76,9 +76,9 @@ public class ExceptionUnitTests
     {
         var input = new Input
         {
-            InputData = _json,
+            InputData = Json,
             ConnectionString = "Server=127.0.0.1,1433;Database=Master;User Id=SA;Password=Salakala123!;TrustServerCertificate=True",
-            TableName = "InvalidTable"
+            TableName = "InvalidTable",
         };
 
         var options = new Options
@@ -87,12 +87,11 @@ public class ExceptionUnitTests
             ThrowErrorOnFailure = true,
             SqlTransactionIsolationLevel = SqlTransactionIsolationLevel.None,
             CommandTimeoutSeconds = 60,
-            NotifyAfter = 1
+            NotifyAfter = 1,
         };
 
         var ex = await Assert.ThrowsExceptionAsync<Exception>(() => MicrosoftSQL.BulkInsert(input, options, CancellationToken.None));
 
-        Assert.IsNotNull(ex.InnerException);
-        Assert.IsTrue(ex.InnerException.Message.Contains("BulkInsert exception: 'Options.SqlTransactionIsolationLevel = None', so there was no transaction rollback."));
+        Assert.IsTrue(ex.Message.Contains("BulkInsert exception: 'Options.SqlTransactionIsolationLevel = None', so there was no transaction rollback."));
     }
 }

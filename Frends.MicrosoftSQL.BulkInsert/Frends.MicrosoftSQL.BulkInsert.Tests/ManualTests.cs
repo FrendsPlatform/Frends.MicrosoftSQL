@@ -1,6 +1,6 @@
-using Frends.MicrosoftSQL.BulkInsert.Definitions;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Frends.MicrosoftSQL.BulkInsert.Definitions;
 using Microsoft.Data.SqlClient;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Frends.MicrosoftSQL.BulkInsert.Tests;
 
@@ -17,9 +17,9 @@ public class ManualTests
         GO
    */
 
-    private static readonly string _connString = "Server=127.0.0.1,1433;Database=Master;User Id=SA;Password=Salakala123!";
-    private static readonly string _tableName = "TestTable";
-    private static readonly string _json = @"[
+    private static readonly string ConnString = "Server=127.0.0.1,1433;Database=Master;User Id=SA;Password=Salakala123!";
+    private static readonly string TableName = "TestTable";
+    private static readonly string Json = @"[
                   {
                     ""Id"": 1,
                     ""Firstname"": ""Etu"",
@@ -37,20 +37,20 @@ public class ManualTests
                   }
                 ]";
 
-    readonly Input _input = new()
+    private readonly Input defaultInput = new()
     {
-        ConnectionString = _connString,
-        TableName = _tableName,
-        InputData = _json
+        ConnectionString = ConnString,
+        TableName = TableName,
+        InputData = Json,
     };
 
     [TestInitialize]
     public void Init()
     {
-        using var connection = new SqlConnection(_connString);
+        using var connection = new SqlConnection(ConnString);
         connection.Open();
         var createTable = connection.CreateCommand();
-        createTable.CommandText = $@"IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME='{_tableName}') BEGIN CREATE TABLE {_tableName} ( Id int, LastName varchar(255), FirstName varchar(255) ); END";
+        createTable.CommandText = $@"IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME='{TableName}') BEGIN CREATE TABLE {TableName} ( Id int, LastName varchar(255), FirstName varchar(255) ); END";
         createTable.ExecuteNonQuery();
         connection.Close();
         connection.Dispose();
@@ -59,10 +59,10 @@ public class ManualTests
     [TestCleanup]
     public void CleanUp()
     {
-        using var connection = new SqlConnection(_connString);
+        using var connection = new SqlConnection(ConnString);
         connection.Open();
         var createTable = connection.CreateCommand();
-        createTable.CommandText = $@"IF EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME='{_tableName}') BEGIN DROP TABLE IF EXISTS {_tableName}; END";
+        createTable.CommandText = $@"IF EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME='{TableName}') BEGIN DROP TABLE IF EXISTS {TableName}; END";
         createTable.ExecuteNonQuery();
         connection.Close();
         connection.Dispose();
@@ -77,14 +77,13 @@ public class ManualTests
         {
             SqlTransactionIsolationLevel = SqlTransactionIsolationLevel.Unspecified,
             CommandTimeoutSeconds = 2,
-            ThrowErrorOnFailure = false
+            ThrowErrorOnFailure = false,
         };
 
-
-        var result = await MicrosoftSQL.BulkInsert(_input, options, default);
+        var result = await MicrosoftSQL.BulkInsert(defaultInput, options, default);
         Assert.IsFalse(result.Success);
         Assert.AreEqual(0, result.Count);
-        Assert.IsTrue(result.ErrorMessage.Contains("(If required) transaction rollback completed without exception."));
+        Assert.IsTrue(result.Error.Message.Contains("(If required) transaction rollback completed without exception."));
         Assert.AreEqual(0, GetRowCount());
     }
 
@@ -97,22 +96,21 @@ public class ManualTests
         {
             SqlTransactionIsolationLevel = SqlTransactionIsolationLevel.Unspecified,
             CommandTimeoutSeconds = 2,
-            ThrowErrorOnFailure = true
+            ThrowErrorOnFailure = true,
         };
 
-        var ex = await Assert.ThrowsExceptionAsync<Exception>(async () => await MicrosoftSQL.BulkInsert(_input, options, default));
-        Assert.IsNotNull(ex.InnerException);
-        Assert.IsTrue(ex.InnerException.Message.Contains("(If required) transaction rollback completed without exception."));
+        var ex = await Assert.ThrowsExceptionAsync<Exception>(async () => await MicrosoftSQL.BulkInsert(defaultInput, options, default));
+        Assert.IsTrue(ex.Message.Contains("(If required) transaction rollback completed without exception."));
         Assert.Equals(0, GetRowCount());
     }
 
     // Simple select query
     private static int GetRowCount()
     {
-        using var connection = new SqlConnection(_connString);
+        using var connection = new SqlConnection(ConnString);
         connection.Open();
         var getRows = connection.CreateCommand();
-        getRows.CommandText = $"SELECT COUNT(*) FROM {_tableName}";
+        getRows.CommandText = $"SELECT COUNT(*) FROM {TableName}";
         var count = (int)getRows.ExecuteScalar();
         connection.Close();
         connection.Dispose();
