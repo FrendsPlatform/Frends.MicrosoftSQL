@@ -6,6 +6,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Frends.MicrosoftSQL.ExecuteQueryToFile.Definitions;
 using Frends.MicrosoftSQL.ExecuteQueryToFile.Enums;
+using Frends.MicrosoftSQL.ExecuteQueryToFile.Tests.lib;
 using Microsoft.Data.SqlClient;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -443,7 +444,7 @@ public class JsonUnitTests
                     FROM sys.objects a CROSS JOIN sys.objects b CROSS JOIN sys.objects c
                 )
                 INSERT INTO {table}
-                SELECT 
+                SELECT
                     N,
                     REPLICATE('Name_' + CAST(N AS nvarchar), 5),
                     REPLICATE('Description_' + CAST(N AS nvarchar), 10),

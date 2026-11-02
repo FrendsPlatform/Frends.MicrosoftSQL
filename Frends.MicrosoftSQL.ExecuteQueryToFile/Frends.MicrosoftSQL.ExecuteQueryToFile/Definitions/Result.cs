@@ -21,7 +21,7 @@ public class Result
     /// Indicates whether the task completed successfully.
     /// </summary>
     /// <example>true</example>
-    public bool Success { get; private set; }
+    public bool Success { get; set; }
 
     /// <summary>
     /// Amount of entries written.
@@ -42,8 +42,8 @@ public class Result
     public string FileName { get; set; }
 
     /// <summary>
-    /// Error message generated when the task fails.
+    /// Error that occurred during task execution.
     /// </summary>
-    /// <example>Login failed for user 'sqluser'.</example>
-    public string Error { get; private set; }
+    /// <example>object { string Message, Exception AdditionalInfo }</example>
+    public Error Error { get; set; }
 }

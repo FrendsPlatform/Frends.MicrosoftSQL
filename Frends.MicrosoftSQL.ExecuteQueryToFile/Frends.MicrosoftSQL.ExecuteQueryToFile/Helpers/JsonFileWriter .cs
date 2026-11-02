@@ -6,11 +6,12 @@ using System.Globalization;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
+using Frends.MicrosoftSQL.ExecuteQueryToFile.Definitions;
 using Frends.MicrosoftSQL.ExecuteQueryToFile.Enums;
 using Microsoft.Data.SqlClient;
 using Newtonsoft.Json;
 
-namespace Frends.MicrosoftSQL.ExecuteQueryToFile.Definitions;
+namespace Frends.MicrosoftSQL.ExecuteQueryToFile.Helpers;
 
 internal class JsonFileWriter : IAsyncDisposable
 {
