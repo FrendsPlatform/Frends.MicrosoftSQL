@@ -1,14 +1,13 @@
-﻿using Frends.MicrosoftSQL.BulkInsert.Definitions;
-using Frends.MicrosoftSQL.BulkInsert.Helpers;
-using Microsoft.Data.SqlClient;
-using Microsoft.IdentityModel.Abstractions;
-using Newtonsoft.Json.Linq;
-using System;
+﻿using System;
 using System.ComponentModel;
 using System.Data;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Frends.MicrosoftSQL.BulkInsert.Definitions;
+using Frends.MicrosoftSQL.BulkInsert.Helpers;
+using Microsoft.Data.SqlClient;
+using Newtonsoft.Json.Linq;
 
 namespace Frends.MicrosoftSQL.BulkInsert;
 
