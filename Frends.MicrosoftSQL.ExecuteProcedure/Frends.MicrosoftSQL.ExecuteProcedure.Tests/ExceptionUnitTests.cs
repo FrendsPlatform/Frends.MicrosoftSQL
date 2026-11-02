@@ -1,4 +1,5 @@
 using Frends.MicrosoftSQL.ExecuteProcedure.Definitions;
+using Microsoft.Data.SqlClient;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Frends.MicrosoftSQL.ExecuteProcedure.Tests;
@@ -60,8 +61,8 @@ public class ExceptionUnitTests
                 var options = testOptions;
                 options.SqlTransactionIsolationLevel = isolation;
 
-                var ex = await Assert.ThrowsExceptionAsync<Exception>(() => MicrosoftSQL.ExecuteProcedure(input, options, default));
-                Assert.IsTrue(ex.Message.Contains("SqlException (0x80131904): Login failed for user 'SA'."), $"ExecuteType: {executeType}, IsolationLevel: {isolation}");
+                var ex = await Assert.ThrowsExceptionAsync<SqlException>(() => MicrosoftSQL.ExecuteProcedure(input, options, default));
+                Assert.IsTrue(ex.Message.Contains("Login failed for user 'SA'."), $"ExecuteType: {executeType}, IsolationLevel: {isolation}");
             }
         }
     }
