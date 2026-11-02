@@ -56,10 +56,7 @@ public static class MicrosoftSQL
         }
         catch (Exception ex)
         {
-            var exceptionToHandle = options.ThrowErrorOnFailure
-                ? new Exception("BatchOperation exception: ", ex)
-                : ex;
-            return exceptionToHandle.Handle(options);
+            return ex.Handle(options);
         }
         finally
         {
@@ -92,9 +89,7 @@ public static class MicrosoftSQL
             if (transaction is null)
             {
                 var message = "ExecuteHandler exception: 'Options.SqlTransactionIsolationLevel = None', so there was no transaction rollback.";
-                var exceptionToHandle = options.ThrowErrorOnFailure
-                    ? new Exception(message, ex)
-                    : new Exception($"{message} {ex}", ex);
+                var exceptionToHandle = new Exception($"{message} {ex}", ex);
                 return exceptionToHandle.Handle(options);
             }
 
@@ -104,16 +99,12 @@ public static class MicrosoftSQL
             }
             catch (Exception rollbackEx)
             {
-                var message = options.ThrowErrorOnFailure
-                    ? "ExecuteHandler exception: An exception occurred on transaction rollback."
-                    : $"ExecuteHandler exception: An exception occurred on transaction rollback. Rollback exception: {rollbackEx}. || Exception leading to rollback: {ex}";
+                var message = "ExecuteHandler exception: An exception occurred on transaction rollback.";
                 return new Exception(message, rollbackEx).Handle(options);
             }
 
             var rollbackMessage = "ExecuteHandler exception: (If required) transaction rollback completed without exception.";
-            var rollbackException = options.ThrowErrorOnFailure
-                ? new Exception(rollbackMessage, ex)
-                : new Exception($"{rollbackMessage} {ex}.", ex);
+            var rollbackException = new Exception(rollbackMessage, ex);
             return rollbackException.Handle(options);
         }
         finally

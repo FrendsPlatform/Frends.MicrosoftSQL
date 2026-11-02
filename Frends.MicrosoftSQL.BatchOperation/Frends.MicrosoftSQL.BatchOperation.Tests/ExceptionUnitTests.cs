@@ -1,4 +1,5 @@
 using Frends.MicrosoftSQL.BatchOperation.Definitions;
+using Microsoft.Data.SqlClient;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Frends.MicrosoftSQL.BatchOperation.Tests;
@@ -25,9 +26,9 @@ public class ExceptionUnitTests
             ThrowErrorOnFailure = true,
         };
 
-        var ex = await Assert.ThrowsExceptionAsync<Exception>(() => MicrosoftSQL.BatchOperation(input, options, default));
-        Assert.IsNotNull(ex.InnerException);
-        Assert.IsTrue(ex.InnerException.Message.Contains("Login failed for user 'SA'."));
+        var ex = await Assert.ThrowsExceptionAsync<SqlException>(() => MicrosoftSQL.BatchOperation(input, options, default));
+        Assert.IsNotNull(ex);
+        Assert.IsTrue(ex.Message.Contains("Login failed for user 'SA'."));
     }
 
     [TestMethod]
@@ -73,7 +74,7 @@ public class ExceptionUnitTests
 
         // Assert
         Assert.IsNotNull(ex.InnerException);
-        Assert.IsTrue(ex.InnerException.Message.Contains("ExecuteHandler exception: 'Options.SqlTransactionIsolationLevel = None', so there was no transaction rollback."));
+        Assert.IsTrue(ex.Message.Contains("ExecuteHandler exception: 'Options.SqlTransactionIsolationLevel = None', so there was no transaction rollback."));
     }
 
     [TestMethod]
@@ -94,6 +95,6 @@ public class ExceptionUnitTests
         var ex = await Assert.ThrowsExceptionAsync<Exception>(() => MicrosoftSQL.BatchOperation(input, options, CancellationToken.None));
 
         Assert.IsNotNull(ex.InnerException);
-        Assert.IsTrue(ex.InnerException.Message.Contains("ExecuteHandler exception: (If required) transaction rollback completed without exception."));
+        Assert.IsTrue(ex.Message.Contains("ExecuteHandler exception: (If required) transaction rollback completed without exception."));
     }
 }

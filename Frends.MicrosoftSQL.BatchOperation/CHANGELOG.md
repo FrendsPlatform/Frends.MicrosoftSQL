@@ -1,11 +1,12 @@
 # Changelog
 
-## [2.3.0] - 2026-11-02
+## [3.0.0] - 2026-11-02
 
 ### Changed
 
 - Added structured error details and a configurable error message for failed batch operations.
 - Upgraded the task and its tests to .NET 8.
+- **[Braking Change]** The task rethrows original exceptions instead of wrapping them in a new exception.
 
 ## [2.2.0] - 2026-01-22
 
