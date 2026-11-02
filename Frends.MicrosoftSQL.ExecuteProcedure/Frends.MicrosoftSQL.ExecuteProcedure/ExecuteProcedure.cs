@@ -75,7 +75,7 @@ public static class MicrosoftSQL
         }
         catch (Exception ex)
         {
-                return ex.Handle(options);
+            return ex.Handle(options);
         }
         finally
         {
