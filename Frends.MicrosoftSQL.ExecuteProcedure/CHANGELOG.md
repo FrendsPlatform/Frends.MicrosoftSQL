@@ -1,11 +1,12 @@
 # Changelog
 
-## [2.4.0] - 2026-11-02
+## [3.0.0] - 2026-11-02
 
 ### Changed
 
 - Updated the task to .NET 8.
 - Added structured error details and a configurable error message for failed executions.
+- **[Breaking Change]** The task now rethrows original exception instead of wrapping it in a new exception.
 
 ## [2.3.0] - 2026-01-22
 

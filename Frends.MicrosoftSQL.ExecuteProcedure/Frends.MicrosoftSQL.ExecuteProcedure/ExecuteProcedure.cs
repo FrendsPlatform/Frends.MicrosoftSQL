@@ -1,6 +1,7 @@
 using System;
 using System.ComponentModel;
 using System.Data;
+using System.Runtime.ExceptionServices;
 using System.Threading;
 using System.Threading.Tasks;
 using Frends.MicrosoftSQL.ExecuteProcedure.Definitions;
@@ -74,11 +75,7 @@ public static class MicrosoftSQL
         }
         catch (Exception ex)
         {
-            if (ex is OperationCanceledException)
                 return ex.Handle(options);
-
-            var exception = new Exception($"ExecuteProcedure exception: {ex}.", ex);
-            return exception.Handle(options);
         }
         finally
         {
@@ -128,30 +125,7 @@ public static class MicrosoftSQL
         {
             if (dataReader != null && !dataReader.IsClosed)
                 await dataReader.CloseAsync().ConfigureAwait(false);
-
-            if (ex is OperationCanceledException)
-                return ex.Handle(options);
-
-            if (command.Transaction != null)
-            {
-                try
-                {
-                    command.Transaction.Rollback();
-                }
-                catch (Exception rollbackEx)
-                {
-                    var rollbackErrorMsg = $"An exception occurred on transaction rollback. Rollback exception: {rollbackEx}.";
-                    var rollbackException = new Exception(rollbackErrorMsg, rollbackEx);
-                    return rollbackException.Handle(options);
-                }
-
-                var rollbackCompletedMsg = "(If required) transaction rollback completed without exception.";
-                var transactionException = new Exception($"ExecuteProcedure exception: {ex}. || {rollbackCompletedMsg}", ex);
-                return transactionException.Handle(options);
-            }
-
-            var exception = new Exception($"ExecuteProcedure exception: {ex}.", ex);
-            return exception.Handle(options);
+            return ex.Handle(options);
         }
     }
 
