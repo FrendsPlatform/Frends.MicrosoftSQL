@@ -1,6 +1,6 @@
 using Frends.MicrosoftSQL.ExecuteProcedure.Definitions;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Microsoft.Data.SqlClient;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Frends.MicrosoftSQL.ExecuteProcedure.Tests;
 
@@ -21,42 +21,42 @@ namespace Frends.MicrosoftSQL.ExecuteProcedure.Tests;
 [TestClass]
 public class ManualTesting
 {
-    private static readonly string _connString = Helper.GetConnectionString();
-    private static readonly string _tableName = "TestTable";
+    private static readonly string ConnectionString = Helper.GetConnectionString();
+    private static readonly string TableName = "TestTable";
 
     [TestInitialize]
     public void Init()
     {
-        using var connection = new SqlConnection(_connString);
+        using var connection = new SqlConnection(ConnectionString);
         connection.Open();
         var command = connection.CreateCommand();
 
-        //Create
-        command.CommandText = $@"IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME='{_tableName}') BEGIN CREATE TABLE {_tableName} ( Id int, LastName varchar(255), FirstName varchar(255) ); END";
+        // Create
+        command.CommandText = $@"IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME='{TableName}') BEGIN CREATE TABLE {TableName} ( Id int, LastName varchar(255), FirstName varchar(255) ); END";
         command.ExecuteNonQuery();
 
-        //Insert
-        command.CommandText = $@"CREATE PROCEDURE InsertValues AS INSERT INTO {_tableName} VALUES (1, 'Suku', 'Etu'), (2, 'Last', 'Forst'), (3, 'Hiiri', 'Mikki')";
+        // Insert
+        command.CommandText = $@"CREATE PROCEDURE InsertValues AS INSERT INTO {TableName} VALUES (1, 'Suku', 'Etu'), (2, 'Last', 'Forst'), (3, 'Hiiri', 'Mikki')";
         command.ExecuteNonQuery();
 
-        //Select all
-        command.CommandText = $"CREATE PROCEDURE SelectAll AS select * from {_tableName}";
+        // Select all
+        command.CommandText = $"CREATE PROCEDURE SelectAll AS select * from {TableName}";
         command.ExecuteNonQuery();
 
-        //Select single
-        command.CommandText = $"CREATE PROCEDURE SelectSingle AS select * from {_tableName} where Id = 1";
+        // Select single
+        command.CommandText = $"CREATE PROCEDURE SelectSingle AS select * from {TableName} where Id = 1";
         command.ExecuteNonQuery();
 
-        //Select lastname
-        command.CommandText = $"CREATE PROCEDURE SelectLastname AS select LastName from {_tableName} where Id = 1";
+        // Select lastname
+        command.CommandText = $"CREATE PROCEDURE SelectLastname AS select LastName from {TableName} where Id = 1";
         command.ExecuteNonQuery();
 
-        //Update
-        command.CommandText = $@"CREATE PROCEDURE UpdateValue AS update {_tableName} set LastName = 'Edit' where Id = 2";
+        // Update
+        command.CommandText = $@"CREATE PROCEDURE UpdateValue AS update {TableName} set LastName = 'Edit' where Id = 2";
         command.ExecuteNonQuery();
 
-        //Delete
-        command.CommandText = $"CREATE PROCEDURE DeleteValue AS delete from {_tableName} where Id = 2";
+        // Delete
+        command.CommandText = $"CREATE PROCEDURE DeleteValue AS delete from {TableName} where Id = 2";
         command.ExecuteNonQuery();
 
         connection.Close();
@@ -66,10 +66,10 @@ public class ManualTesting
     [TestCleanup]
     public void CleanUp()
     {
-        using var connection = new SqlConnection(_connString);
+        using var connection = new SqlConnection(ConnectionString);
         connection.Open();
         var command = connection.CreateCommand();
-        command.CommandText = $@"IF EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME='{_tableName}') BEGIN DROP TABLE IF EXISTS {_tableName}; END";
+        command.CommandText = $@"IF EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME='{TableName}') BEGIN DROP TABLE IF EXISTS {TableName}; END";
         command.ExecuteNonQuery();
         command.CommandText = $@"DECLARE @procedureName varchar(500)
 DECLARE cur CURSOR
@@ -96,17 +96,17 @@ DECLARE cur CURSOR
     {
         var inputInsert = new Input()
         {
-            ConnectionString = _connString,
+            ConnectionString = ConnectionString,
             Execute = "InsertValues",
             ExecuteType = ExecuteTypes.ExecuteReader,
-            Parameters = null
+            Parameters = null,
         };
 
         var options = new Options()
         {
             SqlTransactionIsolationLevel = SqlTransactionIsolationLevel.Unspecified,
             CommandTimeoutSeconds = 2,
-            ThrowErrorOnFailure = false
+            ThrowErrorOnFailure = false,
         };
 
         // Insert rows
@@ -114,7 +114,7 @@ DECLARE cur CURSOR
         Assert.IsFalse(insert.Success);
         Assert.AreEqual(0, insert.RecordsAffected);
         Assert.IsTrue(insert.ErrorMessage.Contains("ExecuteHandler exception: (If required) transaction rollback completed without exception."));
-        Assert.AreEqual(0, Helper.GetRowCount(_tableName));
+        Assert.AreEqual(0, Helper.GetRowCount(TableName));
     }
 
     // Use 'throw new Exception();' in HandleExecutionException class.
@@ -124,17 +124,17 @@ DECLARE cur CURSOR
     {
         var inputInsert = new Input()
         {
-            ConnectionString = _connString,
+            ConnectionString = ConnectionString,
             Execute = "InsertValues",
             ExecuteType = ExecuteTypes.ExecuteReader,
-            Parameters = null
+            Parameters = null,
         };
 
         var options = new Options()
         {
             SqlTransactionIsolationLevel = SqlTransactionIsolationLevel.Unspecified,
             CommandTimeoutSeconds = 2,
-            ThrowErrorOnFailure = true
+            ThrowErrorOnFailure = true,
         };
 
         // Insert rows

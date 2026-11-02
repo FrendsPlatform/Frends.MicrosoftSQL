@@ -20,23 +20,23 @@ namespace Frends.MicrosoftSQL.ExecuteProcedure.Tests;
 [TestClass]
 public class ExceptionUnitTests
 {
-    private static readonly string _connString = Helper.GetInvalidConnectionString();
+    private static readonly string ConnectionString = Helper.GetInvalidConnectionString();
 
-    Input _input = new();
-    Options _options = new();
+    private Input input = new();
+    private Options options = new();
 
     [TestInitialize]
     public void Init()
     {
-        _input = new()
+        input = new()
         {
-            ConnectionString = _connString,
+            ConnectionString = ConnectionString,
             Execute = "foo",
             ExecuteType = ExecuteTypes.NonQuery,
             Parameters = null,
         };
 
-        _options = new()
+        options = new()
         {
             CommandTimeoutSeconds = 2,
             SqlTransactionIsolationLevel = SqlTransactionIsolationLevel.ReadCommitted,
@@ -54,13 +54,13 @@ public class ExceptionUnitTests
         {
             foreach (var isolation in isolationLevel)
             {
-                var input = _input;
-                input.ExecuteType = executeType;
+                var procedureInput = input;
+                procedureInput.ExecuteType = executeType;
 
-                var options = _options;
-                options.SqlTransactionIsolationLevel = isolation;
+                var procedureOptions = options;
+                procedureOptions.SqlTransactionIsolationLevel = isolation;
 
-                var ex = await Assert.ThrowsExceptionAsync<Exception>(() => MicrosoftSQL.ExecuteProcedure(input, options, default));
+                var ex = await Assert.ThrowsExceptionAsync<Exception>(() => MicrosoftSQL.ExecuteProcedure(procedureInput, procedureOptions, default));
                 Assert.IsTrue(ex.Message.Contains("SqlException (0x80131904): Login failed for user 'SA'."), $"ExecuteType: {executeType}, IsolationLevel: {isolation}");
             }
         }
@@ -76,19 +76,50 @@ public class ExceptionUnitTests
         {
             foreach (var isolation in isolationLevel)
             {
-                var input = _input;
-                input.ExecuteType = executeType;
+                var procedureInput = input;
+                procedureInput.ExecuteType = executeType;
 
-                var options = _options;
-                options.SqlTransactionIsolationLevel = isolation;
-                options.ThrowErrorOnFailure = false;
+                var procedureOptions = options;
+                procedureOptions.SqlTransactionIsolationLevel = isolation;
+                procedureOptions.ThrowErrorOnFailure = false;
 
-                var result = await MicrosoftSQL.ExecuteProcedure(input, options, default);
+                var result = await MicrosoftSQL.ExecuteProcedure(procedureInput, procedureOptions, default);
                 Assert.IsFalse(result.Success, $"ExecuteType: {executeType}, IsolationLevel: {isolation}");
                 Assert.IsTrue(result.ErrorMessage.Contains("Login failed for user 'SA'."), $"ExecuteType: {executeType}, IsolationLevel: {isolation}");
+                Assert.AreEqual(result.ErrorMessage, result.Error.Message, $"ExecuteType: {executeType}, IsolationLevel: {isolation}");
+                Assert.IsNotNull(result.Error.AdditionalInfo, $"ExecuteType: {executeType}, IsolationLevel: {isolation}");
                 Assert.AreEqual(0, result.RecordsAffected, $"ExecuteType: {executeType}, IsolationLevel: {isolation}");
                 Assert.IsNull(result.Data, $"ExecuteType: {executeType}, IsolationLevel: {isolation}");
             }
+        }
+    }
+
+    [TestMethod]
+    public async Task TestExecuteProcedure_CustomErrorMessage()
+    {
+        options.ThrowErrorOnFailure = false;
+        options.ErrorMessageOnFailure = "Custom procedure failure";
+
+        var result = await MicrosoftSQL.ExecuteProcedure(input, options, default);
+
+        Assert.IsTrue(result.Error.Message.StartsWith("Custom procedure failure:"));
+        Assert.AreEqual(result.Error.Message, result.ErrorMessage);
+    }
+
+    [TestMethod]
+    public async Task TestExecuteProcedure_CancellationIsRethrown()
+    {
+        options.ThrowErrorOnFailure = false;
+        using var cancellationTokenSource = new CancellationTokenSource();
+        cancellationTokenSource.Cancel();
+
+        try
+        {
+            await MicrosoftSQL.ExecuteProcedure(input, options, cancellationTokenSource.Token);
+            Assert.Fail("Expected cancellation to be rethrown.");
+        }
+        catch (OperationCanceledException)
+        {
         }
     }
 }

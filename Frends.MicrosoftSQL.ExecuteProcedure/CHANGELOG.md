@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.4.0] - 2026-11-02
+
+### Changed
+
+- Updated the task to .NET 8.
+- Added structured error details and a configurable error message for failed executions.
+
 ## [2.3.0] - 2026-01-22
 
 ### Changed

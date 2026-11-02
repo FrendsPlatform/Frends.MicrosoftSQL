@@ -1,10 +1,19 @@
-﻿namespace Frends.MicrosoftSQL.ExecuteProcedure.Definitions;
+namespace Frends.MicrosoftSQL.ExecuteProcedure.Definitions;
 
 /// <summary>
 /// Task's result.
 /// </summary>
 public class Result
 {
+    internal Result(bool success, int recordsAffected, string errorMessage, dynamic data, Error error = null)
+    {
+        Success = success;
+        RecordsAffected = recordsAffected;
+        ErrorMessage = errorMessage;
+        Data = data;
+        Error = error;
+    }
+
     /// <summary>
     /// Operation complete without errors.
     /// </summary>
@@ -35,11 +44,9 @@ public class Result
     /// </example>
     public dynamic Data { get; private set; }
 
-    internal Result(bool success, int recordsAffected, string errorMessage, dynamic data)
-    {
-        Success = success;
-        RecordsAffected = recordsAffected;
-        ErrorMessage = errorMessage;
-        Data = data;
-    }
+    /// <summary>
+    /// Error that occurred during task execution.
+    /// </summary>
+    /// <example>object { string Message, Exception AdditionalInfo }</example>
+    public Error Error { get; private set; }
 }
