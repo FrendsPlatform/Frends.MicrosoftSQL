@@ -7,18 +7,18 @@ internal class Helper
     /// <summary>
     /// Test credentials for docker server.
     /// </summary>
-    private static readonly string _dockerAddress = "127.0.0.1,1433";
-    private static readonly string _dockerUsername = "SA";
-    private static readonly string _dockerPassword = "Salakala123!";
+    private static readonly string DockerAddress = "127.0.0.1,1433";
+    private static readonly string DockerUsername = "SA";
+    private static readonly string DockerPassword = "Salakala123!";
 
     internal static string CreateConnectionString()
     {
-        return $"Server={_dockerAddress};Database=Master;User Id={_dockerUsername};Password={_dockerPassword};Encrypt=true;TrustServerCertificate=True;";
+        return $"Server={DockerAddress};Database=Master;User Id={DockerUsername};Password={DockerPassword};Encrypt=true;TrustServerCertificate=True;";
     }
 
     internal static string GetInvalidConnectionString()
     {
-        return $"Server=127.0.0.1,1433;Database=Master;User Id={_dockerUsername};Password={Guid.NewGuid()};Encrypt=true;TrustServerCertificate=True;";
+        return $"Server=127.0.0.1,1433;Database=Master;User Id={DockerUsername};Password={Guid.NewGuid()};Encrypt=true;TrustServerCertificate=True;";
     }
 
     internal static int GetRowCount(string connString, string table)

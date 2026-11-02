@@ -15,14 +15,14 @@ public class ExceptionUnitTests : ExecuteQueryTestBase
     {
         input = new Input()
         {
-            ConnectionString = _connString,
+            ConnectionString = ConnString,
         };
 
         options = new Options()
         {
             SqlTransactionIsolationLevel = SqlTransactionIsolationLevel.ReadCommitted,
             CommandTimeoutSeconds = 2,
-            ThrowErrorOnFailure = true
+            ThrowErrorOnFailure = true,
         };
     }
 
@@ -50,7 +50,7 @@ public class ExceptionUnitTests : ExecuteQueryTestBase
     [TestMethod]
     public void TestExecuteQuery_ExceptionIsThrownWhenQueryFails()
     {
-        input.Query = $"INSERT INTO {_tableName} VALUES (1, Unit, Tests, 456)";
+        input.Query = $"INSERT INTO {TableName} VALUES (1, Unit, Tests, 456)";
         input.ExecuteType = ExecuteTypes.NonQuery;
 
         var ex = Assert.ThrowsExceptionAsync<Exception>(async () => await MicrosoftSQL.ExecuteQuery(input, options, default));
@@ -60,7 +60,7 @@ public class ExceptionUnitTests : ExecuteQueryTestBase
     [TestMethod]
     public async Task TestExecuteQuery_ErrorMessageWhenQueryFails()
     {
-        input.Query = $"INSERT INTO {_tableName} VALUES (1, Unit, Tests, 456)";
+        input.Query = $"INSERT INTO {TableName} VALUES (1, Unit, Tests, 456)";
         input.ExecuteType = ExecuteTypes.NonQuery;
 
         options.ThrowErrorOnFailure = false;

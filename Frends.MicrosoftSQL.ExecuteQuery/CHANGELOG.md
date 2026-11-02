@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.0.0] - 2026-11-02
+
+### Changed
+
+- **[Breaking Change]** Updated the task to .NET 8, requiring a compatible execution environment.
+- Added structured error details to failed results and an optional custom failure message.
+
 ## [2.3.0] - 2026-01-22
 
 ### Changed

@@ -22,8 +22,8 @@ public class Input
     /// Supports SELECT, INSERT, UPDATE and DELETE statements.
     /// </summary>
     /// <example>
-    /// "SELECT * FROM MyTable", 
-    /// "INSERT INTO MyTable (id, first_name, last_name) VALUES (:id, :first_name, :last_name)", 
+    /// "SELECT * FROM MyTable",
+    /// "INSERT INTO MyTable (id, first_name, last_name) VALUES (:id, :first_name, :last_name)",
     /// </example>
     [DisplayFormat(DataFormatString = "Sql")]
     public string Query { get; set; }
@@ -48,32 +48,4 @@ public class Input
     /// <example>ExecuteType.ExecuteReader</example>
     [DefaultValue(ExecuteTypes.ExecuteReader)]
     public ExecuteTypes ExecuteType { get; set; }
-}
-
-/// <summary>
-/// Query parameter.
-/// </summary>
-public class QueryParameter
-{
-    /// <summary>
-    /// The name of the parameter.
-    /// </summary>
-    /// <example>first_name</example>
-    public string Name { get; set; }
-
-    /// <summary>
-    /// The value of the parameter.
-    /// </summary>
-    /// <example>FirstName</example>
-    public object Value { get; set; }
-
-    /// <summary>
-    /// SQL Server-specific data type.
-    /// Note! Use SqlDataType.Auto if not sure of the type.
-    /// See https://learn.microsoft.com/en-us/dotnet/api/system.data.sqldbtype?view=net-7.0 for more information.
-    /// </summary>
-    /// <example>SqlDbTypes.Empty</example>
-    [DefaultValue(SqlDataTypes.Auto)]
-    public SqlDataTypes SqlDataType { get; set; }
-
 }

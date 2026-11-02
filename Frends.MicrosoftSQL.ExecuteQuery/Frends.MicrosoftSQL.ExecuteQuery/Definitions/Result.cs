@@ -5,6 +5,15 @@
 /// </summary>
 public class Result
 {
+    internal Result(bool success, int recordsAffected, string errorMessage, dynamic data, Error error = null)
+    {
+        Success = success;
+        RecordsAffected = recordsAffected;
+        ErrorMessage = errorMessage;
+        Data = data;
+        Error = error;
+    }
+
     /// <summary>
     /// Operation complete without errors.
     /// </summary>
@@ -29,17 +38,15 @@ public class Result
     /// Query result as JToken.
     /// </summary>
     /// <example>
-    /// Input.ExecuteType = ExecuteReader: [{"ID": "1","FIRST_NAME": "Saija","LAST_NAME": "Saijalainen","START_DATE": ""}],
+    /// Input.ExecuteType = ExecuteReader: [{"ID": "1","FIRST_NAME": "Saija","LAST_NAME": "Saijalainen","START_DATE": "2026-01-15"}],
     /// Input.ExecuteType = NonQuery: {{  "AffectedRows": -1 }},
     /// Input.ExecuteType = Scalar: {{  "Value": 1 }}
     /// </example>
     public dynamic Data { get; private set; }
 
-    internal Result(bool success, int recordsAffected, string errorMessage, dynamic data)
-    {
-        Success = success;
-        RecordsAffected = recordsAffected;
-        ErrorMessage = errorMessage;
-        Data = data;
-    }
+    /// <summary>
+    /// Error details when the task fails.
+    /// </summary>
+    /// <example>object { Message = "Invalid column name 'OrderId'.", AdditionalInfo = SqlException }</example>
+    public Error Error { get; private set; }
 }
