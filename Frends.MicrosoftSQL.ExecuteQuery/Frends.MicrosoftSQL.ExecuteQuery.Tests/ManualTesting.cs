@@ -14,17 +14,17 @@ public class ManualTesting : ExecuteQueryTestBase
     {
         var inputInsert = new Input()
         {
-            ConnectionString = _connString,
-            Query = $@"INSERT INTO {_tableName} VALUES (1, 'Suku', 'Etu'), (2, 'Last', 'Forst'), (3, 'Hiiri', 'Mikki')",
+            ConnectionString = ConnString,
+            Query = $@"INSERT INTO {TableName} VALUES (1, 'Suku', 'Etu'), (2, 'Last', 'Forst'), (3, 'Hiiri', 'Mikki')",
             ExecuteType = ExecuteTypes.ExecuteReader,
-            Parameters = null
+            Parameters = null,
         };
 
         var options = new Options()
         {
             SqlTransactionIsolationLevel = SqlTransactionIsolationLevel.Unspecified,
             CommandTimeoutSeconds = 2,
-            ThrowErrorOnFailure = false
+            ThrowErrorOnFailure = false,
         };
 
         // Insert rows
@@ -32,7 +32,7 @@ public class ManualTesting : ExecuteQueryTestBase
         Assert.IsFalse(insert.Success);
         Assert.AreEqual(0, insert.RecordsAffected);
         Assert.IsTrue(insert.ErrorMessage.Contains("(If required) transaction rollback completed without exception."));
-        Assert.AreEqual(0, Helper.GetRowCount(_connString, _tableName));
+        Assert.AreEqual(0, Helper.GetRowCount(ConnString, TableName));
     }
 
     // Add following line to ExecuteQuery.cs: 'throw new Exception();' under 'dataReader = await command.ExecuteReaderAsync(cancellationToken).ConfigureAwait(false);' (currently line 124)
@@ -42,17 +42,17 @@ public class ManualTesting : ExecuteQueryTestBase
     {
         var inputInsert = new Input()
         {
-            ConnectionString = _connString,
-            Query = $@"INSERT INTO {_tableName} VALUES (1, 'Suku', 'Etu'), (2, 'Last', 'Forst'), (3, 'Hiiri', 'Mikki')",
+            ConnectionString = ConnString,
+            Query = $@"INSERT INTO {TableName} VALUES (1, 'Suku', 'Etu'), (2, 'Last', 'Forst'), (3, 'Hiiri', 'Mikki')",
             ExecuteType = ExecuteTypes.ExecuteReader,
-            Parameters = null
+            Parameters = null,
         };
 
         var options = new Options()
         {
             SqlTransactionIsolationLevel = SqlTransactionIsolationLevel.Unspecified,
             CommandTimeoutSeconds = 2,
-            ThrowErrorOnFailure = true
+            ThrowErrorOnFailure = true,
         };
 
         // Insert rows

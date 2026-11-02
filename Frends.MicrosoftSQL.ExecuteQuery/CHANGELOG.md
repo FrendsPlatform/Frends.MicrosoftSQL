@@ -1,5 +1,11 @@
 # Changelog
 
+## [2.4.0] - 2026-11-02
+
+### Changed
+
+- Updated the task to .NET 8 and added structured error details to failed results.
+
 ## [2.3.0] - 2026-01-22
 
 ### Changed

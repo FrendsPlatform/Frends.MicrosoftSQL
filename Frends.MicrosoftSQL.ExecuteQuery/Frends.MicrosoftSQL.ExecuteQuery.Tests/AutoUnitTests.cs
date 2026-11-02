@@ -11,52 +11,53 @@ public class AutoUnitTests : ExecuteQueryTestBase
     [TestMethod]
     public async Task TestExecuteQuery_Auto()
     {
-        var transactionLevels = new List<SqlTransactionIsolationLevel>() {
+        var transactionLevels = new List<SqlTransactionIsolationLevel>()
+        {
             SqlTransactionIsolationLevel.Unspecified,
             SqlTransactionIsolationLevel.Serializable,
             SqlTransactionIsolationLevel.None,
             SqlTransactionIsolationLevel.ReadUncommitted,
-            SqlTransactionIsolationLevel.ReadCommitted
+            SqlTransactionIsolationLevel.ReadCommitted,
         };
 
         var inputInsert = new Input()
         {
-            ConnectionString = _connString,
-            Query = $@"INSERT INTO {_tableName} VALUES (1, 'Suku', 'Etu'), (2, 'Last', 'Forst'), (3, 'Hiiri', 'Mikki')",
+            ConnectionString = ConnString,
+            Query = $@"INSERT INTO {TableName} VALUES (1, 'Suku', 'Etu'), (2, 'Last', 'Forst'), (3, 'Hiiri', 'Mikki')",
             ExecuteType = ExecuteTypes.NonQuery,
-            Parameters = null
+            Parameters = null,
         };
 
         var inputSelect = new Input()
         {
-            ConnectionString = _connString,
-            Query = $"select * from {_tableName}",
+            ConnectionString = ConnString,
+            Query = $"select * from {TableName}",
             ExecuteType = ExecuteTypes.Auto,
-            Parameters = null
+            Parameters = null,
         };
 
         var inputSelectSingle = new Input()
         {
-            ConnectionString = _connString,
-            Query = $"select * from {_tableName} where Id = 1",
+            ConnectionString = ConnString,
+            Query = $"select * from {TableName} where Id = 1",
             ExecuteType = ExecuteTypes.Auto,
-            Parameters = null
+            Parameters = null,
         };
 
         var inputUpdate = new Input()
         {
-            ConnectionString = _connString,
-            Query = $@"update {_tableName} set LastName = 'Edit' where Id = 2",
+            ConnectionString = ConnString,
+            Query = $@"update {TableName} set LastName = 'Edit' where Id = 2",
             ExecuteType = ExecuteTypes.Auto,
-            Parameters = null
+            Parameters = null,
         };
 
         var inputDelete = new Input()
         {
-            ConnectionString = _connString,
-            Query = $"delete from {_tableName} where Id = 2",
+            ConnectionString = ConnString,
+            Query = $"delete from {TableName} where Id = 2",
             ExecuteType = ExecuteTypes.Auto,
-            Parameters = null
+            Parameters = null,
         };
 
         foreach (var level in transactionLevels)
@@ -67,7 +68,7 @@ public class AutoUnitTests : ExecuteQueryTestBase
             {
                 SqlTransactionIsolationLevel = level,
                 CommandTimeoutSeconds = 2,
-                ThrowErrorOnFailure = true
+                ThrowErrorOnFailure = true,
             };
 
             // Insert rows
@@ -76,7 +77,7 @@ public class AutoUnitTests : ExecuteQueryTestBase
             Assert.AreEqual(3, insert.RecordsAffected);
             Assert.IsNull(insert.ErrorMessage);
             Assert.AreEqual(3, (int)insert.Data["AffectedRows"]);
-            Assert.AreEqual(3, Helper.GetRowCount(_connString, _tableName)); // Make sure rows inserted before moving on.
+            Assert.AreEqual(3, Helper.GetRowCount(ConnString, TableName)); // Make sure rows inserted before moving on.
 
             // Select all
             var select = await MicrosoftSQL.ExecuteQuery(inputSelect, options, default);
@@ -90,7 +91,7 @@ public class AutoUnitTests : ExecuteQueryTestBase
             Assert.AreEqual("Forst", (string)select.Data[1]["FirstName"]);
             Assert.AreEqual("Hiiri", (string)select.Data[2]["LastName"]);
             Assert.AreEqual("Mikki", (string)select.Data[2]["FirstName"]);
-            Assert.AreEqual(3, Helper.GetRowCount(_connString, _tableName)); // double check
+            Assert.AreEqual(3, Helper.GetRowCount(ConnString, TableName)); // double check
 
             // Select single
             var selectSingle = await MicrosoftSQL.ExecuteQuery(inputSelectSingle, options, default);
@@ -100,14 +101,14 @@ public class AutoUnitTests : ExecuteQueryTestBase
             Assert.AreEqual(typeof(JArray), selectSingle.Data.GetType());
             Assert.AreEqual("Suku", (string)selectSingle.Data[0]["LastName"]);
             Assert.AreEqual("Etu", (string)selectSingle.Data[0]["FirstName"]);
-            Assert.AreEqual(3, Helper.GetRowCount(_connString, _tableName)); // double check
+            Assert.AreEqual(3, Helper.GetRowCount(ConnString, TableName)); // double check
 
             // Update
             var update = await MicrosoftSQL.ExecuteQuery(inputUpdate, options, default);
             Assert.IsTrue(update.Success);
             Assert.AreEqual(1, update.RecordsAffected);
             Assert.IsNull(update.ErrorMessage);
-            Assert.AreEqual(3, Helper.GetRowCount(_connString, _tableName)); // double check
+            Assert.AreEqual(3, Helper.GetRowCount(ConnString, TableName)); // double check
             var checkUpdateResult = await MicrosoftSQL.ExecuteQuery(inputSelect, options, default);
             Assert.AreEqual("Suku", (string)checkUpdateResult.Data[0]["LastName"]);
             Assert.AreEqual("Etu", (string)checkUpdateResult.Data[0]["FirstName"]);
@@ -115,14 +116,14 @@ public class AutoUnitTests : ExecuteQueryTestBase
             Assert.AreEqual("Forst", (string)checkUpdateResult.Data[1]["FirstName"]);
             Assert.AreEqual("Hiiri", (string)checkUpdateResult.Data[2]["LastName"]);
             Assert.AreEqual("Mikki", (string)checkUpdateResult.Data[2]["FirstName"]);
-            Assert.AreEqual(3, Helper.GetRowCount(_connString, _tableName)); // double check
+            Assert.AreEqual(3, Helper.GetRowCount(ConnString, TableName)); // double check
 
             // Delete
             var delete = await MicrosoftSQL.ExecuteQuery(inputDelete, options, default);
             Assert.IsTrue(delete.Success);
             Assert.AreEqual(1, delete.RecordsAffected);
             Assert.IsNull(delete.ErrorMessage);
-            Assert.AreEqual(2, Helper.GetRowCount(_connString, _tableName)); // double check
+            Assert.AreEqual(2, Helper.GetRowCount(ConnString, TableName)); // double check
             var checkDeleteResult = await MicrosoftSQL.ExecuteQuery(inputSelect, options, default);
             Assert.AreEqual("Suku", (string)checkDeleteResult.Data[0]["LastName"]);
             Assert.AreEqual("Etu", (string)checkDeleteResult.Data[0]["FirstName"]);
@@ -142,15 +143,15 @@ public class AutoUnitTests : ExecuteQueryTestBase
         {
             SqlTransactionIsolationLevel = SqlTransactionIsolationLevel.None,
             CommandTimeoutSeconds = 2,
-            ThrowErrorOnFailure = true
+            ThrowErrorOnFailure = true,
         };
 
         var input = new Input
         {
-            ConnectionString = _connString,
+            ConnectionString = ConnString,
             Query = $"IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME='{table}') BEGIN CREATE TABLE {table} ( Id int IDENTITY(1, 1), GeogCol1 geography, GeogCol2 AS GeogCol1.STAsText()); END",
             ExecuteType = ExecuteTypes.Auto,
-            Parameters = null
+            Parameters = null,
         };
 
         try

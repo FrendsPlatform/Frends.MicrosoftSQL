@@ -15,14 +15,14 @@ public class ExceptionUnitTests : ExecuteQueryTestBase
     {
         input = new Input()
         {
-            ConnectionString = _connString,
+            ConnectionString = ConnString,
         };
 
         options = new Options()
         {
             SqlTransactionIsolationLevel = SqlTransactionIsolationLevel.ReadCommitted,
             CommandTimeoutSeconds = 2,
-            ThrowErrorOnFailure = true
+            ThrowErrorOnFailure = true,
         };
     }
 
@@ -50,7 +50,7 @@ public class ExceptionUnitTests : ExecuteQueryTestBase
     [TestMethod]
     public void TestExecuteQuery_ExceptionIsThrownWhenQueryFails()
     {
-        input.Query = $"INSERT INTO {_tableName} VALUES (1, Unit, Tests, 456)";
+        input.Query = $"INSERT INTO {TableName} VALUES (1, Unit, Tests, 456)";
         input.ExecuteType = ExecuteTypes.NonQuery;
 
         var ex = Assert.ThrowsExceptionAsync<Exception>(async () => await MicrosoftSQL.ExecuteQuery(input, options, default));
@@ -60,13 +60,16 @@ public class ExceptionUnitTests : ExecuteQueryTestBase
     [TestMethod]
     public async Task TestExecuteQuery_ErrorMessageWhenQueryFails()
     {
-        input.Query = $"INSERT INTO {_tableName} VALUES (1, Unit, Tests, 456)";
+        input.Query = $"INSERT INTO {TableName} VALUES (1, Unit, Tests, 456)";
         input.ExecuteType = ExecuteTypes.NonQuery;
 
         options.ThrowErrorOnFailure = false;
+        options.ErrorMessageOnFailure = "Query execution failed";
 
         var result = await MicrosoftSQL.ExecuteQuery(input, options, default);
         Assert.IsFalse(result.Success);
-        Assert.IsTrue(result.ErrorMessage.Contains("Microsoft.Data.SqlClient.SqlException (0x80131904): Invalid column name 'Unit'."));
+        Assert.IsTrue(result.ErrorMessage.Contains("Query execution failed: Microsoft.Data.SqlClient.SqlException (0x80131904): Invalid column name 'Unit'."));
+        Assert.AreEqual(result.ErrorMessage, result.Error.Message);
+        Assert.IsNotNull(result.Error.AdditionalInfo);
     }
 }
