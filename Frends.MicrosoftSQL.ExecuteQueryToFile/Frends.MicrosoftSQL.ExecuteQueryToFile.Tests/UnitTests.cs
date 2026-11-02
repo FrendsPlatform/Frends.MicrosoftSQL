@@ -1,4 +1,4 @@
-﻿using Frends.MicrosoftSQL.ExecuteQueryToFile.Tests.lib;
+using Frends.MicrosoftSQL.ExecuteQueryToFile.Tests.Lib;
 
 namespace Frends.MicrosoftSQL.ExecuteQueryToFile.Tests;
 

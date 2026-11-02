@@ -1,7 +1,7 @@
 ﻿using System.Data;
 using Microsoft.Data.SqlClient;
 
-namespace Frends.MicrosoftSQL.ExecuteQueryToFile.Tests.lib;
+namespace Frends.MicrosoftSQL.ExecuteQueryToFile.Tests.Lib;
 
 internal static class Helper
 {

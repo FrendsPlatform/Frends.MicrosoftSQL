@@ -6,7 +6,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Frends.MicrosoftSQL.ExecuteQueryToFile.Definitions;
 using Frends.MicrosoftSQL.ExecuteQueryToFile.Enums;
-using Frends.MicrosoftSQL.ExecuteQueryToFile.Tests.lib;
+using Frends.MicrosoftSQL.ExecuteQueryToFile.Tests.Lib;
 using Microsoft.Data.SqlClient;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
