@@ -1,6 +1,6 @@
 using Frends.MicrosoftSQL.BatchOperation.Definitions;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Microsoft.Data.SqlClient;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Frends.MicrosoftSQL.BatchOperation.Tests;
 
@@ -19,16 +19,16 @@ public class ManualTesting
         GO
    */
 
-    private static readonly string _connString = "Server=127.0.0.1,1433;Database=Master;User Id=SA;Password=Salakala123!";
-    private static readonly string _tableName = "TestTable";
+    private static readonly string DatabaseConnectionString = "Server=127.0.0.1,1433;Database=Master;User Id=SA;Password=Salakala123!";
+    private static readonly string TableName = "TestTable";
 
     [TestInitialize]
     public void Init()
     {
-        using var connection = new SqlConnection(_connString);
+        using var connection = new SqlConnection(DatabaseConnectionString);
         connection.Open();
         var createTable = connection.CreateCommand();
-        createTable.CommandText = $@"IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME='{_tableName}') BEGIN CREATE TABLE {_tableName} ( Id int, LastName varchar(255), FirstName varchar(255) ); END";
+        createTable.CommandText = $@"IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME='{TableName}') BEGIN CREATE TABLE {TableName} ( Id int, LastName varchar(255), FirstName varchar(255) ); END";
         createTable.ExecuteNonQuery();
         connection.Close();
         connection.Dispose();
@@ -37,10 +37,10 @@ public class ManualTesting
     [TestCleanup]
     public void CleanUp()
     {
-        using var connection = new SqlConnection(_connString);
+        using var connection = new SqlConnection(DatabaseConnectionString);
         connection.Open();
         var createTable = connection.CreateCommand();
-        createTable.CommandText = $@"IF EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME='{_tableName}') BEGIN DROP TABLE IF EXISTS {_tableName}; END";
+        createTable.CommandText = $@"IF EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME='{TableName}') BEGIN DROP TABLE IF EXISTS {TableName}; END";
         createTable.ExecuteNonQuery();
         connection.Close();
         connection.Dispose();
@@ -53,16 +53,16 @@ public class ManualTesting
     {
         var inputInsert = new Input()
         {
-            ConnectionString = _connString,
-            Query = $@"INSERT INTO {_tableName} VALUES (@Id, @last_name, @first_name)",
-            InputJson = "[{\"Id\":1,\"last_name\":\"Suku\",\"first_name\":\"Etu\"},{\"Id\":2,\"last_name\":\"Last\",\"first_name\":\"Forst\"},{\"Id\":3,\"last_name\":\"Hiiri\",\"first_name\":\"Mikki\"}]"
+            ConnectionString = DatabaseConnectionString,
+            Query = $@"INSERT INTO {TableName} VALUES (@Id, @last_name, @first_name)",
+            InputJson = "[{\"Id\":1,\"last_name\":\"Suku\",\"first_name\":\"Etu\"},{\"Id\":2,\"last_name\":\"Last\",\"first_name\":\"Forst\"},{\"Id\":3,\"last_name\":\"Hiiri\",\"first_name\":\"Mikki\"}]",
         };
 
         var options = new Options()
         {
             SqlTransactionIsolationLevel = SqlTransactionIsolationLevel.Unspecified,
             CommandTimeoutSeconds = 2,
-            ThrowErrorOnFailure = false
+            ThrowErrorOnFailure = false,
         };
 
         // Insert rows
@@ -80,16 +80,16 @@ public class ManualTesting
     {
         var inputInsert = new Input()
         {
-            ConnectionString = _connString,
-            Query = $@"INSERT INTO {_tableName} VALUES (@Id, @last_name, @first_name)",
-            InputJson = "[{\"Id\":1,\"last_name\":\"Suku\",\"first_name\":\"Etu\"},{\"Id\":2,\"last_name\":\"Last\",\"first_name\":\"Forst\"},{\"Id\":3,\"last_name\":\"Hiiri\",\"first_name\":\"Mikki\"}]"
+            ConnectionString = DatabaseConnectionString,
+            Query = $@"INSERT INTO {TableName} VALUES (@Id, @last_name, @first_name)",
+            InputJson = "[{\"Id\":1,\"last_name\":\"Suku\",\"first_name\":\"Etu\"},{\"Id\":2,\"last_name\":\"Last\",\"first_name\":\"Forst\"},{\"Id\":3,\"last_name\":\"Hiiri\",\"first_name\":\"Mikki\"}]",
         };
 
         var options = new Options()
         {
             SqlTransactionIsolationLevel = SqlTransactionIsolationLevel.Unspecified,
             CommandTimeoutSeconds = 2,
-            ThrowErrorOnFailure = true
+            ThrowErrorOnFailure = true,
         };
 
         // Insert rows
@@ -100,10 +100,10 @@ public class ManualTesting
 
     private static int GetRowCount()
     {
-        using var connection = new SqlConnection(_connString);
+        using var connection = new SqlConnection(DatabaseConnectionString);
         connection.Open();
         var getRows = connection.CreateCommand();
-        getRows.CommandText = $"SELECT COUNT(*) FROM {_tableName}";
+        getRows.CommandText = $"SELECT COUNT(*) FROM {TableName}";
         var count = (int)getRows.ExecuteScalar();
         connection.Close();
         connection.Dispose();

@@ -9,25 +9,24 @@ public class Result
     /// Operation complete without errors.
     /// </summary>
     /// <example>true</example>
-    public bool Success { get; private set; }
+    public bool Success { get; set; }
 
     /// <summary>
     /// Records affected.
     /// </summary>
     /// <example>100</example>
-    public int RecordsAffected { get; private set; }
+    public int RecordsAffected { get; set; }
 
     /// <summary>
     /// Error message.
     /// This value is generated when an exception occurs and Options.ThrowErrorOnFailure = false.
     /// </summary>
     /// <example>Login failed for user 'user'.</example>
-    public string ErrorMessage { get; private set; }
+    public string ErrorMessage => Error?.Message;
 
-    internal Result(bool success, int recordsAffected, string errorMessage)
-    {
-        Success = success;
-        RecordsAffected = recordsAffected;
-        ErrorMessage = errorMessage;
-    }
+    /// <summary>
+    /// Error that occurred during the task.
+    /// </summary>
+    /// <example>object { string Message, Exception AdditionalInfo }</example>
+    public Error Error { get; set; }
 }

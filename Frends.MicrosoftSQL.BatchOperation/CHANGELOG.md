@@ -1,5 +1,11 @@
 # Changelog
 
+## [2.3.0] - 2026-11-02
+
+### Changed
+
+- Added structured error details to failed BatchOperation results.
+
 ## [2.2.0] - 2026-01-22
 
 ### Changed
