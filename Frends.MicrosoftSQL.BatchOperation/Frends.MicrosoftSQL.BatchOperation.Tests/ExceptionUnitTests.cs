@@ -22,7 +22,7 @@ public class ExceptionUnitTests
         {
             SqlTransactionIsolationLevel = SqlTransactionIsolationLevel.ReadCommitted,
             CommandTimeoutSeconds = 2,
-            ThrowErrorOnFailure = true
+            ThrowErrorOnFailure = true,
         };
 
         var ex = await Assert.ThrowsExceptionAsync<Exception>(() => MicrosoftSQL.BatchOperation(input, options, default));
@@ -42,7 +42,7 @@ public class ExceptionUnitTests
         {
             SqlTransactionIsolationLevel = SqlTransactionIsolationLevel.ReadCommitted,
             CommandTimeoutSeconds = 2,
-            ThrowErrorOnFailure = false
+            ThrowErrorOnFailure = false,
         };
 
         var result = await MicrosoftSQL.BatchOperation(input, options, default);
