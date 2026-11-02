@@ -20,23 +20,23 @@ namespace Frends.MicrosoftSQL.ExecuteProcedure.Tests;
 [TestClass]
 public class ExceptionUnitTests
 {
-    private static readonly string _connString = Helper.GetInvalidConnectionString();
+    private static readonly string ConnectionString = Helper.GetInvalidConnectionString();
 
-    Input _input = new();
-    Options _options = new();
+    private Input testInput = new();
+    private Options testOptions = new();
 
     [TestInitialize]
     public void Init()
     {
-        _input = new()
+        testInput = new()
         {
-            ConnectionString = _connString,
+            ConnectionString = ConnectionString,
             Execute = "foo",
             ExecuteType = ExecuteTypes.NonQuery,
             Parameters = null,
         };
 
-        _options = new()
+        testOptions = new()
         {
             CommandTimeoutSeconds = 2,
             SqlTransactionIsolationLevel = SqlTransactionIsolationLevel.ReadCommitted,
@@ -54,10 +54,10 @@ public class ExceptionUnitTests
         {
             foreach (var isolation in isolationLevel)
             {
-                var input = _input;
+                var input = testInput;
                 input.ExecuteType = executeType;
 
-                var options = _options;
+                var options = testOptions;
                 options.SqlTransactionIsolationLevel = isolation;
 
                 var ex = await Assert.ThrowsExceptionAsync<Exception>(() => MicrosoftSQL.ExecuteProcedure(input, options, default));
@@ -76,10 +76,10 @@ public class ExceptionUnitTests
         {
             foreach (var isolation in isolationLevel)
             {
-                var input = _input;
+                var input = testInput;
                 input.ExecuteType = executeType;
 
-                var options = _options;
+                var options = testOptions;
                 options.SqlTransactionIsolationLevel = isolation;
                 options.ThrowErrorOnFailure = false;
 

@@ -9,21 +9,21 @@ public class Result
     /// Operation complete without errors.
     /// </summary>
     /// <example>true</example>
-    public bool Success { get; private set; }
+    public bool Success { get; internal set; }
 
     /// <summary>
     /// Records affected.
     /// Some statements will return -1. See Input.ExecuteType's documentation for more information.
     /// </summary>
     /// <example>100</example>
-    public int RecordsAffected { get; private set; }
+    public int RecordsAffected { get; internal set; }
 
     /// <summary>
     /// Error message.
     /// This value is generated when an exception occurs and Options.ThrowErrorOnFailure = false.
     /// </summary>
     /// <example>Login failed for user 'user'.</example>
-    public string ErrorMessage { get; private set; }
+    public string ErrorMessage => Error?.Message;
 
     /// <summary>
     /// Procedure's result as JToken.
@@ -33,13 +33,11 @@ public class Result
     /// Input.ExecuteType = NonQuery: {{  "AffectedRows": -1 }},
     /// Input.ExecuteType = Scalar: {{  "Value": 1 }}
     /// </example>
-    public dynamic Data { get; private set; }
+    public dynamic Data { get; internal set; }
 
-    internal Result(bool success, int recordsAffected, string errorMessage, dynamic data)
-    {
-        Success = success;
-        RecordsAffected = recordsAffected;
-        ErrorMessage = errorMessage;
-        Data = data;
-    }
+    /// <summary>
+    /// Error that occurred during task execution.
+    /// </summary>
+    /// <example>object { string Message, Exception AdditionalInfo }</example>
+    public Error Error { get; internal set; }
 }

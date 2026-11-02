@@ -1,7 +1,7 @@
 using Frends.MicrosoftSQL.ExecuteProcedure.Definitions;
+using Microsoft.Data.SqlClient;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Newtonsoft.Json.Linq;
-using Microsoft.Data.SqlClient;
 
 namespace Frends.MicrosoftSQL.ExecuteProcedure.Tests;
 
@@ -22,46 +22,46 @@ namespace Frends.MicrosoftSQL.ExecuteProcedure.Tests;
 [TestClass]
 public class ExecuteReaderUnitTests
 {
-    private static readonly string _connString = Helper.GetConnectionString();
-    private static readonly string _tableName = "TestTable";
+    private static readonly string ConnectionString = Helper.GetConnectionString();
+    private static readonly string TableName = "TestTable";
 
     [TestInitialize]
     public void Init()
     {
-        using var connection = new SqlConnection(_connString);
+        using var connection = new SqlConnection(ConnectionString);
         connection.Open();
         var command = connection.CreateCommand();
 
-        //Create
-        command.CommandText = $@"IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME='{_tableName}') BEGIN CREATE TABLE {_tableName} ( Id int, LastName varchar(255), FirstName varchar(255) ); END";
+        // Create
+        command.CommandText = $@"IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME='{TableName}') BEGIN CREATE TABLE {TableName} ( Id int, LastName varchar(255), FirstName varchar(255) ); END";
         command.ExecuteNonQuery();
 
-        //Insert
-        command.CommandText = $@"CREATE PROCEDURE InsertValues AS INSERT INTO {_tableName} VALUES (1, 'Suku', 'Etu'), (2, 'Last', 'Forst'), (3, 'Hiiri', 'Mikki')";
+        // Insert
+        command.CommandText = $@"CREATE PROCEDURE InsertValues AS INSERT INTO {TableName} VALUES (1, 'Suku', 'Etu'), (2, 'Last', 'Forst'), (3, 'Hiiri', 'Mikki')";
         command.ExecuteNonQuery();
 
-        //Select all
-        command.CommandText = $"CREATE PROCEDURE SelectAll AS select * from {_tableName}";
+        // Select all
+        command.CommandText = $"CREATE PROCEDURE SelectAll AS select * from {TableName}";
         command.ExecuteNonQuery();
 
-        //Select single parameter
-        command.CommandText = $"CREATE PROCEDURE SelectSingleParameter (@id INT) AS SELECT * FROM {_tableName} WHERE Id = @id";
+        // Select single parameter
+        command.CommandText = $"CREATE PROCEDURE SelectSingleParameter (@id INT) AS SELECT * FROM {TableName} WHERE Id = @id";
         command.ExecuteNonQuery();
 
-        //Select single
-        command.CommandText = $"CREATE PROCEDURE SelectSingle AS select * from {_tableName} where Id = 1";
+        // Select single
+        command.CommandText = $"CREATE PROCEDURE SelectSingle AS select * from {TableName} where Id = 1";
         command.ExecuteNonQuery();
 
-        //Select lastname
-        command.CommandText = $"CREATE PROCEDURE SelectLastname AS select LastName from {_tableName} where Id = 1";
+        // Select lastname
+        command.CommandText = $"CREATE PROCEDURE SelectLastname AS select LastName from {TableName} where Id = 1";
         command.ExecuteNonQuery();
 
-        //Update
-        command.CommandText = $@"CREATE PROCEDURE UpdateValue AS update {_tableName} set LastName = 'Edit' where Id = 2";
+        // Update
+        command.CommandText = $@"CREATE PROCEDURE UpdateValue AS update {TableName} set LastName = 'Edit' where Id = 2";
         command.ExecuteNonQuery();
 
-        //Delete
-        command.CommandText = $"CREATE PROCEDURE DeleteValue AS delete from {_tableName} where Id = 2";
+        // Delete
+        command.CommandText = $"CREATE PROCEDURE DeleteValue AS delete from {TableName} where Id = 2";
         command.ExecuteNonQuery();
 
         connection.Close();
@@ -71,10 +71,10 @@ public class ExecuteReaderUnitTests
     [TestCleanup]
     public void CleanUp()
     {
-        using var connection = new SqlConnection(_connString);
+        using var connection = new SqlConnection(ConnectionString);
         connection.Open();
         var command = connection.CreateCommand();
-        command.CommandText = $@"IF EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME='{_tableName}') BEGIN DROP TABLE IF EXISTS {_tableName}; END";
+        command.CommandText = $@"IF EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME='{TableName}') BEGIN DROP TABLE IF EXISTS {TableName}; END";
         command.ExecuteNonQuery();
         command.CommandText = $@"DECLARE @procedureName varchar(500)
 DECLARE cur CURSOR
@@ -97,52 +97,53 @@ DECLARE cur CURSOR
     [TestMethod]
     public async Task TestExecuteProcedure_ExecuteReader()
     {
-        var transactionLevels = new List<SqlTransactionIsolationLevel>() {
-            //SqlTransactionIsolationLevel.Unspecified,
+        var transactionLevels = new List<SqlTransactionIsolationLevel>()
+        {
+            // SqlTransactionIsolationLevel.Unspecified,
             SqlTransactionIsolationLevel.Serializable,
             SqlTransactionIsolationLevel.None,
             SqlTransactionIsolationLevel.ReadUncommitted,
-            SqlTransactionIsolationLevel.ReadCommitted
+            SqlTransactionIsolationLevel.ReadCommitted,
         };
 
         var inputInsert = new Input()
         {
-            ConnectionString = _connString,
+            ConnectionString = ConnectionString,
             Execute = "InsertValues",
             ExecuteType = ExecuteTypes.ExecuteReader,
-            Parameters = null
+            Parameters = null,
         };
 
         var inputSelect = new Input()
         {
-            ConnectionString = _connString,
+            ConnectionString = ConnectionString,
             Execute = "SelectAll",
             ExecuteType = ExecuteTypes.ExecuteReader,
-            Parameters = null
+            Parameters = null,
         };
 
         var inputSelectSingle = new Input()
         {
-            ConnectionString = _connString,
+            ConnectionString = ConnectionString,
             Execute = "SelectSingle",
             ExecuteType = ExecuteTypes.ExecuteReader,
-            Parameters = null
+            Parameters = null,
         };
 
         var inputUpdate = new Input()
         {
-            ConnectionString = _connString,
+            ConnectionString = ConnectionString,
             Execute = "UpdateValue",
             ExecuteType = ExecuteTypes.ExecuteReader,
-            Parameters = null
+            Parameters = null,
         };
 
         var inputDelete = new Input()
         {
-            ConnectionString = _connString,
+            ConnectionString = ConnectionString,
             Execute = "DeleteValue",
             ExecuteType = ExecuteTypes.ExecuteReader,
-            Parameters = null
+            Parameters = null,
         };
 
         foreach (var level in transactionLevels)
@@ -151,7 +152,7 @@ DECLARE cur CURSOR
             {
                 SqlTransactionIsolationLevel = level,
                 CommandTimeoutSeconds = 2,
-                ThrowErrorOnFailure = true
+                ThrowErrorOnFailure = true,
             };
 
             // Insert rows
@@ -159,7 +160,7 @@ DECLARE cur CURSOR
             Assert.IsTrue(insert.Success, $"TransactionLevel: {level}.");
             Assert.AreEqual(3, insert.RecordsAffected, $"TransactionLevel: {level}.");
             Assert.IsNull(insert.ErrorMessage, $"TransactionLevel: {level}.");
-            Assert.AreEqual(3, Helper.GetRowCount(_tableName), $"TransactionLevel: {level}.");
+            Assert.AreEqual(3, Helper.GetRowCount(TableName), $"TransactionLevel: {level}.");
 
             // Select all
             var select = await MicrosoftSQL.ExecuteProcedure(inputSelect, options, default);
@@ -173,7 +174,7 @@ DECLARE cur CURSOR
             Assert.AreEqual("Forst", (string)select.Data[1]["FirstName"], $"TransactionLevel: {level}.");
             Assert.AreEqual("Hiiri", (string)select.Data[2]["LastName"], $"TransactionLevel: {level}.");
             Assert.AreEqual("Mikki", (string)select.Data[2]["FirstName"], $"TransactionLevel: {level}.");
-            Assert.AreEqual(3, Helper.GetRowCount(_tableName), $"TransactionLevel: {level}.");
+            Assert.AreEqual(3, Helper.GetRowCount(TableName), $"TransactionLevel: {level}.");
 
             // Select single
             var selectSingle = await MicrosoftSQL.ExecuteProcedure(inputSelectSingle, options, default);
@@ -183,14 +184,14 @@ DECLARE cur CURSOR
             Assert.AreEqual(typeof(JArray), selectSingle.Data.GetType(), $"TransactionLevel: {level}.");
             Assert.AreEqual("Suku", (string)selectSingle.Data[0]["LastName"], $"TransactionLevel: {level}.");
             Assert.AreEqual("Etu", (string)selectSingle.Data[0]["FirstName"], $"TransactionLevel: {level}.");
-            Assert.AreEqual(3, Helper.GetRowCount(_tableName));
+            Assert.AreEqual(3, Helper.GetRowCount(TableName));
 
             // Update
             var update = await MicrosoftSQL.ExecuteProcedure(inputUpdate, options, default);
             Assert.IsTrue(update.Success, $"TransactionLevel: {level}.");
             Assert.AreEqual(1, update.RecordsAffected, $"TransactionLevel: {level}.");
             Assert.IsNull(update.ErrorMessage, $"TransactionLevel: {level}.");
-            Assert.AreEqual(3, Helper.GetRowCount(_tableName), $"TransactionLevel: {level}.");
+            Assert.AreEqual(3, Helper.GetRowCount(TableName), $"TransactionLevel: {level}.");
             var checkUpdateResult = await MicrosoftSQL.ExecuteProcedure(inputSelect, options, default);
             Assert.AreEqual("Suku", (string)checkUpdateResult.Data[0]["LastName"], $"TransactionLevel: {level}.");
             Assert.AreEqual("Etu", (string)checkUpdateResult.Data[0]["FirstName"], $"TransactionLevel: {level}.");
@@ -198,14 +199,14 @@ DECLARE cur CURSOR
             Assert.AreEqual("Forst", (string)checkUpdateResult.Data[1]["FirstName"], $"TransactionLevel: {level}.");
             Assert.AreEqual("Hiiri", (string)checkUpdateResult.Data[2]["LastName"], $"TransactionLevel: {level}.");
             Assert.AreEqual("Mikki", (string)checkUpdateResult.Data[2]["FirstName"], $"TransactionLevel: {level}.");
-            Assert.AreEqual(3, Helper.GetRowCount(_tableName));
+            Assert.AreEqual(3, Helper.GetRowCount(TableName));
 
             // Delete
             var delete = await MicrosoftSQL.ExecuteProcedure(inputDelete, options, default);
             Assert.IsTrue(delete.Success, $"TransactionLevel: {level}.");
             Assert.AreEqual(1, delete.RecordsAffected, $"TransactionLevel: {level}.");
             Assert.IsNull(delete.ErrorMessage, $"TransactionLevel: {level}.");
-            Assert.AreEqual(2, Helper.GetRowCount(_tableName), $"TransactionLevel: {level}.");
+            Assert.AreEqual(2, Helper.GetRowCount(TableName), $"TransactionLevel: {level}.");
             var checkDeleteResult = await MicrosoftSQL.ExecuteProcedure(inputSelect, options, default);
             Assert.AreEqual("Suku", (string)checkDeleteResult.Data[0]["LastName"], $"TransactionLevel: {level}.");
             Assert.AreEqual("Etu", (string)checkDeleteResult.Data[0]["FirstName"], $"TransactionLevel: {level}.");
@@ -224,30 +225,30 @@ DECLARE cur CURSOR
         {
             Name = "id",
             Value = "1",
-            SqlDataType = SqlDataTypes.Auto
+            SqlDataType = SqlDataTypes.Auto,
         };
 
         var inputInsert = new Input()
         {
-            ConnectionString = _connString,
+            ConnectionString = ConnectionString,
             Execute = "InsertValues",
             ExecuteType = ExecuteTypes.ExecuteReader,
-            Parameters = null
+            Parameters = null,
         };
 
         var parameterInput = new Input()
         {
-            ConnectionString = _connString,
+            ConnectionString = ConnectionString,
             Execute = "SelectSingleParameter",
             ExecuteType = ExecuteTypes.ExecuteReader,
-            Parameters = new ProcedureParameter[] { parameter }
+            Parameters = new ProcedureParameter[] { parameter },
         };
 
         var options = new Options()
         {
             SqlTransactionIsolationLevel = SqlTransactionIsolationLevel.None,
             CommandTimeoutSeconds = 2,
-            ThrowErrorOnFailure = true
+            ThrowErrorOnFailure = true,
         };
 
         await MicrosoftSQL.ExecuteProcedure(inputInsert, options, default);
@@ -269,38 +270,38 @@ DECLARE cur CURSOR
 
         var binary = File.ReadAllBytes(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "../../../TestData/", "Test_image.png"));
 
-        //Insert
+        // Insert
         command = $"CREATE PROCEDURE InsertBinaryValues(@binary as varbinary(MAX)) AS INSERT INTO {table} (Id, Data) VALUES (1, @binary)";
         Helper.ExecuteNonQuery(command);
 
         var input = new Input
         {
-            ConnectionString = _connString,
+            ConnectionString = ConnectionString,
             Execute = "InsertBinaryValues",
             ExecuteType = ExecuteTypes.NonQuery,
-            Parameters = new ProcedureParameter[] { new ProcedureParameter { Name = "binary", Value = binary, SqlDataType = SqlDataTypes.VarBinary } }
+            Parameters = new ProcedureParameter[] { new ProcedureParameter { Name = "binary", Value = binary, SqlDataType = SqlDataTypes.VarBinary } },
         };
 
         var options = new Options
         {
             CommandTimeoutSeconds = 30,
             SqlTransactionIsolationLevel = SqlTransactionIsolationLevel.ReadCommitted,
-            ThrowErrorOnFailure = true
+            ThrowErrorOnFailure = true,
         };
 
         var result = await MicrosoftSQL.ExecuteProcedure(input, options, default);
         Assert.IsTrue(result.Success);
 
-        //Select single
+        // Select single
         command = $"CREATE PROCEDURE SelectSingleBinary AS select * from {table} where Id = 1";
         Helper.ExecuteNonQuery(command);
 
         input = new Input
         {
-            ConnectionString = _connString,
+            ConnectionString = ConnectionString,
             Execute = "SelectSingleBinary",
             ExecuteType = ExecuteTypes.ExecuteReader,
-            Parameters = null
+            Parameters = null,
         };
 
         result = await MicrosoftSQL.ExecuteProcedure(input, options, default);
@@ -321,15 +322,15 @@ DECLARE cur CURSOR
         {
             SqlTransactionIsolationLevel = SqlTransactionIsolationLevel.None,
             CommandTimeoutSeconds = 30,
-            ThrowErrorOnFailure = true
+            ThrowErrorOnFailure = true,
         };
 
         var input = new Input
         {
-            ConnectionString = _connString,
-            Execute = "",
+            ConnectionString = ConnectionString,
+            Execute = string.Empty,
             ExecuteType = ExecuteTypes.NonQuery,
-            Parameters = null
+            Parameters = null,
         };
 
         // Create new table

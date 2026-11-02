@@ -1,5 +1,11 @@
 # Changelog
 
+## [2.4.0] - 2026-11-02
+
+### Changed
+
+- Added structured error details and configurable error messages for failed procedure execution.
+
 ## [2.3.0] - 2026-01-22
 
 ### Changed
