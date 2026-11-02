@@ -68,7 +68,8 @@ public class ExceptionUnitTests : ExecuteQueryTestBase
 
         var result = await MicrosoftSQL.ExecuteQuery(input, options, default);
         Assert.IsFalse(result.Success);
-        Assert.IsTrue(result.ErrorMessage.Contains("Query execution failed: Microsoft.Data.SqlClient.SqlException (0x80131904): Invalid column name 'Unit'."));
+        Assert.IsTrue(result.ErrorMessage.Contains("Query execution failed"));
+        Assert.IsTrue(result.Error.Message.Contains("Invalid column name 'Unit'."));
         Assert.AreEqual(result.ErrorMessage, result.Error.Message);
         Assert.IsNotNull(result.Error.AdditionalInfo);
     }

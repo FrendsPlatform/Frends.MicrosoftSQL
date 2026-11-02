@@ -68,7 +68,7 @@ public static class MicrosoftSQL
         }
         catch (Exception ex)
         {
-            return ex.Handle(options);
+            return new Exception($"ExecuteQuery exception: {ex}", ex).Handle(options);
         }
 
         using (command)
