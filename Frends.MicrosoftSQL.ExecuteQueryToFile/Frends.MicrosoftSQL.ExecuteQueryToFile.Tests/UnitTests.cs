@@ -1,4 +1,4 @@
-namespace Frends.MicrosoftSQL.ExecuteQueryToFile.Tests;
+﻿namespace Frends.MicrosoftSQL.ExecuteQueryToFile.Tests;
 
 using System;
 using System.Data;
@@ -27,6 +27,12 @@ using NUnit.Framework;
 public class UnitTests
 {
     private static readonly string ConnectionString = Helper.GetConnectionString();
+
+    private static readonly Definitions.Connection DatabaseConnection = new()
+    {
+        ConnectionString = ConnectionString,
+    };
+
     private static readonly string TableName = "TestTable";
     private static readonly string Destination = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "../../../TestData/test.csv");
 
@@ -101,14 +107,13 @@ public class UnitTests
                     SqlDataType = SqlDataTypes.Int,
                 },
             },
-            ConnectionString = ConnectionString,
             OutputFilePath = Destination,
         };
 
         options.CsvOptions.AddQuotesToStrings = true;
         options.CsvOptions.IncludeHeadersInOutput = true;
 
-        await MicrosoftSQL.ExecuteQueryToFile(query, options, default);
+        await MicrosoftSQL.ExecuteQueryToFile(query, DatabaseConnection, options, default);
         var output = File.ReadAllText(Destination);
 
         Assert.AreEqual("Id;LastName;FirstName;Salary\r\n1;\"Meikalainen\";\"Matti\";\"1523,25\"\r\n", output);
@@ -121,14 +126,13 @@ public class UnitTests
         {
             Query = $"Select Id, LastName, FirstName, REPLACE(Salary, '.', ',') AS 'Salary' from {TableName}",
             QueryParameters = Array.Empty<Definitions.SqlParameter>(),
-            ConnectionString = ConnectionString,
             OutputFilePath = Destination,
         };
 
         options.CsvOptions.AddQuotesToStrings = true;
         options.CsvOptions.IncludeHeadersInOutput = true;
 
-        await MicrosoftSQL.ExecuteQueryToFile(query, options, default);
+        await MicrosoftSQL.ExecuteQueryToFile(query, DatabaseConnection, options, default);
         var output = File.ReadAllText(Destination);
 
         Assert.AreEqual("Id;LastName;FirstName;Salary\r\n1;\"Meikalainen\";\"Matti\";\"1523,25\"\r\n", output);
@@ -141,13 +145,12 @@ public class UnitTests
         {
             Query = $"Select Id, LastName, FirstName, REPLACE(Salary, '.', ',') AS 'Salary' from {TableName}",
             QueryParameters = Array.Empty<Definitions.SqlParameter>(),
-            ConnectionString = ConnectionString,
             OutputFilePath = Destination,
         };
 
         options.CsvOptions.IncludeHeadersInOutput = true;
 
-        await MicrosoftSQL.ExecuteQueryToFile(query, options, default);
+        await MicrosoftSQL.ExecuteQueryToFile(query, DatabaseConnection, options, default);
 
         var output = File.ReadAllText(Destination);
 
@@ -161,11 +164,10 @@ public class UnitTests
         {
             Query = $"SELECT Image from {TableName}",
             QueryParameters = Array.Empty<Definitions.SqlParameter>(),
-            ConnectionString = ConnectionString,
             OutputFilePath = Destination,
         };
 
-        await MicrosoftSQL.ExecuteQueryToFile(query, options, default);
+        await MicrosoftSQL.ExecuteQueryToFile(query, DatabaseConnection, options, default);
 
         var output = File.ReadAllText(Destination);
 
@@ -187,11 +189,10 @@ public class UnitTests
                     SqlDataType = SqlDataTypes.VarBinary,
                 },
             },
-            ConnectionString = ConnectionString,
             OutputFilePath = Destination,
         };
 
-        await MicrosoftSQL.ExecuteQueryToFile(query, options, default);
+        await MicrosoftSQL.ExecuteQueryToFile(query, DatabaseConnection, options, default);
 
         var output = File.ReadAllText(Destination);
 
@@ -205,11 +206,10 @@ public class UnitTests
         {
             Query = $"SELECT TestText from {TableName}",
             QueryParameters = Array.Empty<Definitions.SqlParameter>(),
-            ConnectionString = ConnectionString,
             OutputFilePath = Destination,
         };
 
-        await MicrosoftSQL.ExecuteQueryToFile(query, options, default);
+        await MicrosoftSQL.ExecuteQueryToFile(query, DatabaseConnection, options, default);
 
         var output = File.ReadAllText(Destination);
 
@@ -231,11 +231,10 @@ public class UnitTests
                     SqlDataType = SqlDataTypes.VarBinary,
                 },
             },
-            ConnectionString = ConnectionString,
             OutputFilePath = Destination,
         };
 
-        await MicrosoftSQL.ExecuteQueryToFile(query, options, default);
+        await MicrosoftSQL.ExecuteQueryToFile(query, DatabaseConnection, options, default);
 
         var output = File.ReadAllText(Destination);
 
@@ -257,11 +256,10 @@ public class UnitTests
                     SqlDataType = SqlDataTypes.VarChar,
                 },
             },
-            ConnectionString = ConnectionString,
             OutputFilePath = Destination,
         };
 
-        await MicrosoftSQL.ExecuteQueryToFile(query, options, default);
+        await MicrosoftSQL.ExecuteQueryToFile(query, DatabaseConnection, options, default);
 
         var output = File.ReadAllText(Destination);
 
@@ -281,7 +279,6 @@ public class UnitTests
 
         var input = new Input
         {
-            ConnectionString = ConnectionString,
             Query = $"SELECT * From {table}",
             OutputFilePath = Destination,
         };
@@ -290,7 +287,7 @@ public class UnitTests
         {
             input.Query = $"SELECT * From {table}";
 
-            var select = await MicrosoftSQL.ExecuteQueryToFile(input, options, default);
+            var select = await MicrosoftSQL.ExecuteQueryToFile(input, DatabaseConnection, options, default);
 
             var output = File.ReadAllLines(Destination);
             Assert.AreEqual(2, output.Length);

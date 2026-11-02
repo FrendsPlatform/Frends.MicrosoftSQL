@@ -17,6 +17,12 @@ namespace Frends.MicrosoftSQL.ExecuteQueryToFile.Tests;
 public class JsonUnitTests
 {
     private static readonly string ConnectionString = Helper.GetConnectionString();
+
+    private static readonly Definitions.Connection DatabaseConnection = new()
+    {
+        ConnectionString = ConnectionString,
+    };
+
     private static readonly string TableName = "TestTable";
     private static readonly string Destination = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "../../../TestData/test.json");
 
@@ -78,11 +84,10 @@ public class JsonUnitTests
         {
             Query = $"SELECT Id, LastName, FirstName, Salary FROM {TableName}",
             QueryParameters = Array.Empty<Definitions.SqlParameter>(),
-            ConnectionString = ConnectionString,
             OutputFilePath = Destination,
         };
 
-        var result = await MicrosoftSQL.ExecuteQueryToFile(input, options, default);
+        var result = await MicrosoftSQL.ExecuteQueryToFile(input, DatabaseConnection, options, default);
 
         var content = await File.ReadAllTextAsync(Destination);
         var array = JArray.Parse(content); // throws if invalid JSON
@@ -104,11 +109,10 @@ public class JsonUnitTests
         {
             Query = $"SELECT Id, LastName, FirstName, Salary FROM {TableName}",
             QueryParameters = Array.Empty<Definitions.SqlParameter>(),
-            ConnectionString = ConnectionString,
             OutputFilePath = Destination,
         };
 
-        await MicrosoftSQL.ExecuteQueryToFile(input, options, default);
+        await MicrosoftSQL.ExecuteQueryToFile(input, DatabaseConnection, options, default);
 
         var lines = (await File.ReadAllLinesAsync(Destination))
             .Where(l => !string.IsNullOrWhiteSpace(l))
@@ -156,13 +160,12 @@ public class JsonUnitTests
         {
             Query = $"SELECT * FROM {table}",
             QueryParameters = Array.Empty<Definitions.SqlParameter>(),
-            ConnectionString = ConnectionString,
             OutputFilePath = Destination,
         };
 
         try
         {
-            await MicrosoftSQL.ExecuteQueryToFile(input, options, default);
+            await MicrosoftSQL.ExecuteQueryToFile(input, DatabaseConnection, options, default);
 
             var content = await File.ReadAllTextAsync(Destination);
             using var stringReader = new StringReader(content);
@@ -204,11 +207,10 @@ public class JsonUnitTests
         {
             Query = $"SELECT Id, LastName, TestNull FROM {TableName}",
             QueryParameters = Array.Empty<Definitions.SqlParameter>(),
-            ConnectionString = ConnectionString,
             OutputFilePath = Destination,
         };
 
-        await MicrosoftSQL.ExecuteQueryToFile(input, options, default);
+        await MicrosoftSQL.ExecuteQueryToFile(input, DatabaseConnection, options, default);
 
         var content = await File.ReadAllTextAsync(Destination);
         var row = JArray.Parse(content)[0];
@@ -225,11 +227,10 @@ public class JsonUnitTests
         {
             Query = $"SELECT Id, TestNull FROM {TableName}",
             QueryParameters = Array.Empty<Definitions.SqlParameter>(),
-            ConnectionString = ConnectionString,
             OutputFilePath = Destination,
         };
 
-        await MicrosoftSQL.ExecuteQueryToFile(input, options, default);
+        await MicrosoftSQL.ExecuteQueryToFile(input, DatabaseConnection, options, default);
 
         var content = await File.ReadAllTextAsync(Destination);
         var row = JArray.Parse(content)[0];
@@ -260,13 +261,12 @@ public class JsonUnitTests
         {
             Query = $"SELECT * FROM {table}",
             QueryParameters = Array.Empty<Definitions.SqlParameter>(),
-            ConnectionString = ConnectionString,
             OutputFilePath = Destination,
         };
 
         try
         {
-            await MicrosoftSQL.ExecuteQueryToFile(input, options, default);
+            await MicrosoftSQL.ExecuteQueryToFile(input, DatabaseConnection, options, default);
 
             var content = await File.ReadAllTextAsync(Destination);
             var row = JArray.Parse(content)[0];
@@ -313,7 +313,6 @@ public class JsonUnitTests
         {
             Query = $"SELECT * FROM {table}",
             QueryParameters = Array.Empty<Definitions.SqlParameter>(),
-            ConnectionString = ConnectionString,
             OutputFilePath = Destination,
         };
 
@@ -324,7 +323,7 @@ public class JsonUnitTests
             GC.Collect();
             var memoryBefore = Process.GetCurrentProcess().WorkingSet64;
 
-            var result = await MicrosoftSQL.ExecuteQueryToFile(input, options, default);
+            var result = await MicrosoftSQL.ExecuteQueryToFile(input, DatabaseConnection, options, default);
 
             GC.Collect();
             GC.WaitForPendingFinalizers();
@@ -376,7 +375,6 @@ public class JsonUnitTests
         {
             Query = $"SELECT * FROM {table}",
             QueryParameters = Array.Empty<Definitions.SqlParameter>(),
-            ConnectionString = ConnectionString,
             OutputFilePath = Destination,
         };
 
@@ -387,7 +385,7 @@ public class JsonUnitTests
             GC.Collect();
             var memoryBefore = Process.GetCurrentProcess().WorkingSet64;
 
-            var result = await MicrosoftSQL.ExecuteQueryToFile(input, options, default);
+            var result = await MicrosoftSQL.ExecuteQueryToFile(input, DatabaseConnection, options, default);
 
             GC.Collect();
             GC.WaitForPendingFinalizers();
@@ -462,7 +460,6 @@ public class JsonUnitTests
         {
             Query = $"SELECT * FROM {table}",
             QueryParameters = Array.Empty<Definitions.SqlParameter>(),
-            ConnectionString = ConnectionString,
             OutputFilePath = Destination,
         };
 
@@ -473,7 +470,7 @@ public class JsonUnitTests
             GC.Collect();
             var memoryBefore = Process.GetCurrentProcess().WorkingSet64;
 
-            var result = await MicrosoftSQL.ExecuteQueryToFile(input, options, default);
+            var result = await MicrosoftSQL.ExecuteQueryToFile(input, DatabaseConnection, options, default);
 
             GC.Collect();
             GC.WaitForPendingFinalizers();

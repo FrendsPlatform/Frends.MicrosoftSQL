@@ -1,7 +1,8 @@
-# Changelog
+﻿# Changelog
 
-## [2.6.0] - 2026-10-30
+## [3.0.0] - 2026-11-02
 ### Changed
+- **[Breaking Change]**Moved the `ConnectionString` from the Input tab to a new Connection tab.
 - Added success and error fields to the task result and failure-related options.
 - Updated the task and tests to target .NET 8.
 

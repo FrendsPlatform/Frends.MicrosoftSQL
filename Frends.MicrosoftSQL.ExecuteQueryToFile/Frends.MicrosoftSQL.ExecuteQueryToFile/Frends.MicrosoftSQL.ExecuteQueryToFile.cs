@@ -19,17 +19,19 @@ public static class MicrosoftSQL
     /// [Documentation](https://tasks.frends.com/tasks/frends-tasks/Frends.MicrosoftSQL.ExecuteQueryToFile).
     /// </summary>
     /// <param name="input">Input parameters.</param>
+    /// <param name="connection">Connection parameters.</param>
     /// <param name="options">Options parameters.</param>
     /// <param name="cancellationToken">Cancellation token given by Frends.</param>
     /// <returns>object { bool Success, int EntriesWritten, string Path, string FileName, string Error }</returns>
     public static async Task<Result> ExecuteQueryToFile(
         [PropertyTab] Input input,
+        [PropertyTab] Connection connection,
         [PropertyTab] Options options,
         CancellationToken cancellationToken)
     {
         Result result = new();
 
-        await using var sqlConnection = new SqlConnection(input.ConnectionString);
+        await using var sqlConnection = new SqlConnection(connection.ConnectionString);
         await sqlConnection.OpenAsync(cancellationToken).ConfigureAwait(false);
 
         await using var command = sqlConnection.CreateCommand();
