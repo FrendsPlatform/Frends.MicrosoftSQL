@@ -43,7 +43,7 @@ public class ExceptionUnitTests : ExecuteQueryTestBase
 
         var result = await MicrosoftSQL.ExecuteQuery(input, options, default);
         Assert.IsFalse(result.Success);
-        Assert.IsTrue(result.ErrorMessage.Contains("Login failed for user 'SA'."));
+        Assert.IsTrue(result.Error.Message.Contains("Login failed for user 'SA'."));
         Assert.AreEqual(0, result.RecordsAffected);
     }
 
@@ -68,9 +68,8 @@ public class ExceptionUnitTests : ExecuteQueryTestBase
 
         var result = await MicrosoftSQL.ExecuteQuery(input, options, default);
         Assert.IsFalse(result.Success);
-        Assert.IsTrue(result.ErrorMessage.Contains("Query execution failed"));
+        Assert.IsTrue(result.Error.Message.Contains("Query execution failed"));
         Assert.IsTrue(result.Error.Message.Contains("Invalid column name 'Unit'."));
-        Assert.AreEqual(result.ErrorMessage, result.Error.Message);
         Assert.IsNotNull(result.Error.AdditionalInfo);
     }
 }

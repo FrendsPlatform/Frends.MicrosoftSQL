@@ -48,7 +48,7 @@ internal static class ErrorHandler
             ? exception.Message
             : $"{customMessage}: {exception.Message}";
 
-        return new Result(false, 0, errorMessage, null)
+        return new Result(false, 0, null)
         {
             Error = new Error
             {
