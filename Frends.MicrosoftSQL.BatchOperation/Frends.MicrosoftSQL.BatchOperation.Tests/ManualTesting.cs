@@ -69,7 +69,7 @@ public class ManualTesting
         var insert = await MicrosoftSQL.BatchOperation(inputInsert, options, default);
         Assert.IsFalse(insert.Success);
         Assert.AreEqual(3, insert.RecordsAffected);
-        Assert.IsTrue(insert.ErrorMessage.Contains("(If required) transaction rollback completed without exception."));
+        Assert.IsTrue(insert.Error.Message.Contains("(If required) transaction rollback completed without exception."));
         Assert.AreEqual(0, GetRowCount());
     }
 

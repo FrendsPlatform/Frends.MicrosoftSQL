@@ -32,7 +32,7 @@ public class ExceptionUnitTests
     }
 
     [TestMethod]
-    public async Task TestBatchOperation_Invalid_Creds_ReturnErrorMessage()
+    public async Task TestBatchOperation_Invalid_Creds_ReturnErrorDetails()
     {
         var input = new Input()
         {
@@ -48,7 +48,8 @@ public class ExceptionUnitTests
 
         var result = await MicrosoftSQL.BatchOperation(input, options, default);
         Assert.IsFalse(result.Success);
-        Assert.IsTrue(result.ErrorMessage.Contains("Login failed for user 'SA'."));
+        Assert.IsTrue(result.Error.Message.Contains("Login failed for user 'SA'."));
+        Assert.IsNotNull(result.Error.AdditionalInfo);
         Assert.AreEqual(0, result.RecordsAffected);
     }
 

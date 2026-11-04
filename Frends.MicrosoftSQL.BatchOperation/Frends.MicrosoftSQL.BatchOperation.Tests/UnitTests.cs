@@ -106,35 +106,35 @@ public class UnitTests
             var insert = await MicrosoftSQL.BatchOperation(inputInsert, options, default);
             Assert.IsTrue(insert.Success);
             Assert.AreEqual(3, insert.RecordsAffected);
-            Assert.IsNull(insert.ErrorMessage);
+            Assert.IsNull(insert.Error);
             Assert.AreEqual(3, GetRowCount($"SELECT COUNT(*) FROM {TableName}"));
 
             // Update single
             var updateSingle = await MicrosoftSQL.BatchOperation(inputUpdateSingle, options, default);
             Assert.IsTrue(updateSingle.Success);
             Assert.AreEqual(1, updateSingle.RecordsAffected);
-            Assert.IsNull(updateSingle.ErrorMessage);
+            Assert.IsNull(updateSingle.Error);
             Assert.AreEqual(1, GetRowCount($"SELECT COUNT(*) FROM {TableName} WHERE LastName = 'Edit'"));
 
             // Update multiple
             var updateMultiple = await MicrosoftSQL.BatchOperation(inputUpdateMultiple, options, default);
             Assert.IsTrue(updateMultiple.Success);
             Assert.AreEqual(2, updateMultiple.RecordsAffected);
-            Assert.IsNull(updateMultiple.ErrorMessage);
+            Assert.IsNull(updateMultiple.Error);
             Assert.AreEqual(2, GetRowCount($"SELECT COUNT(*) FROM {TableName} WHERE LastName = 'Foobar'"));
 
             // Delete single
             var deleteSingle = await MicrosoftSQL.BatchOperation(inputDeleteSingle, options, default);
             Assert.IsTrue(deleteSingle.Success);
             Assert.AreEqual(1, deleteSingle.RecordsAffected);
-            Assert.IsNull(deleteSingle.ErrorMessage);
+            Assert.IsNull(deleteSingle.Error);
             Assert.AreEqual(2, GetRowCount($"SELECT COUNT(*) FROM {TableName}"));
 
             // Delete multiple
             var deleteMultiple = await MicrosoftSQL.BatchOperation(inputDeleteMultiple, options, default);
             Assert.IsTrue(deleteMultiple.Success);
             Assert.AreEqual(2, deleteMultiple.RecordsAffected);
-            Assert.IsNull(deleteMultiple.ErrorMessage);
+            Assert.IsNull(deleteMultiple.Error);
             Assert.AreEqual(0, GetRowCount($"SELECT COUNT(*) FROM {TableName}"));
 
             CleanUp();

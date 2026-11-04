@@ -4,9 +4,10 @@
 
 ### Changed
 
-- Added structured error details and a configurable error message for failed batch operations.
+- Added the `Error` result object with `Message` and `AdditionalInfo` fields for failed batch operations.
 - Upgraded the task and its tests to .NET 8.
-- **[Braking Change]** The task rethrows original exceptions instead of wrapping them in a new exception.
+- **[Breaking Change]** Removed the `ErrorMessage` result field; use `Error.Message` and `Error.AdditionalInfo` instead.
+- **[Breaking Change]** The task rethrows original exceptions instead of wrapping them in a new exception.
 
 ## [2.2.0] - 2026-01-22
 
