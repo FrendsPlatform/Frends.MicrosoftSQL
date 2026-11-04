@@ -7,6 +7,9 @@
 - Added configurable exception handling and structured error details to the task result.
 - Updated the task and tests to target .NET 8.
 
+### Added
+- New `ThrowErrorOnFailure` and `ErrorMessageOnFailure` properties in `Options` tab to control error handling behavior.
+
 ## [2.5.0] - 2026-10-16
 ### Fixed
 - Fixed default JsonOptions.TimeFormat format to Text from Expression.
