@@ -86,8 +86,7 @@ public class ExceptionUnitTests
 
                 var result = await MicrosoftSQL.ExecuteProcedure(procedureInput, procedureOptions, default);
                 Assert.IsFalse(result.Success, $"ExecuteType: {executeType}, IsolationLevel: {isolation}");
-                Assert.IsTrue(result.ErrorMessage.Contains("Login failed for user 'SA'."), $"ExecuteType: {executeType}, IsolationLevel: {isolation}");
-                Assert.AreEqual(result.ErrorMessage, result.Error.Message, $"ExecuteType: {executeType}, IsolationLevel: {isolation}");
+                Assert.IsTrue(result.Error.Message.Contains("Login failed for user 'SA'."), $"ExecuteType: {executeType}, IsolationLevel: {isolation}");
                 Assert.IsNotNull(result.Error.AdditionalInfo, $"ExecuteType: {executeType}, IsolationLevel: {isolation}");
                 Assert.AreEqual(0, result.RecordsAffected, $"ExecuteType: {executeType}, IsolationLevel: {isolation}");
                 Assert.IsNull(result.Data, $"ExecuteType: {executeType}, IsolationLevel: {isolation}");
@@ -104,7 +103,6 @@ public class ExceptionUnitTests
         var result = await MicrosoftSQL.ExecuteProcedure(input, options, default);
 
         Assert.IsTrue(result.Error.Message.StartsWith("Custom procedure failure:"));
-        Assert.AreEqual(result.Error.Message, result.ErrorMessage);
     }
 
     [TestMethod]

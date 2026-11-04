@@ -166,7 +166,7 @@ DECLARE cur CURSOR
             var insert = await MicrosoftSQL.ExecuteProcedure(inputInsert, options, default);
             Assert.IsTrue(insert.Success);
             Assert.AreEqual(3, insert.RecordsAffected);
-            Assert.IsNull(insert.ErrorMessage);
+            Assert.IsNull(insert.Error);
             Assert.AreEqual(3, (int)insert.Data["AffectedRows"]);
             Assert.AreEqual(3, Helper.GetRowCount(TableName)); // Make sure rows inserted before moving on.
 
@@ -174,7 +174,7 @@ DECLARE cur CURSOR
             var select = await MicrosoftSQL.ExecuteProcedure(inputSelect, options, default);
             Assert.IsTrue(select.Success);
             Assert.AreEqual(-1, select.RecordsAffected);
-            Assert.IsNull(select.ErrorMessage);
+            Assert.IsNull(select.Error);
             Assert.AreEqual(-1, (int)select.Data["AffectedRows"]);
             Assert.AreEqual(3, Helper.GetRowCount(TableName));
 
@@ -182,7 +182,7 @@ DECLARE cur CURSOR
             var selectSingle = await MicrosoftSQL.ExecuteProcedure(inputSelectSingle, options, default);
             Assert.IsTrue(selectSingle.Success);
             Assert.AreEqual(-1, selectSingle.RecordsAffected);
-            Assert.IsNull(selectSingle.ErrorMessage);
+            Assert.IsNull(selectSingle.Error);
             Assert.AreEqual(-1, (int)select.Data["AffectedRows"]);
             Assert.AreEqual(3, Helper.GetRowCount(TableName));
 
@@ -190,7 +190,7 @@ DECLARE cur CURSOR
             var update = await MicrosoftSQL.ExecuteProcedure(inputUpdate, options, default);
             Assert.IsTrue(update.Success);
             Assert.AreEqual(1, update.RecordsAffected);
-            Assert.IsNull(update.ErrorMessage);
+            Assert.IsNull(update.Error);
             Assert.AreEqual(3, Helper.GetRowCount(TableName));
             var checkUpdateResult = await MicrosoftSQL.ExecuteProcedure(inputSelectAfterExecution, options, default);
             Assert.AreEqual("Suku", (string)checkUpdateResult.Data[0]["LastName"]);
@@ -205,7 +205,7 @@ DECLARE cur CURSOR
             var delete = await MicrosoftSQL.ExecuteProcedure(inputDelete, options, default);
             Assert.IsTrue(delete.Success);
             Assert.AreEqual(1, delete.RecordsAffected);
-            Assert.IsNull(delete.ErrorMessage);
+            Assert.IsNull(delete.Error);
             Assert.AreEqual(2, Helper.GetRowCount(TableName));
             var checkDeleteResult = await MicrosoftSQL.ExecuteProcedure(inputSelectAfterExecution, options, default);
             Assert.AreEqual("Suku", (string)checkDeleteResult.Data[0]["LastName"]);
@@ -246,7 +246,7 @@ DECLARE cur CURSOR
         var insert = await MicrosoftSQL.ExecuteProcedure(parameterInput, options, default);
         Assert.IsTrue(insert.Success);
         Assert.AreEqual(1, insert.RecordsAffected);
-        Assert.IsNull(insert.ErrorMessage);
+        Assert.IsNull(insert.Error);
     }
 
     [TestMethod]
@@ -277,6 +277,6 @@ DECLARE cur CURSOR
         var insert = await MicrosoftSQL.ExecuteProcedure(parameterInput, options, default);
         Assert.IsTrue(insert.Success);
         Assert.AreEqual(1, insert.RecordsAffected);
-        Assert.IsNull(insert.ErrorMessage);
+        Assert.IsNull(insert.Error);
     }
 }

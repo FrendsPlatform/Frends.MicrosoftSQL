@@ -5,8 +5,9 @@
 ### Changed
 
 - Updated the task to .NET 8.
-- Added structured error details and a configurable error message for failed executions.
-- **[Breaking Change]** The task now rethrows original exception instead of wrapping it in a new exception.
+- Added `Options.ErrorMessageOnFailure` and `Result.Error` with `Message` and `AdditionalInfo` fields.
+- **[Breaking Change]** Removed `Result.ErrorMessage`; use `Result.Error.Message` instead.
+- **[Breaking Change]** When `Options.ThrowErrorOnFailure` is enabled without a custom error message, the task now rethrows the original exception instead of wrapping it in a new exception.
 
 ## [2.3.0] - 2026-01-22
 

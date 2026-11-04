@@ -39,6 +39,10 @@ public class ManualTesting
         command.CommandText = $@"CREATE PROCEDURE InsertValues AS INSERT INTO {TableName} VALUES (1, 'Suku', 'Etu'), (2, 'Last', 'Forst'), (3, 'Hiiri', 'Mikki')";
         command.ExecuteNonQuery();
 
+        // Insert and then fail so task transaction rollback can be verified.
+        command.CommandText = $@"CREATE PROCEDURE InsertThenFail AS BEGIN INSERT INTO {TableName} VALUES (1, 'Suku', 'Etu'); THROW 51000, 'Transaction rollback test failure.', 1; END";
+        command.ExecuteNonQuery();
+
         // Select all
         command.CommandText = $"CREATE PROCEDURE SelectAll AS select * from {TableName}";
         command.ExecuteNonQuery();
@@ -89,15 +93,13 @@ DECLARE cur CURSOR
         connection.Dispose();
     }
 
-    // Use 'throw new Exception();' in HandleExecutionException class.
-    [Ignore("Use 'throw new Exception();' in HandleExecutionException class.")]
     [TestMethod]
     public async Task TestExecuteProcedure_RollbackInsert_ThrowErrorOnFailure_False()
     {
         var inputInsert = new Input()
         {
             ConnectionString = ConnectionString,
-            Execute = "InsertValues",
+            Execute = "InsertThenFail",
             ExecuteType = ExecuteTypes.ExecuteReader,
             Parameters = null,
         };
@@ -113,19 +115,19 @@ DECLARE cur CURSOR
         var insert = await MicrosoftSQL.ExecuteProcedure(inputInsert, options, default);
         Assert.IsFalse(insert.Success);
         Assert.AreEqual(0, insert.RecordsAffected);
-        Assert.IsTrue(insert.ErrorMessage.Contains("ExecuteHandler exception: (If required) transaction rollback completed without exception."));
+        Assert.IsNotNull(insert.Error);
+        Assert.IsTrue(insert.Error.Message.Contains("Transaction rollback test failure."));
+        Assert.IsNotNull(insert.Error.AdditionalInfo);
         Assert.AreEqual(0, Helper.GetRowCount(TableName));
     }
 
-    // Use 'throw new Exception();' in HandleExecutionException class.
-    [Ignore("Use 'throw new Exception();' in HandleExecutionException class.")]
     [TestMethod]
     public async Task TestExecuteProcedure_RollbackInsert_ThrowErrorOnFailure_True()
     {
         var inputInsert = new Input()
         {
             ConnectionString = ConnectionString,
-            Execute = "InsertValues",
+            Execute = "InsertThenFail",
             ExecuteType = ExecuteTypes.ExecuteReader,
             Parameters = null,
         };
@@ -138,7 +140,9 @@ DECLARE cur CURSOR
         };
 
         // Insert rows
-        var insert = await Assert.ThrowsExceptionAsync<Exception>(async () => await MicrosoftSQL.ExecuteProcedure(inputInsert, options, default));
-        Assert.IsTrue(insert.Message.Contains("ExecuteHandler exception: (If required) transaction rollback completed without exception."));
+        var insert = await Assert.ThrowsExceptionAsync<SqlException>(async () => await MicrosoftSQL.ExecuteProcedure(inputInsert, options, default));
+        Assert.IsTrue(insert.Message.Contains("Transaction rollback test failure."));
+        Assert.IsNull(insert.InnerException);
+        Assert.AreEqual(0, Helper.GetRowCount(TableName));
     }
 }

@@ -5,11 +5,10 @@ namespace Frends.MicrosoftSQL.ExecuteProcedure.Definitions;
 /// </summary>
 public class Result
 {
-    internal Result(bool success, int recordsAffected, string errorMessage, dynamic data, Error error = null)
+    internal Result(bool success, int recordsAffected, dynamic data, Error error = null)
     {
         Success = success;
         RecordsAffected = recordsAffected;
-        ErrorMessage = errorMessage;
         Data = data;
         Error = error;
     }
@@ -26,13 +25,6 @@ public class Result
     /// </summary>
     /// <example>100</example>
     public int RecordsAffected { get; private set; }
-
-    /// <summary>
-    /// Error message.
-    /// This value is generated when an exception occurs and Options.ThrowErrorOnFailure = false.
-    /// </summary>
-    /// <example>Login failed for user 'user'.</example>
-    public string ErrorMessage { get; private set; }
 
     /// <summary>
     /// Procedure's result as JToken.
