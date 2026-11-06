@@ -14,7 +14,6 @@ public class ManualTesting : ExecuteQueryTestBase
     {
         var inputInsert = new Input()
         {
-            ConnectionString = ConnString,
             Query = $@"INSERT INTO {TableName} VALUES (1, 'Suku', 'Etu'), (2, 'Last', 'Forst'), (3, 'Hiiri', 'Mikki')",
             ExecuteType = ExecuteTypes.ExecuteReader,
             Parameters = null,
@@ -28,7 +27,7 @@ public class ManualTesting : ExecuteQueryTestBase
         };
 
         // Insert rows
-        var insert = await MicrosoftSQL.ExecuteQuery(inputInsert, options, default);
+        var insert = await MicrosoftSQL.ExecuteQuery(inputInsert, CreateConnection(), options, default);
         Assert.IsFalse(insert.Success);
         Assert.AreEqual(0, insert.RecordsAffected);
         Assert.IsTrue(insert.Error.Message.Contains("(If required) transaction rollback completed without exception."));
@@ -42,7 +41,6 @@ public class ManualTesting : ExecuteQueryTestBase
     {
         var inputInsert = new Input()
         {
-            ConnectionString = ConnString,
             Query = $@"INSERT INTO {TableName} VALUES (1, 'Suku', 'Etu'), (2, 'Last', 'Forst'), (3, 'Hiiri', 'Mikki')",
             ExecuteType = ExecuteTypes.ExecuteReader,
             Parameters = null,
@@ -56,7 +54,7 @@ public class ManualTesting : ExecuteQueryTestBase
         };
 
         // Insert rows
-        var insert = await Assert.ThrowsExceptionAsync<Exception>(async () => await MicrosoftSQL.ExecuteQuery(inputInsert, options, default));
+        var insert = await Assert.ThrowsExceptionAsync<Exception>(async () => await MicrosoftSQL.ExecuteQuery(inputInsert, CreateConnection(), options, default));
         Assert.IsTrue(insert.Message.Contains("(If required) transaction rollback completed without exception."));
     }
 }

@@ -8,15 +8,15 @@ namespace Frends.MicrosoftSQL.ExecuteQuery.Tests;
 public class ExceptionUnitTests : ExecuteQueryTestBase
 {
     private Input input = new();
+    private Connection connection = new();
     private Options options = new();
 
     [TestInitialize]
     public void SetUp()
     {
-        input = new Input()
-        {
-            ConnectionString = ConnString,
-        };
+        input = new();
+
+        connection = CreateConnection();
 
         options = new Options()
         {
@@ -29,9 +29,9 @@ public class ExceptionUnitTests : ExecuteQueryTestBase
     [TestMethod]
     public async Task TestExecuteQuery_Invalid_Creds_ThrowError()
     {
-        input.ConnectionString = Helper.GetInvalidConnectionString();
+        connection.ConnectionString = Helper.GetInvalidConnectionString();
 
-        var ex = await Assert.ThrowsExceptionAsync<Exception>(() => MicrosoftSQL.ExecuteQuery(input, options, default));
+        var ex = await Assert.ThrowsExceptionAsync<Exception>(() => MicrosoftSQL.ExecuteQuery(input, connection, options, default));
         Assert.IsTrue(ex.Message.Contains("Login failed for user 'SA'."));
     }
 
@@ -39,9 +39,9 @@ public class ExceptionUnitTests : ExecuteQueryTestBase
     public async Task TestExecuteQuery_Invalid_Creds_ReturnErrorMessage()
     {
         options.ThrowErrorOnFailure = false;
-        input.ConnectionString = Helper.GetInvalidConnectionString();
+        connection.ConnectionString = Helper.GetInvalidConnectionString();
 
-        var result = await MicrosoftSQL.ExecuteQuery(input, options, default);
+        var result = await MicrosoftSQL.ExecuteQuery(input, connection, options, default);
         Assert.IsFalse(result.Success);
         Assert.IsTrue(result.Error.Message.Contains("Login failed for user 'SA'."));
         Assert.AreEqual(0, result.RecordsAffected);
@@ -53,7 +53,7 @@ public class ExceptionUnitTests : ExecuteQueryTestBase
         input.Query = $"INSERT INTO {TableName} VALUES (1, Unit, Tests, 456)";
         input.ExecuteType = ExecuteTypes.NonQuery;
 
-        var ex = Assert.ThrowsExceptionAsync<Exception>(async () => await MicrosoftSQL.ExecuteQuery(input, options, default));
+        var ex = Assert.ThrowsExceptionAsync<Exception>(async () => await MicrosoftSQL.ExecuteQuery(input, connection, options, default));
         Assert.IsTrue(ex.Result.Message.Contains("Microsoft.Data.SqlClient.SqlException (0x80131904): Invalid column name 'Unit'."));
     }
 
@@ -66,7 +66,7 @@ public class ExceptionUnitTests : ExecuteQueryTestBase
         options.ThrowErrorOnFailure = false;
         options.ErrorMessageOnFailure = "Query execution failed";
 
-        var result = await MicrosoftSQL.ExecuteQuery(input, options, default);
+        var result = await MicrosoftSQL.ExecuteQuery(input, connection, options, default);
         Assert.IsFalse(result.Success);
         Assert.IsTrue(result.Error.Message.Contains("Query execution failed"));
         Assert.IsTrue(result.Error.Message.Contains("Invalid column name 'Unit'."));

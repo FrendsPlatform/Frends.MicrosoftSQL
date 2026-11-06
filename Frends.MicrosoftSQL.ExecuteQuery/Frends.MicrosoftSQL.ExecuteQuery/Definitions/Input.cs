@@ -9,15 +9,6 @@ namespace Frends.MicrosoftSQL.ExecuteQuery.Definitions;
 public class Input
 {
     /// <summary>
-    /// Connection string.
-    /// </summary>
-    /// <example>Server=myServerAddress;Database=myDataBase;User Id=myUsername;Password=myPassword;</example>
-    [PasswordPropertyText]
-    [DisplayFormat(DataFormatString = "Text")]
-    [DefaultValue("Server=myServerAddress;Database=myDataBase;User Id=myUsername;Password=myPassword;")]
-    public string ConnectionString { get; set; }
-
-    /// <summary>
     /// Query to be executed in string format.
     /// Supports SELECT, INSERT, UPDATE and DELETE statements.
     /// </summary>

@@ -1,5 +1,16 @@
 # Changelog
 
+## [4.0.0] - 2026-11-04
+
+### Changed
+
+- **[Breaking Change]** Exceptions are now rethrown instead of wrapping in general Exception.
+- **[Breaking Change]** `Input.ConnectionString` is moved to new tab `Connection`
+
+### Added
+
+- Added new `Connection` properties `UseGivenUserCredentialsForRemoteConnections`, `Username` and `Password` to support Windows Authentication for remote connections.
+
 ## [3.0.0] - 2026-11-04
 
 ### Changed

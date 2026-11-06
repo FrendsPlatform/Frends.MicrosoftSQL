@@ -1,3 +1,4 @@
+using Frends.MicrosoftSQL.ExecuteQuery.Definitions;
 using Microsoft.Data.SqlClient;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -31,4 +32,6 @@ public class ExecuteQueryTestBase
         connection.Close();
         connection.Dispose();
     }
+
+    internal static Connection CreateConnection() => new() { ConnectionString = ConnString };
 }

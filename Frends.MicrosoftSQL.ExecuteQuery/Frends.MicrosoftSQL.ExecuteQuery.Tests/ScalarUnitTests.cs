@@ -22,7 +22,6 @@ public class ScalarUnitTests : ExecuteQueryTestBase
 
         var inputInsert = new Input()
         {
-            ConnectionString = ConnString,
             Query = $@"INSERT INTO {TableName} VALUES (1, 'Suku', 'Etu'), (2, 'Last', 'Forst'), (3, 'Hiiri', 'Mikki')",
             ExecuteType = ExecuteTypes.Scalar,
             Parameters = null,
@@ -30,7 +29,6 @@ public class ScalarUnitTests : ExecuteQueryTestBase
 
         var inputSelect = new Input()
         {
-            ConnectionString = ConnString,
             Query = $"select * from {TableName}",
             ExecuteType = ExecuteTypes.Scalar,
             Parameters = null,
@@ -38,7 +36,6 @@ public class ScalarUnitTests : ExecuteQueryTestBase
 
         var inputSelectSingle = new Input()
         {
-            ConnectionString = ConnString,
             Query = $"select LastName from {TableName} where Id = 1",
             ExecuteType = ExecuteTypes.Scalar,
             Parameters = null,
@@ -46,7 +43,6 @@ public class ScalarUnitTests : ExecuteQueryTestBase
 
         var inputUpdate = new Input()
         {
-            ConnectionString = ConnString,
             Query = $@"update {TableName} set LastName = 'Edit' where Id = 2",
             ExecuteType = ExecuteTypes.Scalar,
             Parameters = null,
@@ -54,7 +50,6 @@ public class ScalarUnitTests : ExecuteQueryTestBase
 
         var inputDelete = new Input()
         {
-            ConnectionString = ConnString,
             Query = $"delete from {TableName} where Id = 2",
             ExecuteType = ExecuteTypes.Scalar,
             Parameters = null,
@@ -62,7 +57,6 @@ public class ScalarUnitTests : ExecuteQueryTestBase
 
         var inputSelectAfterExecution = new Input()
         {
-            ConnectionString = ConnString,
             Query = $"select * from {TableName}",
             ExecuteType = ExecuteTypes.ExecuteReader,
             Parameters = null,
@@ -80,14 +74,14 @@ public class ScalarUnitTests : ExecuteQueryTestBase
             };
 
             // Insert rows
-            var insert = await MicrosoftSQL.ExecuteQuery(inputInsert, options, default);
+            var insert = await MicrosoftSQL.ExecuteQuery(inputInsert, CreateConnection(), options, default);
             Assert.IsTrue(insert.Success);
             Assert.AreEqual(1, insert.RecordsAffected);
             Assert.IsNull(insert.Error);
             Assert.AreEqual(3, Helper.GetRowCount(ConnString, TableName)); // Make sure rows inserted before moving on.
 
             // Select all - Returns 1 because first value (row/column) is ID = 1
-            var select = await MicrosoftSQL.ExecuteQuery(inputSelect, options, default);
+            var select = await MicrosoftSQL.ExecuteQuery(inputSelect, CreateConnection(), options, default);
             Assert.IsTrue(select.Success);
             Assert.AreEqual(1, select.RecordsAffected);
             Assert.IsNull(select.Error);
@@ -95,7 +89,7 @@ public class ScalarUnitTests : ExecuteQueryTestBase
             Assert.AreEqual(3, Helper.GetRowCount(ConnString, TableName)); // double check
 
             // Select single
-            var selectSingle = await MicrosoftSQL.ExecuteQuery(inputSelectSingle, options, default);
+            var selectSingle = await MicrosoftSQL.ExecuteQuery(inputSelectSingle, CreateConnection(), options, default);
             Assert.IsTrue(selectSingle.Success);
             Assert.AreEqual(1, selectSingle.RecordsAffected);
             Assert.IsNull(selectSingle.Error);
@@ -103,12 +97,12 @@ public class ScalarUnitTests : ExecuteQueryTestBase
             Assert.AreEqual(3, Helper.GetRowCount(ConnString, TableName)); // double check
 
             // Update
-            var update = await MicrosoftSQL.ExecuteQuery(inputUpdate, options, default);
+            var update = await MicrosoftSQL.ExecuteQuery(inputUpdate, CreateConnection(), options, default);
             Assert.IsTrue(update.Success);
             Assert.AreEqual(1, update.RecordsAffected);
             Assert.IsNull(update.Error);
             Assert.AreEqual(3, Helper.GetRowCount(ConnString, TableName)); // double check
-            var checkUpdateResult = await MicrosoftSQL.ExecuteQuery(inputSelectAfterExecution, options, default);
+            var checkUpdateResult = await MicrosoftSQL.ExecuteQuery(inputSelectAfterExecution, CreateConnection(), options, default);
             Assert.AreEqual("Suku", (string)checkUpdateResult.Data[0]["LastName"]);
             Assert.AreEqual("Etu", (string)checkUpdateResult.Data[0]["FirstName"]);
             Assert.AreEqual("Edit", (string)checkUpdateResult.Data[1]["LastName"]);
@@ -118,12 +112,12 @@ public class ScalarUnitTests : ExecuteQueryTestBase
             Assert.AreEqual(3, Helper.GetRowCount(ConnString, TableName)); // double check
 
             // Delete
-            var delete = await MicrosoftSQL.ExecuteQuery(inputDelete, options, default);
+            var delete = await MicrosoftSQL.ExecuteQuery(inputDelete, CreateConnection(), options, default);
             Assert.IsTrue(delete.Success);
             Assert.AreEqual(1, delete.RecordsAffected);
             Assert.IsNull(delete.Error);
             Assert.AreEqual(2, Helper.GetRowCount(ConnString, TableName)); // double check
-            var checkDeleteResult = await MicrosoftSQL.ExecuteQuery(inputSelectAfterExecution, options, default);
+            var checkDeleteResult = await MicrosoftSQL.ExecuteQuery(inputSelectAfterExecution, CreateConnection(), options, default);
             Assert.AreEqual("Suku", (string)checkDeleteResult.Data[0]["LastName"]);
             Assert.AreEqual("Etu", (string)checkDeleteResult.Data[0]["FirstName"]);
             Assert.AreEqual("Hiiri", (string)checkDeleteResult.Data[1]["LastName"]);
@@ -147,7 +141,6 @@ public class ScalarUnitTests : ExecuteQueryTestBase
 
         var input = new Input
         {
-            ConnectionString = ConnString,
             Query = $"IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME='{table}') BEGIN CREATE TABLE {table} ( Id int IDENTITY(1, 1), GeogCol1 geography, GeogCol2 AS GeogCol1.STAsText()); END",
             ExecuteType = ExecuteTypes.Auto,
             Parameters = null,
@@ -155,23 +148,23 @@ public class ScalarUnitTests : ExecuteQueryTestBase
 
         try
         {
-            var create = await MicrosoftSQL.ExecuteQuery(input, options, default);
+            var create = await MicrosoftSQL.ExecuteQuery(input, CreateConnection(), options, default);
             Assert.IsTrue(create.Success, "Create table");
 
             input.Query = $"INSERT INTO {table} (GeogCol1) VALUES (geography::STGeomFromText('LINESTRING(-122.360 47.656, -122.343 47.656 )', 4326));";
 
-            var insert1 = await MicrosoftSQL.ExecuteQuery(input, options, default);
+            var insert1 = await MicrosoftSQL.ExecuteQuery(input, CreateConnection(), options, default);
             Assert.IsTrue(insert1.Success, "First insert");
 
             input.Query = $"INSERT INTO {table} (GeogCol1) VALUES(geography::STGeomFromText('POLYGON((-122.358 47.653 , -122.348 47.649, -122.348 47.658, -122.358 47.658, -122.358 47.653))', 4326));";
 
-            var insert2 = await MicrosoftSQL.ExecuteQuery(input, options, default);
+            var insert2 = await MicrosoftSQL.ExecuteQuery(input, CreateConnection(), options, default);
             Assert.IsTrue(insert2.Success, "Second insert");
 
             input.Query = $"SELECT GeogCol1 From {table}";
             input.ExecuteType = ExecuteTypes.Scalar;
 
-            var select = await MicrosoftSQL.ExecuteQuery(input, options, default);
+            var select = await MicrosoftSQL.ExecuteQuery(input, CreateConnection(), options, default);
             Assert.IsTrue(select.Success, "Select");
             Assert.IsNotNull(select.Data["Value"], "Selected data should not be null");
             Assert.IsInstanceOfType(select.Data["Value"], typeof(JValue), "Geography data should be converted to string");
@@ -182,7 +175,7 @@ public class ScalarUnitTests : ExecuteQueryTestBase
             input.Query = $"DROP TABLE {table}";
             input.ExecuteType = ExecuteTypes.Auto;
 
-            var drop = await MicrosoftSQL.ExecuteQuery(input, options, default);
+            var drop = await MicrosoftSQL.ExecuteQuery(input, CreateConnection(), options, default);
             Assert.IsTrue(drop.Success, "Drop");
         }
     }

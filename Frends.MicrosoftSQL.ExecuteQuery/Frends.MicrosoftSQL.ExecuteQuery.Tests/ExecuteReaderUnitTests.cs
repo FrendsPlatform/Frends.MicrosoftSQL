@@ -23,7 +23,6 @@ public class ExecuteReaderUnitTests : ExecuteQueryTestBase
 
         var inputInsert = new Input()
         {
-            ConnectionString = ConnString,
             Query = $@"INSERT INTO {TableName} VALUES (1, 'Suku', 'Etu'), (2, 'Last', 'Forst'), (3, 'Hiiri', 'Mikki')",
             ExecuteType = ExecuteTypes.ExecuteReader,
             Parameters = null,
@@ -31,7 +30,6 @@ public class ExecuteReaderUnitTests : ExecuteQueryTestBase
 
         var inputSelect = new Input()
         {
-            ConnectionString = ConnString,
             Query = $"select * from {TableName}",
             ExecuteType = ExecuteTypes.ExecuteReader,
             Parameters = null,
@@ -39,7 +37,6 @@ public class ExecuteReaderUnitTests : ExecuteQueryTestBase
 
         var inputSelectSingle = new Input()
         {
-            ConnectionString = ConnString,
             Query = $"select * from {TableName} where Id = 1",
             ExecuteType = ExecuteTypes.ExecuteReader,
             Parameters = null,
@@ -47,7 +44,6 @@ public class ExecuteReaderUnitTests : ExecuteQueryTestBase
 
         var inputUpdate = new Input()
         {
-            ConnectionString = ConnString,
             Query = $@"update {TableName} set LastName = 'Edit' where Id = 2",
             ExecuteType = ExecuteTypes.ExecuteReader,
             Parameters = null,
@@ -55,7 +51,6 @@ public class ExecuteReaderUnitTests : ExecuteQueryTestBase
 
         var inputDelete = new Input()
         {
-            ConnectionString = ConnString,
             Query = $"delete from {TableName} where Id = 2",
             ExecuteType = ExecuteTypes.ExecuteReader,
             Parameters = null,
@@ -73,14 +68,14 @@ public class ExecuteReaderUnitTests : ExecuteQueryTestBase
             };
 
             // Insert rows
-            var insert = await MicrosoftSQL.ExecuteQuery(inputInsert, options, default);
+            var insert = await MicrosoftSQL.ExecuteQuery(inputInsert, CreateConnection(), options, default);
             Assert.IsTrue(insert.Success);
             Assert.AreEqual(3, insert.RecordsAffected);
             Assert.IsNull(insert.Error);
             Assert.AreEqual(3, Helper.GetRowCount(ConnString, TableName)); // Make sure rows inserted before moving on.
 
             // Select all
-            var select = await MicrosoftSQL.ExecuteQuery(inputSelect, options, default);
+            var select = await MicrosoftSQL.ExecuteQuery(inputSelect, CreateConnection(), options, default);
             Assert.IsTrue(select.Success);
             Assert.AreEqual(-1, select.RecordsAffected);
             Assert.IsNull(select.Error);
@@ -94,7 +89,7 @@ public class ExecuteReaderUnitTests : ExecuteQueryTestBase
             Assert.AreEqual(3, Helper.GetRowCount(ConnString, TableName)); // double check
 
             // Select single
-            var selectSingle = await MicrosoftSQL.ExecuteQuery(inputSelectSingle, options, default);
+            var selectSingle = await MicrosoftSQL.ExecuteQuery(inputSelectSingle, CreateConnection(), options, default);
             Assert.IsTrue(selectSingle.Success);
             Assert.AreEqual(-1, selectSingle.RecordsAffected);
             Assert.IsNull(selectSingle.Error);
@@ -104,12 +99,12 @@ public class ExecuteReaderUnitTests : ExecuteQueryTestBase
             Assert.AreEqual(3, Helper.GetRowCount(ConnString, TableName)); // double check
 
             // Update
-            var update = await MicrosoftSQL.ExecuteQuery(inputUpdate, options, default);
+            var update = await MicrosoftSQL.ExecuteQuery(inputUpdate, CreateConnection(), options, default);
             Assert.IsTrue(update.Success);
             Assert.AreEqual(1, update.RecordsAffected);
             Assert.IsNull(update.Error);
             Assert.AreEqual(3, Helper.GetRowCount(ConnString, TableName)); // double check
-            var checkUpdateResult = await MicrosoftSQL.ExecuteQuery(inputSelect, options, default);
+            var checkUpdateResult = await MicrosoftSQL.ExecuteQuery(inputSelect, CreateConnection(), options, default);
             Assert.AreEqual("Suku", (string)checkUpdateResult.Data[0]["LastName"]);
             Assert.AreEqual("Etu", (string)checkUpdateResult.Data[0]["FirstName"]);
             Assert.AreEqual("Edit", (string)checkUpdateResult.Data[1]["LastName"]);
@@ -119,12 +114,12 @@ public class ExecuteReaderUnitTests : ExecuteQueryTestBase
             Assert.AreEqual(3, Helper.GetRowCount(ConnString, TableName)); // double check
 
             // Delete
-            var delete = await MicrosoftSQL.ExecuteQuery(inputDelete, options, default);
+            var delete = await MicrosoftSQL.ExecuteQuery(inputDelete, CreateConnection(), options, default);
             Assert.IsTrue(delete.Success);
             Assert.AreEqual(1, delete.RecordsAffected);
             Assert.IsNull(delete.Error);
             Assert.AreEqual(2, Helper.GetRowCount(ConnString, TableName)); // double check
-            var checkDeleteResult = await MicrosoftSQL.ExecuteQuery(inputSelect, options, default);
+            var checkDeleteResult = await MicrosoftSQL.ExecuteQuery(inputSelect, CreateConnection(), options, default);
             Assert.AreEqual("Suku", (string)checkDeleteResult.Data[0]["LastName"]);
             Assert.AreEqual("Etu", (string)checkDeleteResult.Data[0]["FirstName"]);
             Assert.AreEqual("Hiiri", (string)checkDeleteResult.Data[1]["LastName"]);
@@ -145,7 +140,6 @@ public class ExecuteReaderUnitTests : ExecuteQueryTestBase
 
         var input = new Input
         {
-            ConnectionString = ConnString,
             Query = $"INSERT INTO {table} VALUES (1, @bin)",
             ExecuteType = ExecuteTypes.NonQuery,
             Parameters = new QueryParameter[] { new QueryParameter { Name = "bin", Value = binary, SqlDataType = SqlDataTypes.VarBinary } },
@@ -158,18 +152,17 @@ public class ExecuteReaderUnitTests : ExecuteQueryTestBase
             ThrowErrorOnFailure = true,
         };
 
-        var result = await MicrosoftSQL.ExecuteQuery(input, options, default);
+        var result = await MicrosoftSQL.ExecuteQuery(input, CreateConnection(), options, default);
         Assert.IsTrue(result.Success);
 
         input = new Input
         {
-            ConnectionString = ConnString,
             Query = $@"SELECT Id, Data From {table}",
             ExecuteType = ExecuteTypes.ExecuteReader,
             Parameters = null,
         };
 
-        result = await MicrosoftSQL.ExecuteQuery(input, options, default);
+        result = await MicrosoftSQL.ExecuteQuery(input, CreateConnection(), options, default);
 
         command = $"IF EXISTS(SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = '{table}') BEGIN DROP TABLE IF EXISTS {table}; END";
         ExecuteQuery(command);
