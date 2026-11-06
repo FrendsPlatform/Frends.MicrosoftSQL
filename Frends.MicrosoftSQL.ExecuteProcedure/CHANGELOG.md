@@ -1,5 +1,14 @@
 # Changelog
 
+## [3.0.0] - 2026-11-02
+
+### Changed
+
+- Updated the task to .NET 8.
+- Added `Options.ErrorMessageOnFailure` and `Result.Error` with `Message` and `AdditionalInfo` fields.
+- **[Breaking Change]** Removed `Result.ErrorMessage`; use `Result.Error.Message` instead.
+- **[Breaking Change]** When `Options.ThrowErrorOnFailure` is enabled without a custom error message, the task now rethrows the original exception instead of wrapping it in a new exception.
+
 ## [2.3.0] - 2026-01-22
 
 ### Changed

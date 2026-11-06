@@ -1,4 +1,4 @@
-﻿using System.ComponentModel;
+using System.ComponentModel;
 
 namespace Frends.MicrosoftSQL.ExecuteProcedure.Definitions;
 
@@ -7,13 +7,6 @@ namespace Frends.MicrosoftSQL.ExecuteProcedure.Definitions;
 /// </summary>
 public class Options
 {
-    /// <summary>
-    /// (true) Throw an exception or (false) stop the Task and return result object containing Result.Success = false and Result.ErrorMessage = 'exception message'.
-    /// </summary>
-    /// <example>true</example>
-    [DefaultValue(true)]
-    public bool ThrowErrorOnFailure { get; set; }
-
     /// <summary>
     /// Number of seconds for the operation to complete before it times out.
     /// </summary>
@@ -36,4 +29,18 @@ public class Options
     /// <example>SqlTransactionIsolationLevel.ReadCommitted</example>
     [DefaultValue(SqlTransactionIsolationLevel.ReadCommitted)]
     public SqlTransactionIsolationLevel SqlTransactionIsolationLevel { get; set; }
+
+    /// <summary>
+    /// Whether to throw an error on failure.
+    /// </summary>
+    /// <example>true</example>
+    [DefaultValue(true)]
+    public bool ThrowErrorOnFailure { get; set; } = true;
+
+    /// <summary>
+    /// Overrides the error message when the task fails.
+    /// </summary>
+    /// <example>Procedure execution failed</example>
+    [DefaultValue("")]
+    public string ErrorMessageOnFailure { get; set; } = string.Empty;
 }
