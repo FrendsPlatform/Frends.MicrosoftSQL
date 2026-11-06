@@ -1,5 +1,14 @@
 # Changelog
 
+## [3.0.0] - 2026-11-02
+
+### Changed
+
+- Added the `Error` result object with `Message` and `AdditionalInfo` fields for failed batch operations.
+- Upgraded the task and its tests to .NET 8.
+- **[Breaking Change]** Removed the `ErrorMessage` result field; use `Error.Message` and `Error.AdditionalInfo` instead.
+- **[Breaking Change]** The task rethrows original exceptions instead of wrapping them in a new exception.
+
 ## [2.2.0] - 2026-01-22
 
 ### Changed

@@ -1,15 +1,21 @@
-﻿namespace Frends.MicrosoftSQL.BatchOperation.Definitions;
+namespace Frends.MicrosoftSQL.BatchOperation.Definitions;
 
 /// <summary>
 /// Task's result.
 /// </summary>
 public class Result
 {
+    internal Result(bool success = false, int recordsAffected = 0)
+    {
+        Success = success;
+        RecordsAffected = recordsAffected;
+    }
+
     /// <summary>
     /// Operation complete without errors.
     /// </summary>
     /// <example>true</example>
-    public bool Success { get; private set; }
+    public bool Success { get; set; }
 
     /// <summary>
     /// Records affected.
@@ -18,16 +24,8 @@ public class Result
     public int RecordsAffected { get; private set; }
 
     /// <summary>
-    /// Error message.
-    /// This value is generated when an exception occurs and Options.ThrowErrorOnFailure = false.
+    /// Error that occurred during task execution.
     /// </summary>
-    /// <example>Login failed for user 'user'.</example>
-    public string ErrorMessage { get; private set; }
-
-    internal Result(bool success, int recordsAffected, string errorMessage)
-    {
-        Success = success;
-        RecordsAffected = recordsAffected;
-        ErrorMessage = errorMessage;
-    }
+    /// <example>object { string Message, Exception AdditionalInfo }</example>
+    public Error Error { get; set; }
 }

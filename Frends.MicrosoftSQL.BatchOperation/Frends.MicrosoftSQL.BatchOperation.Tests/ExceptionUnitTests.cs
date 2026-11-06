@@ -1,4 +1,5 @@
 using Frends.MicrosoftSQL.BatchOperation.Definitions;
+using Microsoft.Data.SqlClient;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Frends.MicrosoftSQL.BatchOperation.Tests;
@@ -22,16 +23,16 @@ public class ExceptionUnitTests
         {
             SqlTransactionIsolationLevel = SqlTransactionIsolationLevel.ReadCommitted,
             CommandTimeoutSeconds = 2,
-            ThrowErrorOnFailure = true
+            ThrowErrorOnFailure = true,
         };
 
-        var ex = await Assert.ThrowsExceptionAsync<Exception>(() => MicrosoftSQL.BatchOperation(input, options, default));
-        Assert.IsNotNull(ex.InnerException);
-        Assert.IsTrue(ex.InnerException.Message.Contains("Login failed for user 'SA'."));
+        var ex = await Assert.ThrowsExceptionAsync<SqlException>(() => MicrosoftSQL.BatchOperation(input, options, default));
+        Assert.IsNotNull(ex);
+        Assert.IsTrue(ex.Message.Contains("Login failed for user 'SA'."));
     }
 
     [TestMethod]
-    public async Task TestBatchOperation_Invalid_Creds_ReturnErrorMessage()
+    public async Task TestBatchOperation_Invalid_Creds_ReturnErrorDetails()
     {
         var input = new Input()
         {
@@ -42,12 +43,13 @@ public class ExceptionUnitTests
         {
             SqlTransactionIsolationLevel = SqlTransactionIsolationLevel.ReadCommitted,
             CommandTimeoutSeconds = 2,
-            ThrowErrorOnFailure = false
+            ThrowErrorOnFailure = false,
         };
 
         var result = await MicrosoftSQL.BatchOperation(input, options, default);
         Assert.IsFalse(result.Success);
-        Assert.IsTrue(result.ErrorMessage.Contains("Login failed for user 'SA'."));
+        Assert.IsTrue(result.Error.Message.Contains("Login failed for user 'SA'."));
+        Assert.IsNotNull(result.Error.AdditionalInfo);
         Assert.AreEqual(0, result.RecordsAffected);
     }
 
@@ -73,7 +75,7 @@ public class ExceptionUnitTests
 
         // Assert
         Assert.IsNotNull(ex.InnerException);
-        Assert.IsTrue(ex.InnerException.Message.Contains("ExecuteHandler exception: 'Options.SqlTransactionIsolationLevel = None', so there was no transaction rollback."));
+        Assert.IsTrue(ex.Message.Contains("ExecuteHandler exception: 'Options.SqlTransactionIsolationLevel = None', so there was no transaction rollback."));
     }
 
     [TestMethod]
@@ -94,6 +96,6 @@ public class ExceptionUnitTests
         var ex = await Assert.ThrowsExceptionAsync<Exception>(() => MicrosoftSQL.BatchOperation(input, options, CancellationToken.None));
 
         Assert.IsNotNull(ex.InnerException);
-        Assert.IsTrue(ex.InnerException.Message.Contains("ExecuteHandler exception: (If required) transaction rollback completed without exception."));
+        Assert.IsTrue(ex.Message.Contains("ExecuteHandler exception: (If required) transaction rollback completed without exception."));
     }
 }
