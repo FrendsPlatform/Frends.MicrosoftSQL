@@ -6,8 +6,9 @@ namespace Frends.MicrosoftSQL.ExecuteQuery.Tests.Lib;
 
 public class ExecuteQueryTestBase
 {
-    internal static readonly string ConnString = Helper.CreateConnectionString();
     internal static readonly string TableName = "TestTable";
+
+    internal static string ConnString => SqlServerContainer.ConnectionString;
 
     [TestInitialize]
     public void Init()

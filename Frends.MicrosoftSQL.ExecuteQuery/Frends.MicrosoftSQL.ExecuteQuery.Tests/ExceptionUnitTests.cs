@@ -1,4 +1,4 @@
-using Frends.MicrosoftSQL.ExecuteQuery.Definitions;
+﻿using Frends.MicrosoftSQL.ExecuteQuery.Definitions;
 using Frends.MicrosoftSQL.ExecuteQuery.Tests.Lib;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -32,7 +32,7 @@ public class ExceptionUnitTests : ExecuteQueryTestBase
         connection.ConnectionString = Helper.GetInvalidConnectionString();
 
         var ex = await Assert.ThrowsExceptionAsync<Exception>(() => MicrosoftSQL.ExecuteQuery(input, connection, options, default));
-        Assert.IsTrue(ex.Message.Contains("Login failed for user 'SA'."));
+        Assert.IsTrue(ex.Message.Contains("Login failed for user 'sa'."));
     }
 
     [TestMethod]
@@ -43,7 +43,7 @@ public class ExceptionUnitTests : ExecuteQueryTestBase
 
         var result = await MicrosoftSQL.ExecuteQuery(input, connection, options, default);
         Assert.IsFalse(result.Success);
-        Assert.IsTrue(result.Error.Message.Contains("Login failed for user 'SA'."));
+        Assert.IsTrue(result.Error.Message.Contains("Login failed for user 'sa'."));
         Assert.AreEqual(0, result.RecordsAffected);
     }
 

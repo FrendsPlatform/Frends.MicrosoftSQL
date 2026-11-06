@@ -11,6 +11,10 @@
 
 - Added new `Connection` properties `UseGivenUserCredentialsForRemoteConnections`, `Username` and `Password` to support Windows Authentication for remote connections.
 
+### Fixed
+
+- Transaction rollback no longer fails with "There is already an open DataReader" when an error occurs while reading query results.
+
 ## [3.0.0] - 2026-11-04
 
 ### Changed

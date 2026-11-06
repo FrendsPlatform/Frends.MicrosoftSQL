@@ -37,6 +37,7 @@ public static class MicrosoftSQL
     {
         try
         {
+            ValidationHandler.Run(connection);
             if (!connection.UseGivenUserCredentialsForRemoteConnections)
                 return await ExecuteQueryInternal(input, connection, options, cancellationToken).ConfigureAwait(false);
 
@@ -57,7 +58,8 @@ public static class MicrosoftSQL
             using var handle = credentials.LogonUser(LogonType.NewCredentials);
             return await WindowsIdentity.RunImpersonatedAsync(
                     handle,
-                    async () => await ExecuteQueryInternal(input, connection, options, cancellationToken).ConfigureAwait(false))
+                    async () => await ExecuteQueryInternal(input, connection, options, cancellationToken)
+                        .ConfigureAwait(false))
                 .ConfigureAwait(false);
         }
         catch (Exception ex)
@@ -211,6 +213,10 @@ public static class MicrosoftSQL
         }
         catch (Exception ex)
         {
+            // An open reader blocks any further command on the connection, including the rollback.
+            if (dataReader is { IsClosed: false })
+                await dataReader.CloseAsync().ConfigureAwait(false);
+
             Exception executionException;
             if (command.Transaction is null)
             {
