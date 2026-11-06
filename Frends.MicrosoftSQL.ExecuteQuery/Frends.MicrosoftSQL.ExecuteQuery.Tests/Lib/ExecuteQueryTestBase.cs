@@ -1,3 +1,4 @@
+using Frends.MicrosoftSQL.ExecuteQuery.Definitions;
 using Microsoft.Data.SqlClient;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -5,8 +6,9 @@ namespace Frends.MicrosoftSQL.ExecuteQuery.Tests.Lib;
 
 public class ExecuteQueryTestBase
 {
-    internal static readonly string ConnString = Helper.CreateConnectionString();
     internal static readonly string TableName = "TestTable";
+
+    internal static string ConnString => SqlServerContainer.ConnectionString;
 
     [TestInitialize]
     public void Init()
@@ -31,4 +33,6 @@ public class ExecuteQueryTestBase
         connection.Close();
         connection.Dispose();
     }
+
+    internal static Connection CreateConnection() => new() { ConnectionString = ConnString };
 }
