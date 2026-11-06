@@ -6,11 +6,12 @@ using System.Globalization;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
+using Frends.MicrosoftSQL.ExecuteQueryToFile.Definitions;
 using Frends.MicrosoftSQL.ExecuteQueryToFile.Enums;
 using Microsoft.Data.SqlClient;
 using Newtonsoft.Json;
 
-namespace Frends.MicrosoftSQL.ExecuteQueryToFile.Definitions;
+namespace Frends.MicrosoftSQL.ExecuteQueryToFile.Helpers;
 
 internal class JsonFileWriter : IAsyncDisposable
 {
@@ -27,12 +28,21 @@ internal class JsonFileWriter : IAsyncDisposable
 
     private JsonOptions Options { get; }
 
+    /// <summary>
+    /// Releases the SQL command resources.
+    /// </summary>
+    /// <returns>A task that represents the asynchronous dispose operation.</returns>
     public async ValueTask DisposeAsync()
     {
         if (SqlCommand != null)
             await SqlCommand.DisposeAsync();
     }
 
+    /// <summary>
+    /// Executes the SQL query and writes the result to a JSON file.
+    /// </summary>
+    /// <param name="cancellationToken">Token used to cancel query execution.</param>
+    /// <returns>The number of entries written and the output file information.</returns>
     public async Task<Result> SaveQueryToJson(CancellationToken cancellationToken)
     {
         await using var fileStream = new FileStream(
@@ -65,6 +75,68 @@ internal class JsonFileWriter : IAsyncDisposable
         await streamWriter.FlushAsync().ConfigureAwait(false);
 
         return new Result(count, Input.OutputFilePath, Path.GetFileName(Input.OutputFilePath));
+    }
+
+    private static async Task WriteBinaryAsBase64Async(
+        JsonTextWriter jsonWriter,
+        DbDataReader reader,
+        int columnIndex,
+        CancellationToken cancellationToken)
+    {
+        const int InputChunkSize = 3 * 1024;
+
+        await using var binaryStream = reader.GetStream(columnIndex);
+
+        await jsonWriter.WriteRawValueAsync("\"", cancellationToken).ConfigureAwait(false);
+
+        var inputBuffer = new byte[InputChunkSize];
+
+        var outputBuffer = new char[((InputChunkSize / 3) + 1) * 4];
+
+        int bytesRead;
+        while ((bytesRead = await ReadChunkAsync(binaryStream, inputBuffer, cancellationToken).ConfigureAwait(false)) > 0)
+        {
+            int charsWritten = Convert.ToBase64CharArray(
+                inputBuffer, 0, bytesRead, outputBuffer, 0);
+
+            await jsonWriter.WriteRawAsync(
+                    new string(outputBuffer, 0, charsWritten), cancellationToken)
+                .ConfigureAwait(false);
+        }
+
+        await jsonWriter.WriteRawAsync("\"", cancellationToken).ConfigureAwait(false);
+    }
+
+    private static List<ColumnSchema> BuildSchema(DbDataReader reader)
+    {
+        var schema = new List<ColumnSchema>(reader.FieldCount);
+
+        for (int i = 0; i < reader.FieldCount; i++)
+        {
+            schema.Add(new ColumnSchema(
+                index: i,
+                name: reader.GetName(i),
+                dotnetType: reader.GetFieldType(i),
+                dbTypeName: reader.GetDataTypeName(i)?.ToLowerInvariant() ?? string.Empty));
+        }
+
+        return schema;
+    }
+
+    private static async Task<int> ReadChunkAsync(Stream stream, byte[] buffer, CancellationToken cancellationToken)
+    {
+        int total = 0;
+        while (total < buffer.Length)
+        {
+            int read = await stream
+                .ReadAsync(buffer, total, buffer.Length - total, cancellationToken)
+                .ConfigureAwait(false);
+            if (read == 0)
+                break;
+            total += read;
+        }
+
+        return total;
     }
 
     private async Task<int> WriteIndented(
@@ -176,71 +248,5 @@ internal class JsonFileWriter : IAsyncDisposable
             return ((Guid)value).ToString();
 
         return value;
-    }
-
-    /// <summary>
-    /// Streams a binary column to JSON as a Base64-encoded string using fixed-size chunks,
-    /// avoiding loading the entire value into memory.
-    /// </summary>
-    private static async Task WriteBinaryAsBase64Async(
-        JsonTextWriter jsonWriter,
-        DbDataReader reader,
-        int columnIndex,
-        CancellationToken cancellationToken)
-    {
-        const int InputChunkSize = 3 * 1024;
-
-        await using var binaryStream = reader.GetStream(columnIndex);
-
-        await jsonWriter.WriteRawValueAsync("\"", cancellationToken).ConfigureAwait(false);
-
-        var inputBuffer = new byte[InputChunkSize];
-
-        var outputBuffer = new char[((InputChunkSize / 3) + 1) * 4];
-
-        int bytesRead;
-        while ((bytesRead = await ReadChunkAsync(binaryStream, inputBuffer, cancellationToken).ConfigureAwait(false)) > 0)
-        {
-            int charsWritten = Convert.ToBase64CharArray(
-                inputBuffer, 0, bytesRead, outputBuffer, 0);
-
-            await jsonWriter.WriteRawAsync(
-                    new string(outputBuffer, 0, charsWritten), cancellationToken)
-                .ConfigureAwait(false);
-        }
-
-        await jsonWriter.WriteRawAsync("\"", cancellationToken).ConfigureAwait(false);
-    }
-
-    private static List<ColumnSchema> BuildSchema(DbDataReader reader)
-    {
-        var schema = new List<ColumnSchema>(reader.FieldCount);
-
-        for (int i = 0; i < reader.FieldCount; i++)
-        {
-            schema.Add(new ColumnSchema(
-                index: i,
-                name: reader.GetName(i),
-                dotnetType: reader.GetFieldType(i),
-                dbTypeName: reader.GetDataTypeName(i)?.ToLowerInvariant() ?? string.Empty));
-        }
-
-        return schema;
-    }
-
-    private static async Task<int> ReadChunkAsync(Stream stream, byte[] buffer, CancellationToken cancellationToken)
-    {
-        int total = 0;
-        while (total < buffer.Length)
-        {
-            int read = await stream
-                .ReadAsync(buffer, total, buffer.Length - total, cancellationToken)
-                .ConfigureAwait(false);
-            if (read == 0)
-                break;
-            total += read;
-        }
-
-        return total;
     }
 }

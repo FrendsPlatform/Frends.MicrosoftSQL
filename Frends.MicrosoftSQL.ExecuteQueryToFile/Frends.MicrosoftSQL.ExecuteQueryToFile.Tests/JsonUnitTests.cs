@@ -6,6 +6,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Frends.MicrosoftSQL.ExecuteQueryToFile.Definitions;
 using Frends.MicrosoftSQL.ExecuteQueryToFile.Enums;
+using Frends.MicrosoftSQL.ExecuteQueryToFile.Tests.Lib;
 using Microsoft.Data.SqlClient;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -16,18 +17,24 @@ namespace Frends.MicrosoftSQL.ExecuteQueryToFile.Tests;
 [TestFixture]
 public class JsonUnitTests
 {
-    private static readonly string _connString = Helper.GetConnectionString();
-    private static readonly string _tableName = "TestTable";
-    private static readonly string _destination = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "../../../TestData/test.json");
+    private static readonly string ConnectionString = Helper.GetConnectionString();
 
-    private Options _options;
+    private static readonly Definitions.Connection DatabaseConnection = new()
+    {
+        ConnectionString = ConnectionString,
+    };
+
+    private static readonly string TableName = "TestTable";
+    private static readonly string Destination = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "../../../TestData/test.json");
+
+    private Options options;
 
     [SetUp]
     public void Init()
     {
-        Helper.ExecuteNonQuery(_connString, $"IF EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME='{_tableName}') DROP TABLE {_tableName}");
+        Helper.ExecuteNonQuery(ConnectionString, $"IF EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME='{TableName}') DROP TABLE {TableName}");
 
-        _options = new Options
+        options = new Options
         {
             TimeoutSeconds = 30,
             ReturnFormat = ReturnFormat.JSON,
@@ -42,33 +49,33 @@ public class JsonUnitTests
             },
         };
 
-        Helper.CreateTestTable(_connString, _tableName);
+        Helper.CreateTestTable(ConnectionString, TableName);
 
         var parameters = new Microsoft.Data.SqlClient.SqlParameter[]
         {
         new Microsoft.Data.SqlClient.SqlParameter("@Hash", SqlDbType.VarBinary)
         {
-            Value = File.ReadAllBytes(Path.Combine(Path.GetDirectoryName(_destination), "Test_image.png")),
+            Value = File.ReadAllBytes(Path.Combine(Path.GetDirectoryName(Destination), "Test_image.png")),
         },
         new Microsoft.Data.SqlClient.SqlParameter("@TestText", SqlDbType.VarBinary)
         {
-            Value = File.ReadAllBytes(Path.Combine(Path.GetDirectoryName(_destination), "Test_text.txt")),
+            Value = File.ReadAllBytes(Path.Combine(Path.GetDirectoryName(Destination), "Test_text.txt")),
         },
         };
 
-        Helper.ExecuteNonQuery(_connString, $"Insert into {_tableName} (Id, LastName, FirstName, Salary, Image, TestText) values (1,'Meikalainen','Matti',1523.25, {parameters[0].ParameterName}, {parameters[1].ParameterName});", parameters);
+        Helper.ExecuteNonQuery(ConnectionString, $"Insert into {TableName} (Id, LastName, FirstName, Salary, Image, TestText) values (1,'Meikalainen','Matti',1523.25, {parameters[0].ParameterName}, {parameters[1].ParameterName});", parameters);
     }
 
     [TearDown]
     public void CleanUp()
     {
-        using var connection = new SqlConnection(_connString);
+        using var connection = new SqlConnection(ConnectionString);
         connection.Open();
         var cmd = connection.CreateCommand();
-        cmd.CommandText = $"IF EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME='{_tableName}') BEGIN DROP TABLE IF EXISTS {_tableName}; END";
+        cmd.CommandText = $"IF EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME='{TableName}') BEGIN DROP TABLE IF EXISTS {TableName}; END";
         cmd.ExecuteNonQuery();
 
-        File.Delete(_destination);
+        File.Delete(Destination);
     }
 
     [Test]
@@ -76,15 +83,14 @@ public class JsonUnitTests
     {
         var input = new Input
         {
-            Query = $"SELECT Id, LastName, FirstName, Salary FROM {_tableName}",
+            Query = $"SELECT Id, LastName, FirstName, Salary FROM {TableName}",
             QueryParameters = Array.Empty<Definitions.SqlParameter>(),
-            ConnectionString = _connString,
-            OutputFilePath = _destination,
+            OutputFilePath = Destination,
         };
 
-        var result = await MicrosoftSQL.ExecuteQueryToFile(input, _options, default);
+        var result = await MicrosoftSQL.ExecuteQueryToFile(input, DatabaseConnection, options, default);
 
-        var content = await File.ReadAllTextAsync(_destination);
+        var content = await File.ReadAllTextAsync(Destination);
         var array = JArray.Parse(content); // throws if invalid JSON
 
         Assert.AreEqual(1, result.EntriesWritten);
@@ -98,19 +104,18 @@ public class JsonUnitTests
     [Test]
     public async Task ExecuteQueryToFile_Json_JsonLines_EachRowOnSeparateLine()
     {
-        _options.JsonOptions.JsonOutputMode = JsonOutputMode.JsonLines;
+        options.JsonOptions.JsonOutputMode = JsonOutputMode.JsonLines;
 
         var input = new Input
         {
-            Query = $"SELECT Id, LastName, FirstName, Salary FROM {_tableName}",
+            Query = $"SELECT Id, LastName, FirstName, Salary FROM {TableName}",
             QueryParameters = Array.Empty<Definitions.SqlParameter>(),
-            ConnectionString = _connString,
-            OutputFilePath = _destination,
+            OutputFilePath = Destination,
         };
 
-        await MicrosoftSQL.ExecuteQueryToFile(input, _options, default);
+        await MicrosoftSQL.ExecuteQueryToFile(input, DatabaseConnection, options, default);
 
-        var lines = (await File.ReadAllLinesAsync(_destination))
+        var lines = (await File.ReadAllLinesAsync(Destination))
             .Where(l => !string.IsNullOrWhiteSpace(l))
             .ToArray();
 
@@ -140,7 +145,7 @@ public class JsonUnitTests
                     );
                 END";
 
-        Helper.CreateTestTable(_connString, table, createSql);
+        Helper.CreateTestTable(ConnectionString, table, createSql);
 
         var guid = Guid.NewGuid();
         var insertSql = $@"
@@ -150,21 +155,20 @@ public class JsonUnitTests
                     '{guid}'
                 )";
 
-        Helper.ExecuteNonQuery(_connString, insertSql);
+        Helper.ExecuteNonQuery(ConnectionString, insertSql);
 
         var input = new Input
         {
             Query = $"SELECT * FROM {table}",
             QueryParameters = Array.Empty<Definitions.SqlParameter>(),
-            ConnectionString = _connString,
-            OutputFilePath = _destination,
+            OutputFilePath = Destination,
         };
 
         try
         {
-            await MicrosoftSQL.ExecuteQueryToFile(input, _options, default);
+            await MicrosoftSQL.ExecuteQueryToFile(input, DatabaseConnection, options, default);
 
-            var content = await File.ReadAllTextAsync(_destination);
+            var content = await File.ReadAllTextAsync(Destination);
             using var stringReader = new StringReader(content);
             using var jsonReader = new JsonTextReader(stringReader) { DateParseHandling = DateParseHandling.None };
             var array = JArray.Load(jsonReader);
@@ -193,7 +197,7 @@ public class JsonUnitTests
         }
         finally
         {
-            Helper.ExecuteNonQuery(_connString, $"DROP TABLE {table}");
+            Helper.ExecuteNonQuery(ConnectionString, $"DROP TABLE {table}");
         }
     }
 
@@ -202,15 +206,14 @@ public class JsonUnitTests
     {
         var input = new Input
         {
-            Query = $"SELECT Id, LastName, TestNull FROM {_tableName}",
+            Query = $"SELECT Id, LastName, TestNull FROM {TableName}",
             QueryParameters = Array.Empty<Definitions.SqlParameter>(),
-            ConnectionString = _connString,
-            OutputFilePath = _destination,
+            OutputFilePath = Destination,
         };
 
-        await MicrosoftSQL.ExecuteQueryToFile(input, _options, default);
+        await MicrosoftSQL.ExecuteQueryToFile(input, DatabaseConnection, options, default);
 
-        var content = await File.ReadAllTextAsync(_destination);
+        var content = await File.ReadAllTextAsync(Destination);
         var row = JArray.Parse(content)[0];
 
         Assert.AreEqual(JTokenType.Null, row["TestNull"].Type);
@@ -219,19 +222,18 @@ public class JsonUnitTests
     [Test]
     public async Task ExecuteQueryToFile_Json_HandleNullAsEmpty_NullStringWrittenAsEmptyString()
     {
-        _options.JsonOptions.HandleNullAsEmpty = true;
+        options.JsonOptions.HandleNullAsEmpty = true;
 
         var input = new Input
         {
-            Query = $"SELECT Id, TestNull FROM {_tableName}",
+            Query = $"SELECT Id, TestNull FROM {TableName}",
             QueryParameters = Array.Empty<Definitions.SqlParameter>(),
-            ConnectionString = _connString,
-            OutputFilePath = _destination,
+            OutputFilePath = Destination,
         };
 
-        await MicrosoftSQL.ExecuteQueryToFile(input, _options, default);
+        await MicrosoftSQL.ExecuteQueryToFile(input, DatabaseConnection, options, default);
 
-        var content = await File.ReadAllTextAsync(_destination);
+        var content = await File.ReadAllTextAsync(Destination);
         var row = JArray.Parse(content)[0];
 
         // String null → empty string.
@@ -242,8 +244,8 @@ public class JsonUnitTests
     [Test]
     public async Task ExecuteQueryToFile_Json_CustomDateFormat_AppliedCorrectly()
     {
-        _options.JsonOptions.DateFormat = "dd.MM.yyyy";
-        _options.JsonOptions.DateTimeFormat = "dd.MM.yyyy HH:mm";
+        options.JsonOptions.DateFormat = "dd.MM.yyyy";
+        options.JsonOptions.DateTimeFormat = "dd.MM.yyyy HH:mm";
 
         var table = "DateFormatTest";
         var createSql = $@"
@@ -252,23 +254,22 @@ public class JsonUnitTests
                     CREATE TABLE {table} (DateCol date, DateTimeCol datetime2);
                 END";
 
-        Helper.CreateTestTable(_connString, table, createSql);
+        Helper.CreateTestTable(ConnectionString, table, createSql);
 
-        Helper.ExecuteNonQuery(_connString, $"INSERT INTO {table} VALUES ('2024-06-15', '2024-06-15T13:45:00')");
+        Helper.ExecuteNonQuery(ConnectionString, $"INSERT INTO {table} VALUES ('2024-06-15', '2024-06-15T13:45:00')");
 
         var input = new Input
         {
             Query = $"SELECT * FROM {table}",
             QueryParameters = Array.Empty<Definitions.SqlParameter>(),
-            ConnectionString = _connString,
-            OutputFilePath = _destination,
+            OutputFilePath = Destination,
         };
 
         try
         {
-            await MicrosoftSQL.ExecuteQueryToFile(input, _options, default);
+            await MicrosoftSQL.ExecuteQueryToFile(input, DatabaseConnection, options, default);
 
-            var content = await File.ReadAllTextAsync(_destination);
+            var content = await File.ReadAllTextAsync(Destination);
             var row = JArray.Parse(content)[0];
 
             Assert.AreEqual("15.06.2024", row["DateCol"].Value<string>());
@@ -276,7 +277,7 @@ public class JsonUnitTests
         }
         finally
         {
-            Helper.ExecuteNonQuery(_connString, $"DROP TABLE {table}");
+            Helper.ExecuteNonQuery(ConnectionString, $"DROP TABLE {table}");
         }
     }
 
@@ -299,7 +300,7 @@ public class JsonUnitTests
                     );
                 END";
 
-        Helper.CreateTestTable(_connString, table, createSql);
+        Helper.CreateTestTable(ConnectionString, table, createSql);
 
         var insertSql = $@"
                 WITH Numbers AS (SELECT TOP {RowCount} ROW_NUMBER() OVER (ORDER BY (SELECT NULL)) AS N FROM sys.objects a CROSS JOIN sys.objects b CROSS JOIN sys.objects c)
@@ -307,14 +308,13 @@ public class JsonUnitTests
                 SELECT N, 'Name_' + CAST(N AS nvarchar), CAST(N AS decimal(18,2)) * 1.5, CAST(N % 2 AS bit), GETDATE()
                 FROM Numbers";
 
-        Helper.ExecuteNonQuery(_connString, insertSql);
+        Helper.ExecuteNonQuery(ConnectionString, insertSql);
 
         var input = new Input
         {
             Query = $"SELECT * FROM {table}",
             QueryParameters = Array.Empty<Definitions.SqlParameter>(),
-            ConnectionString = _connString,
-            OutputFilePath = _destination,
+            OutputFilePath = Destination,
         };
 
         try
@@ -324,7 +324,7 @@ public class JsonUnitTests
             GC.Collect();
             var memoryBefore = Process.GetCurrentProcess().WorkingSet64;
 
-            var result = await MicrosoftSQL.ExecuteQueryToFile(input, _options, default);
+            var result = await MicrosoftSQL.ExecuteQueryToFile(input, DatabaseConnection, options, default);
 
             GC.Collect();
             GC.WaitForPendingFinalizers();
@@ -332,7 +332,7 @@ public class JsonUnitTests
             var memoryAfter = Process.GetCurrentProcess().WorkingSet64;
 
             Assert.AreEqual(RowCount, result.EntriesWritten);
-            Assert.IsTrue(File.Exists(_destination));
+            Assert.IsTrue(File.Exists(Destination));
 
             var memoryGrowth = memoryAfter - memoryBefore;
             Assert.Less(
@@ -342,7 +342,7 @@ public class JsonUnitTests
         }
         finally
         {
-            Helper.ExecuteNonQuery(_connString, $"DROP TABLE {table}");
+            Helper.ExecuteNonQuery(ConnectionString, $"DROP TABLE {table}");
         }
     }
 
@@ -360,7 +360,7 @@ public class JsonUnitTests
                     CREATE TABLE {table} (Id int, Data varbinary(max));
                 END";
 
-        Helper.CreateTestTable(_connString, table, createSql);
+        Helper.CreateTestTable(ConnectionString, table, createSql);
 
         // Insert rows with ~10 MB binary each = ~100 MB total.
         for (int i = 1; i <= RowCount; i++)
@@ -369,15 +369,14 @@ public class JsonUnitTests
             {
                 Value = new byte[BinaryColumnSizeMb * 1024 * 1024],
             };
-            Helper.ExecuteNonQuery(_connString, $"INSERT INTO {table} VALUES ({i}, @Data)", new[] { param });
+            Helper.ExecuteNonQuery(ConnectionString, $"INSERT INTO {table} VALUES ({i}, @Data)", new[] { param });
         }
 
         var input = new Input
         {
             Query = $"SELECT * FROM {table}",
             QueryParameters = Array.Empty<Definitions.SqlParameter>(),
-            ConnectionString = _connString,
-            OutputFilePath = _destination,
+            OutputFilePath = Destination,
         };
 
         try
@@ -387,7 +386,7 @@ public class JsonUnitTests
             GC.Collect();
             var memoryBefore = Process.GetCurrentProcess().WorkingSet64;
 
-            var result = await MicrosoftSQL.ExecuteQueryToFile(input, _options, default);
+            var result = await MicrosoftSQL.ExecuteQueryToFile(input, DatabaseConnection, options, default);
 
             GC.Collect();
             GC.WaitForPendingFinalizers();
@@ -395,7 +394,7 @@ public class JsonUnitTests
             var memoryAfter = Process.GetCurrentProcess().WorkingSet64;
 
             Assert.AreEqual(RowCount, result.EntriesWritten);
-            Assert.IsTrue(File.Exists(_destination));
+            Assert.IsTrue(File.Exists(Destination));
 
             var memoryGrowth = memoryAfter - memoryBefore;
             Assert.Less(
@@ -405,7 +404,7 @@ public class JsonUnitTests
         }
         finally
         {
-            Helper.ExecuteNonQuery(_connString, $"DROP TABLE {table}");
+            Helper.ExecuteNonQuery(ConnectionString, $"DROP TABLE {table}");
         }
     }
 
@@ -431,7 +430,7 @@ public class JsonUnitTests
                 END";
 
         var table = "MultiGigabyteTest";
-        Helper.CreateTestTable(_connString, table, createSql);
+        Helper.CreateTestTable(ConnectionString, table, createSql);
 
         // Insert in batches to avoid timeout
         int inserted = 0;
@@ -445,7 +444,7 @@ public class JsonUnitTests
                     FROM sys.objects a CROSS JOIN sys.objects b CROSS JOIN sys.objects c
                 )
                 INSERT INTO {table}
-                SELECT 
+                SELECT
                     N,
                     REPLICATE('Name_' + CAST(N AS nvarchar), 5),
                     REPLICATE('Description_' + CAST(N AS nvarchar), 10),
@@ -454,7 +453,7 @@ public class JsonUnitTests
                     GETDATE()
                 FROM Numbers";
 
-            Helper.ExecuteNonQuery(_connString, insertSql);
+            Helper.ExecuteNonQuery(ConnectionString, insertSql);
             inserted = batchEnd;
         }
 
@@ -462,8 +461,7 @@ public class JsonUnitTests
         {
             Query = $"SELECT * FROM {table}",
             QueryParameters = Array.Empty<Definitions.SqlParameter>(),
-            ConnectionString = _connString,
-            OutputFilePath = _destination,
+            OutputFilePath = Destination,
         };
 
         try
@@ -473,7 +471,7 @@ public class JsonUnitTests
             GC.Collect();
             var memoryBefore = Process.GetCurrentProcess().WorkingSet64;
 
-            var result = await MicrosoftSQL.ExecuteQueryToFile(input, _options, default);
+            var result = await MicrosoftSQL.ExecuteQueryToFile(input, DatabaseConnection, options, default);
 
             GC.Collect();
             GC.WaitForPendingFinalizers();
@@ -481,9 +479,9 @@ public class JsonUnitTests
             var memoryAfter = Process.GetCurrentProcess().WorkingSet64;
 
             Assert.AreEqual(RowCount, result.EntriesWritten);
-            Assert.IsTrue(File.Exists(_destination));
+            Assert.IsTrue(File.Exists(Destination));
 
-            var fileSizeGb = new FileInfo(_destination).Length / 1024.0 / 1024.0 / 1024.0;
+            var fileSizeGb = new FileInfo(Destination).Length / 1024.0 / 1024.0 / 1024.0;
             TestContext.WriteLine($"File size: {fileSizeGb:F2} GB");
             TestContext.WriteLine($"Memory before: {memoryBefore / 1024 / 1024} MB");
             TestContext.WriteLine($"Memory after: {memoryAfter / 1024 / 1024} MB");
@@ -497,7 +495,7 @@ public class JsonUnitTests
         }
         finally
         {
-            Helper.ExecuteNonQuery(_connString, $"DROP TABLE {table}");
+            Helper.ExecuteNonQuery(ConnectionString, $"DROP TABLE {table}");
         }
     }
 }

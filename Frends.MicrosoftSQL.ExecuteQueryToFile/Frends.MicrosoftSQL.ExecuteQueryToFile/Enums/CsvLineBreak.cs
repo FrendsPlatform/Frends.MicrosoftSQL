@@ -1,15 +1,22 @@
 ﻿namespace Frends.MicrosoftSQL.ExecuteQueryToFile.Enums;
 
-#pragma warning disable CS1591 // Self-explanatory
-
 /// <summary>
 /// CSV line break options.
 /// </summary>
 public enum CsvLineBreak
 {
+    /// <summary>
+    /// Uses a carriage return followed by a line feed.
+    /// </summary>
     CRLF,
+
+    /// <summary>
+    /// Uses a line feed.
+    /// </summary>
     LF,
+
+    /// <summary>
+    /// Uses a carriage return.
+    /// </summary>
     CR,
 }
-
-#pragma warning restore CS1591 // Self-explanatory

@@ -1,4 +1,14 @@
-# Changelog
+﻿# Changelog
+
+## [3.0.0] - 2026-11-02
+### Changed
+- **[Breaking Change]**Moved the `ConnectionString` from the Input tab to a new Connection tab.
+- Added success and error fields to the task result and failure-related options.
+- Added configurable exception handling and structured error details to the task result.
+- Updated the task and tests to target .NET 8.
+
+### Added
+- New `ThrowErrorOnFailure` and `ErrorMessageOnFailure` properties in `Options` tab to control error handling behavior.
 
 ## [2.5.0] - 2026-10-16
 ### Fixed

@@ -22,15 +22,6 @@ public class Input
     public SqlParameter[] QueryParameters { get; set; }
 
     /// <summary>
-    /// Database connection string.
-    /// </summary>
-    /// <example>Server=myServerAddress;Database=myDataBase;User Id=myUsername;Password=myPassword;</example>
-    [DefaultValue("\"Server=myServerAddress;Database=myDataBase;User Id=myUsername;Password=myPassword;\"")]
-    [PasswordPropertyText]
-    [DisplayFormat(DataFormatString = "Text")]
-    public string ConnectionString { get; set; }
-
-    /// <summary>
     /// Output file path.
     /// </summary>
     /// <example>C:\path\tp\file.csv</example>

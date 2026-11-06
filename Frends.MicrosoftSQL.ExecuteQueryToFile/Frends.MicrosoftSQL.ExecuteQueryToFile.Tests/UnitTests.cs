@@ -1,3 +1,5 @@
+using Frends.MicrosoftSQL.ExecuteQueryToFile.Tests.Lib;
+
 namespace Frends.MicrosoftSQL.ExecuteQueryToFile.Tests;
 
 using System;
@@ -26,16 +28,22 @@ using NUnit.Framework;
 [TestFixture]
 public class UnitTests
 {
-    private static readonly string _connString = Helper.GetConnectionString();
-    private static readonly string _tableName = "TestTable";
-    private static readonly string _destination = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "../../../TestData/test.csv");
+    private static readonly string ConnectionString = Helper.GetConnectionString();
 
-    private Options _options;
+    private static readonly Definitions.Connection DatabaseConnection = new()
+    {
+        ConnectionString = ConnectionString,
+    };
+
+    private static readonly string TableName = "TestTable";
+    private static readonly string Destination = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "../../../TestData/test.csv");
+
+    private Options options;
 
     [SetUp]
     public void Init()
     {
-        _options = new Options()
+        options = new Options()
         {
             TimeoutSeconds = 30,
             CsvOptions = new CsvOptions
@@ -53,37 +61,37 @@ public class UnitTests
             },
         };
 
-        Helper.CreateTestTable(_connString, _tableName);
+        Helper.CreateTestTable(ConnectionString, TableName);
 
         var parameters = new Microsoft.Data.SqlClient.SqlParameter[]
         {
             new Microsoft.Data.SqlClient.SqlParameter("@Hash", SqlDbType.VarBinary)
             {
-                Value = File.ReadAllBytes(Path.Combine(Path.GetDirectoryName(_destination), "Test_image.png")),
+                Value = File.ReadAllBytes(Path.Combine(Path.GetDirectoryName(Destination), "Test_image.png")),
             },
             new Microsoft.Data.SqlClient.SqlParameter("@TestText", SqlDbType.VarBinary)
             {
-                Value = File.ReadAllBytes(Path.Combine(Path.GetDirectoryName(_destination), "Test_text.txt")),
+                Value = File.ReadAllBytes(Path.Combine(Path.GetDirectoryName(Destination), "Test_text.txt")),
             },
         };
 
-        Helper.ExecuteNonQuery(_connString, $"Insert into {_tableName} (Id, LastName, FirstName, Salary, Image, TestText) values (1,'Meikalainen','Matti',1523.25, {parameters[0].ParameterName}, {parameters[1].ParameterName});", parameters);
+        Helper.ExecuteNonQuery(ConnectionString, $"Insert into {TableName} (Id, LastName, FirstName, Salary, Image, TestText) values (1,'Meikalainen','Matti',1523.25, {parameters[0].ParameterName}, {parameters[1].ParameterName});", parameters);
     }
 
     [TearDown]
     public void CleanUp()
     {
-        using (var connection = new SqlConnection(_connString))
+        using (var connection = new SqlConnection(ConnectionString))
         {
             connection.Open();
             var createTable = connection.CreateCommand();
-            createTable.CommandText = $@"IF EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME='{_tableName}') BEGIN DROP TABLE IF EXISTS {_tableName}; END";
+            createTable.CommandText = $@"IF EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME='{TableName}') BEGIN DROP TABLE IF EXISTS {TableName}; END";
             createTable.ExecuteNonQuery();
             connection.Close();
         }
 
-        // Clean and remove destination directory
-        File.Delete(_destination);
+        // Clean and remove Destination directory
+        File.Delete(Destination);
     }
 
     [Test]
@@ -91,7 +99,7 @@ public class UnitTests
     {
         var query = new Input
         {
-            Query = $"Select Id, LastName, FirstName, REPLACE(Salary, '.', ',') AS 'Salary' from {_tableName} WHERE Id = @param",
+            Query = $"Select Id, LastName, FirstName, REPLACE(Salary, '.', ',') AS 'Salary' from {TableName} WHERE Id = @param",
             QueryParameters = new Definitions.SqlParameter[]
             {
                 new Definitions.SqlParameter
@@ -101,15 +109,14 @@ public class UnitTests
                     SqlDataType = SqlDataTypes.Int,
                 },
             },
-            ConnectionString = _connString,
-            OutputFilePath = _destination,
+            OutputFilePath = Destination,
         };
 
-        _options.CsvOptions.AddQuotesToStrings = true;
-        _options.CsvOptions.IncludeHeadersInOutput = true;
+        options.CsvOptions.AddQuotesToStrings = true;
+        options.CsvOptions.IncludeHeadersInOutput = true;
 
-        await MicrosoftSQL.ExecuteQueryToFile(query, _options, default);
-        var output = File.ReadAllText(_destination);
+        await MicrosoftSQL.ExecuteQueryToFile(query, DatabaseConnection, options, default);
+        var output = File.ReadAllText(Destination);
 
         Assert.AreEqual("Id;LastName;FirstName;Salary\r\n1;\"Meikalainen\";\"Matti\";\"1523,25\"\r\n", output);
     }
@@ -119,17 +126,16 @@ public class UnitTests
     {
         var query = new Input
         {
-            Query = $"Select Id, LastName, FirstName, REPLACE(Salary, '.', ',') AS 'Salary' from {_tableName}",
+            Query = $"Select Id, LastName, FirstName, REPLACE(Salary, '.', ',') AS 'Salary' from {TableName}",
             QueryParameters = Array.Empty<Definitions.SqlParameter>(),
-            ConnectionString = _connString,
-            OutputFilePath = _destination,
+            OutputFilePath = Destination,
         };
 
-        _options.CsvOptions.AddQuotesToStrings = true;
-        _options.CsvOptions.IncludeHeadersInOutput = true;
+        options.CsvOptions.AddQuotesToStrings = true;
+        options.CsvOptions.IncludeHeadersInOutput = true;
 
-        await MicrosoftSQL.ExecuteQueryToFile(query, _options, default);
-        var output = File.ReadAllText(_destination);
+        await MicrosoftSQL.ExecuteQueryToFile(query, DatabaseConnection, options, default);
+        var output = File.ReadAllText(Destination);
 
         Assert.AreEqual("Id;LastName;FirstName;Salary\r\n1;\"Meikalainen\";\"Matti\";\"1523,25\"\r\n", output);
     }
@@ -139,17 +145,16 @@ public class UnitTests
     {
         var query = new Input
         {
-            Query = $"Select Id, LastName, FirstName, REPLACE(Salary, '.', ',') AS 'Salary' from {_tableName}",
+            Query = $"Select Id, LastName, FirstName, REPLACE(Salary, '.', ',') AS 'Salary' from {TableName}",
             QueryParameters = Array.Empty<Definitions.SqlParameter>(),
-            ConnectionString = _connString,
-            OutputFilePath = _destination,
+            OutputFilePath = Destination,
         };
 
-        _options.CsvOptions.IncludeHeadersInOutput = true;
+        options.CsvOptions.IncludeHeadersInOutput = true;
 
-        await MicrosoftSQL.ExecuteQueryToFile(query, _options, default);
+        await MicrosoftSQL.ExecuteQueryToFile(query, DatabaseConnection, options, default);
 
-        var output = File.ReadAllText(_destination);
+        var output = File.ReadAllText(Destination);
 
         Assert.AreEqual("Id;LastName;FirstName;Salary\r\n1;Meikalainen;Matti;1523,25\r\n", output);
     }
@@ -159,17 +164,16 @@ public class UnitTests
     {
         var query = new Input
         {
-            Query = $"SELECT Image from {_tableName}",
+            Query = $"SELECT Image from {TableName}",
             QueryParameters = Array.Empty<Definitions.SqlParameter>(),
-            ConnectionString = _connString,
-            OutputFilePath = _destination,
+            OutputFilePath = Destination,
         };
 
-        await MicrosoftSQL.ExecuteQueryToFile(query, _options, default);
+        await MicrosoftSQL.ExecuteQueryToFile(query, DatabaseConnection, options, default);
 
-        var output = File.ReadAllText(_destination);
+        var output = File.ReadAllText(Destination);
 
-        Assert.AreEqual(BitConverter.ToString(File.ReadAllBytes(Path.Combine(Path.GetDirectoryName(_destination), "Test_image.png"))), output.TrimEnd(new char[] { '\r', '\n' }));
+        Assert.AreEqual(BitConverter.ToString(File.ReadAllBytes(Path.Combine(Path.GetDirectoryName(Destination), "Test_image.png"))), output.TrimEnd(new char[] { '\r', '\n' }));
     }
 
     [Test]
@@ -177,25 +181,24 @@ public class UnitTests
     {
         var query = new Input
         {
-            Query = $"SELECT Image from {_tableName} WHERE CONVERT(varbinary(max), Image) = @param",
+            Query = $"SELECT Image from {TableName} WHERE CONVERT(varbinary(max), Image) = @param",
             QueryParameters = new Definitions.SqlParameter[]
             {
                 new Definitions.SqlParameter
                 {
                     Name = "@param",
-                    Value = File.ReadAllBytes(Path.Combine(Path.GetDirectoryName(_destination), "Test_image.png")),
+                    Value = File.ReadAllBytes(Path.Combine(Path.GetDirectoryName(Destination), "Test_image.png")),
                     SqlDataType = SqlDataTypes.VarBinary,
                 },
             },
-            ConnectionString = _connString,
-            OutputFilePath = _destination,
+            OutputFilePath = Destination,
         };
 
-        await MicrosoftSQL.ExecuteQueryToFile(query, _options, default);
+        await MicrosoftSQL.ExecuteQueryToFile(query, DatabaseConnection, options, default);
 
-        var output = File.ReadAllText(_destination);
+        var output = File.ReadAllText(Destination);
 
-        Assert.AreEqual(BitConverter.ToString(File.ReadAllBytes(Path.Combine(Path.GetDirectoryName(_destination), "Test_image.png"))), output.TrimEnd(new char[] { '\r', '\n' }));
+        Assert.AreEqual(BitConverter.ToString(File.ReadAllBytes(Path.Combine(Path.GetDirectoryName(Destination), "Test_image.png"))), output.TrimEnd(new char[] { '\r', '\n' }));
     }
 
     [Test]
@@ -203,17 +206,16 @@ public class UnitTests
     {
         var query = new Input
         {
-            Query = $"SELECT TestText from {_tableName}",
+            Query = $"SELECT TestText from {TableName}",
             QueryParameters = Array.Empty<Definitions.SqlParameter>(),
-            ConnectionString = _connString,
-            OutputFilePath = _destination,
+            OutputFilePath = Destination,
         };
 
-        await MicrosoftSQL.ExecuteQueryToFile(query, _options, default);
+        await MicrosoftSQL.ExecuteQueryToFile(query, DatabaseConnection, options, default);
 
-        var output = File.ReadAllText(_destination);
+        var output = File.ReadAllText(Destination);
 
-        Assert.AreEqual(BitConverter.ToString(File.ReadAllBytes(Path.Combine(Path.GetDirectoryName(_destination), "Test_text.txt"))), output.TrimEnd(new char[] { '\r', '\n' }));
+        Assert.AreEqual(BitConverter.ToString(File.ReadAllBytes(Path.Combine(Path.GetDirectoryName(Destination), "Test_text.txt"))), output.TrimEnd(new char[] { '\r', '\n' }));
     }
 
     [Test]
@@ -221,25 +223,24 @@ public class UnitTests
     {
         var query = new Input
         {
-            Query = $"SELECT TestText FROM {_tableName} WHERE TestText = @param",
+            Query = $"SELECT TestText FROM {TableName} WHERE TestText = @param",
             QueryParameters = new Definitions.SqlParameter[]
             {
                 new Definitions.SqlParameter
                 {
                     Name = "@param",
-                    Value = File.ReadAllBytes(Path.Combine(Path.GetDirectoryName(_destination), "Test_text.txt")),
+                    Value = File.ReadAllBytes(Path.Combine(Path.GetDirectoryName(Destination), "Test_text.txt")),
                     SqlDataType = SqlDataTypes.VarBinary,
                 },
             },
-            ConnectionString = _connString,
-            OutputFilePath = _destination,
+            OutputFilePath = Destination,
         };
 
-        await MicrosoftSQL.ExecuteQueryToFile(query, _options, default);
+        await MicrosoftSQL.ExecuteQueryToFile(query, DatabaseConnection, options, default);
 
-        var output = File.ReadAllText(_destination);
+        var output = File.ReadAllText(Destination);
 
-        Assert.AreEqual(BitConverter.ToString(File.ReadAllBytes(Path.Combine(Path.GetDirectoryName(_destination), "Test_text.txt"))), output.TrimEnd(new char[] { '\r', '\n' }));
+        Assert.AreEqual(BitConverter.ToString(File.ReadAllBytes(Path.Combine(Path.GetDirectoryName(Destination), "Test_text.txt"))), output.TrimEnd(new char[] { '\r', '\n' }));
     }
 
     [Test]
@@ -247,7 +248,7 @@ public class UnitTests
     {
         var query = new Input
         {
-            Query = $"SELECT * FROM {_tableName} WHERE TestNull = @param",
+            Query = $"SELECT * FROM {TableName} WHERE TestNull = @param",
             QueryParameters = new Definitions.SqlParameter[]
             {
                 new Definitions.SqlParameter
@@ -257,13 +258,12 @@ public class UnitTests
                     SqlDataType = SqlDataTypes.VarChar,
                 },
             },
-            ConnectionString = _connString,
-            OutputFilePath = _destination,
+            OutputFilePath = Destination,
         };
 
-        await MicrosoftSQL.ExecuteQueryToFile(query, _options, default);
+        await MicrosoftSQL.ExecuteQueryToFile(query, DatabaseConnection, options, default);
 
-        var output = File.ReadAllText(_destination);
+        var output = File.ReadAllText(Destination);
 
         Assert.IsNotNull(output);
     }
@@ -274,32 +274,31 @@ public class UnitTests
         var table = "geographytest";
         var query = $"IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME='{table}') BEGIN CREATE TABLE {table} ( Id int IDENTITY(1, 1), GeogCol1 geography, GeogCol2 AS GeogCol1.STAsText()); END";
 
-        Helper.CreateTestTable(_connString, table, query);
+        Helper.CreateTestTable(ConnectionString, table, query);
 
-        Helper.ExecuteNonQuery(_connString, $"INSERT INTO {table} (GeogCol1) VALUES (geography::STGeomFromText('LINESTRING(-122.360 47.656, -122.343 47.656 )', 4326));");
-        Helper.ExecuteNonQuery(_connString, $"INSERT INTO {table} (GeogCol1) VALUES(geography::STGeomFromText('POLYGON((-122.358 47.653 , -122.348 47.649, -122.348 47.658, -122.358 47.658, -122.358 47.653))', 4326));");
+        Helper.ExecuteNonQuery(ConnectionString, $"INSERT INTO {table} (GeogCol1) VALUES (geography::STGeomFromText('LINESTRING(-122.360 47.656, -122.343 47.656 )', 4326));");
+        Helper.ExecuteNonQuery(ConnectionString, $"INSERT INTO {table} (GeogCol1) VALUES(geography::STGeomFromText('POLYGON((-122.358 47.653 , -122.348 47.649, -122.348 47.658, -122.358 47.658, -122.358 47.653))', 4326));");
 
         var input = new Input
         {
-            ConnectionString = _connString,
             Query = $"SELECT * From {table}",
-            OutputFilePath = _destination,
+            OutputFilePath = Destination,
         };
 
         try
         {
             input.Query = $"SELECT * From {table}";
 
-            var select = await MicrosoftSQL.ExecuteQueryToFile(input, _options, default);
+            var select = await MicrosoftSQL.ExecuteQueryToFile(input, DatabaseConnection, options, default);
 
-            var output = File.ReadAllLines(_destination);
+            var output = File.ReadAllLines(Destination);
             Assert.AreEqual(2, output.Length);
             Assert.IsTrue(output[0].Split(";")[1].StartsWith("LINESTRING"));
             Assert.IsTrue(output[1].Split(";")[1].StartsWith("POLYGON"));
         }
         finally
         {
-            Helper.ExecuteNonQuery(_connString, $"DROP TABLE {table}");
+            Helper.ExecuteNonQuery(ConnectionString, $"DROP TABLE {table}");
         }
     }
 }

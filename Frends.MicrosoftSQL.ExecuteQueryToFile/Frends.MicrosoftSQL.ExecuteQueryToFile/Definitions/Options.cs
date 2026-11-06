@@ -26,12 +26,29 @@ public class Options
     /// <summary>
     /// Csv options.
     /// </summary>
+    /// <example>{ "FieldDelimiter": "Semicolon" }</example>
     [UIHint(nameof(ReturnFormat), "", ReturnFormat.CSV)]
     public CsvOptions CsvOptions { get; set; }
 
     /// <summary>
     /// Json options.
     /// </summary>
+    /// <example>{ "JsonOutputMode": "Indented" }</example>
     [UIHint(nameof(ReturnFormat), "", ReturnFormat.JSON)]
     public JsonOptions JsonOptions { get; set; } = new JsonOptions();
+
+    /// <summary>
+    /// Whether to throw an error when the task fails.
+    /// </summary>
+    /// <example>true</example>
+    [DefaultValue(true)]
+    public bool ThrowErrorOnFailure { get; set; } = true;
+
+    /// <summary>
+    /// Overrides the error message when the task fails.
+    /// </summary>
+    /// <example>SQL query export failed.</example>
+    [DisplayFormat(DataFormatString = "Text")]
+    [DefaultValue("")]
+    public string ErrorMessageOnFailure { get; set; } = string.Empty;
 }
