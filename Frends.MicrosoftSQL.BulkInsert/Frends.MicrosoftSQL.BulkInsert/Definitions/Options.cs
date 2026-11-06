@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
 
 namespace Frends.MicrosoftSQL.BulkInsert.Definitions;
 
@@ -61,13 +62,6 @@ public class Options
     public bool ConvertEmptyPropertyValuesToNull { get; set; }
 
     /// <summary>
-    /// (true) Throw an exception or (false) stop the Task and return result object containing Result.Success = false and Result.ErrorMessage = 'exception message'.
-    /// </summary>
-    /// <example>true</example>
-    [DefaultValue(true)]
-    public bool ThrowErrorOnFailure { get; set; }
-
-    /// <summary>
     /// Starts a database transaction with the specified isolation level.
     /// Isolation evel specifies the transaction locking behavior for the connection.
     /// None: No transaction is set up so there won't be a rollback if exception occurs.
@@ -82,4 +76,19 @@ public class Options
     /// <example>SqlTransactionIsolationLevel.ReadCommitted</example>
     [DefaultValue(SqlTransactionIsolationLevel.ReadCommitted)]
     public SqlTransactionIsolationLevel SqlTransactionIsolationLevel { get; set; }
+
+    /// <summary>
+    /// Whether to throw an error on failure. If false, the Task returns a result object with Result.Success = false and Result.Error populated.
+    /// </summary>
+    /// <example>true</example>
+    [DefaultValue(true)]
+    public bool ThrowErrorOnFailure { get; set; }
+
+    /// <summary>
+    /// Overrides the error message on failure.
+    /// </summary>
+    /// <example>Bulk insert to table dbo.Customers failed</example>
+    [DisplayFormat(DataFormatString = "Text")]
+    [DefaultValue("")]
+    public string ErrorMessageOnFailure { get; set; } = string.Empty;
 }

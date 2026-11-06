@@ -17,9 +17,9 @@ public class UnitTests
         GO
    */
 
-    private static readonly string _connString = "Server=127.0.0.1,1433;Database=Master;User Id=SA;Password=Salakala123!;TrustServerCertificate=True";
-    private static readonly string _tableName = "TestTable";
-    private static readonly string _json = @"[
+    private static readonly string ConnString = "Server=127.0.0.1,1433;Database=Master;User Id=SA;Password=Salakala123!;TrustServerCertificate=True";
+    private static readonly string TableName = "TestTable";
+    private static readonly string Json = @"[
                   {
                     ""Id"": 1,
                     ""Firstname"": ""Etu"",
@@ -36,20 +36,21 @@ public class UnitTests
                     ""Lastname"": ""L��st""
                   }
                 ]";
-    readonly Input _input = new()
+
+    private readonly Input defaultInput = new()
     {
-        ConnectionString = _connString,
-        TableName = _tableName,
-        InputData = _json
+        ConnectionString = ConnString,
+        TableName = TableName,
+        InputData = Json,
     };
 
     [TestInitialize]
     public void Init()
     {
-        using var connection = new SqlConnection(_connString);
+        using var connection = new SqlConnection(ConnString);
         connection.Open();
         var createTable = connection.CreateCommand();
-        createTable.CommandText = $@"IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME='{_tableName}') BEGIN CREATE TABLE {_tableName} ( Id int, LastName varchar(255), FirstName varchar(255) ); END";
+        createTable.CommandText = $@"IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME='{TableName}') BEGIN CREATE TABLE {TableName} ( Id int, LastName varchar(255), FirstName varchar(255) ); END";
         createTable.ExecuteNonQuery();
         connection.Close();
         connection.Dispose();
@@ -58,10 +59,10 @@ public class UnitTests
     [TestCleanup]
     public void CleanUp()
     {
-        using var connection = new SqlConnection(_connString);
+        using var connection = new SqlConnection(ConnString);
         connection.Open();
         var createTable = connection.CreateCommand();
-        createTable.CommandText = $@"IF EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME='{_tableName}') BEGIN DROP TABLE IF EXISTS {_tableName}; END";
+        createTable.CommandText = $@"IF EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME='{TableName}') BEGIN DROP TABLE IF EXISTS {TableName}; END";
         createTable.ExecuteNonQuery();
         connection.Close();
         connection.Dispose();
@@ -70,7 +71,8 @@ public class UnitTests
     [TestMethod]
     public async Task TestBulkInsert_FireTriggers()
     {
-        var transactionLevels = new List<SqlTransactionIsolationLevel>() {
+        var transactionLevels = new List<SqlTransactionIsolationLevel>()
+        {
             SqlTransactionIsolationLevel.Unspecified,
             SqlTransactionIsolationLevel.Serializable,
             SqlTransactionIsolationLevel.None,
@@ -95,12 +97,12 @@ public class UnitTests
                 TableLock = false,
             };
 
-            var result = await MicrosoftSQL.BulkInsert(_input, options, default);
+            var result = await MicrosoftSQL.BulkInsert(defaultInput, options, default);
             Assert.IsTrue(result.Success);
             Assert.AreEqual(3, result.Count);
             Assert.AreEqual(3, GetRowCount());
 
-            await MicrosoftSQL.BulkInsert(_input, options, default);
+            await MicrosoftSQL.BulkInsert(defaultInput, options, default);
             Assert.AreEqual(6, GetRowCount());
 
             CleanUp();
@@ -110,12 +112,13 @@ public class UnitTests
     [TestMethod]
     public async Task TestBulkInsert_KeepIdentity()
     {
-        var transactionLevels = new List<SqlTransactionIsolationLevel>() {
+        var transactionLevels = new List<SqlTransactionIsolationLevel>()
+        {
             SqlTransactionIsolationLevel.Unspecified,
             SqlTransactionIsolationLevel.Serializable,
             SqlTransactionIsolationLevel.None,
             SqlTransactionIsolationLevel.ReadUncommitted,
-            SqlTransactionIsolationLevel.ReadCommitted
+            SqlTransactionIsolationLevel.ReadCommitted,
         };
 
         foreach (var transactionLevel in transactionLevels)
@@ -134,12 +137,12 @@ public class UnitTests
                 TableLock = false,
             };
 
-            var result = await MicrosoftSQL.BulkInsert(_input, options, default);
+            var result = await MicrosoftSQL.BulkInsert(defaultInput, options, default);
             Assert.IsTrue(result.Success);
             Assert.AreEqual(3, result.Count);
             Assert.AreEqual(3, GetRowCount());
 
-            await MicrosoftSQL.BulkInsert(_input, options, default);
+            await MicrosoftSQL.BulkInsert(defaultInput, options, default);
             Assert.AreEqual(6, GetRowCount());
 
             CleanUp();
@@ -149,12 +152,13 @@ public class UnitTests
     [TestMethod]
     public async Task TestBulkInsert_ConvertEmptyPropertyValuesToNull()
     {
-        var transactionLevels = new List<SqlTransactionIsolationLevel>() {
+        var transactionLevels = new List<SqlTransactionIsolationLevel>()
+        {
             SqlTransactionIsolationLevel.Unspecified,
             SqlTransactionIsolationLevel.Serializable,
             SqlTransactionIsolationLevel.None,
             SqlTransactionIsolationLevel.ReadUncommitted,
-            SqlTransactionIsolationLevel.ReadCommitted
+            SqlTransactionIsolationLevel.ReadCommitted,
         };
 
         foreach (var transactionLevel in transactionLevels)
@@ -173,12 +177,12 @@ public class UnitTests
                 TableLock = false,
             };
 
-            var result = await MicrosoftSQL.BulkInsert(_input, options, default);
+            var result = await MicrosoftSQL.BulkInsert(defaultInput, options, default);
             Assert.IsTrue(result.Success);
             Assert.AreEqual(3, result.Count);
             Assert.AreEqual(3, GetRowCount());
 
-            await MicrosoftSQL.BulkInsert(_input, options, default);
+            await MicrosoftSQL.BulkInsert(defaultInput, options, default);
             Assert.AreEqual(6, GetRowCount());
 
             CleanUp();
@@ -188,12 +192,13 @@ public class UnitTests
     [TestMethod]
     public async Task TestBulkInsert_KeepNulls()
     {
-        var transactionLevels = new List<SqlTransactionIsolationLevel>() {
+        var transactionLevels = new List<SqlTransactionIsolationLevel>()
+        {
             SqlTransactionIsolationLevel.Unspecified,
             SqlTransactionIsolationLevel.Serializable,
             SqlTransactionIsolationLevel.None,
             SqlTransactionIsolationLevel.ReadUncommitted,
-            SqlTransactionIsolationLevel.ReadCommitted
+            SqlTransactionIsolationLevel.ReadCommitted,
         };
 
         foreach (var transactionLevel in transactionLevels)
@@ -212,12 +217,12 @@ public class UnitTests
                 TableLock = false,
             };
 
-            var result = await MicrosoftSQL.BulkInsert(_input, options, default);
+            var result = await MicrosoftSQL.BulkInsert(defaultInput, options, default);
             Assert.IsTrue(result.Success);
             Assert.AreEqual(3, result.Count);
             Assert.AreEqual(3, GetRowCount());
 
-            await MicrosoftSQL.BulkInsert(_input, options, default);
+            await MicrosoftSQL.BulkInsert(defaultInput, options, default);
             Assert.AreEqual(6, GetRowCount());
 
             CleanUp();
@@ -227,12 +232,13 @@ public class UnitTests
     [TestMethod]
     public async Task TestBulkInsert_TableLock()
     {
-        var transactionLevels = new List<SqlTransactionIsolationLevel>() {
+        var transactionLevels = new List<SqlTransactionIsolationLevel>()
+        {
             SqlTransactionIsolationLevel.Unspecified,
             SqlTransactionIsolationLevel.Serializable,
             SqlTransactionIsolationLevel.None,
             SqlTransactionIsolationLevel.ReadUncommitted,
-            SqlTransactionIsolationLevel.ReadCommitted
+            SqlTransactionIsolationLevel.ReadCommitted,
         };
 
         foreach (var transactionLevel in transactionLevels)
@@ -251,12 +257,12 @@ public class UnitTests
                 TableLock = true,
             };
 
-            var result = await MicrosoftSQL.BulkInsert(_input, options, default);
+            var result = await MicrosoftSQL.BulkInsert(defaultInput, options, default);
             Assert.IsTrue(result.Success);
             Assert.AreEqual(3, result.Count);
             Assert.AreEqual(3, GetRowCount());
 
-            await MicrosoftSQL.BulkInsert(_input, options, default);
+            await MicrosoftSQL.BulkInsert(defaultInput, options, default);
             Assert.AreEqual(6, GetRowCount());
 
             CleanUp();
@@ -266,13 +272,14 @@ public class UnitTests
     [TestMethod]
     public async Task TestBulkInsert_All()
     {
-        var transactionLevels = new List<SqlTransactionIsolationLevel>() {
+        var transactionLevels = new List<SqlTransactionIsolationLevel>()
+        {
             SqlTransactionIsolationLevel.Unspecified,
             SqlTransactionIsolationLevel.Serializable,
             SqlTransactionIsolationLevel.None,
             SqlTransactionIsolationLevel.ReadUncommitted,
             SqlTransactionIsolationLevel.ReadCommitted,
-            SqlTransactionIsolationLevel.Snapshot
+            SqlTransactionIsolationLevel.Snapshot,
         };
 
         foreach (var transactionLevel in transactionLevels)
@@ -291,12 +298,12 @@ public class UnitTests
                 TableLock = true,
             };
 
-            var result = await MicrosoftSQL.BulkInsert(_input, options, default);
+            var result = await MicrosoftSQL.BulkInsert(defaultInput, options, default);
             Assert.IsTrue(result.Success);
             Assert.AreEqual(3, result.Count);
             Assert.AreEqual(3, GetRowCount());
 
-            await MicrosoftSQL.BulkInsert(_input, options, default);
+            await MicrosoftSQL.BulkInsert(defaultInput, options, default);
             Assert.AreEqual(6, GetRowCount());
 
             CleanUp();
@@ -306,12 +313,13 @@ public class UnitTests
     [TestMethod]
     public async Task TestBulkInsert_NotifyAfterZero()
     {
-        var transactionLevels = new List<SqlTransactionIsolationLevel>() {
+        var transactionLevels = new List<SqlTransactionIsolationLevel>()
+        {
             SqlTransactionIsolationLevel.Unspecified,
             SqlTransactionIsolationLevel.Serializable,
             SqlTransactionIsolationLevel.None,
             SqlTransactionIsolationLevel.ReadUncommitted,
-            SqlTransactionIsolationLevel.ReadCommitted
+            SqlTransactionIsolationLevel.ReadCommitted,
         };
 
         foreach (var transactionLevel in transactionLevels)
@@ -330,12 +338,12 @@ public class UnitTests
                 TableLock = false,
             };
 
-            var result = await MicrosoftSQL.BulkInsert(_input, options, default);
+            var result = await MicrosoftSQL.BulkInsert(defaultInput, options, default);
             Assert.IsTrue(result.Success);
             Assert.AreEqual(3, result.Count);
             Assert.AreEqual(3, GetRowCount());
 
-            await MicrosoftSQL.BulkInsert(_input, options, default);
+            await MicrosoftSQL.BulkInsert(defaultInput, options, default);
             Assert.AreEqual(6, GetRowCount());
 
             CleanUp();
@@ -345,12 +353,13 @@ public class UnitTests
     [TestMethod]
     public async Task TestBulkInsert_NotifyAfterTooMuch()
     {
-        var transactionLevels = new List<SqlTransactionIsolationLevel>() {
+        var transactionLevels = new List<SqlTransactionIsolationLevel>()
+        {
             SqlTransactionIsolationLevel.Unspecified,
             SqlTransactionIsolationLevel.Serializable,
             SqlTransactionIsolationLevel.None,
             SqlTransactionIsolationLevel.ReadUncommitted,
-            SqlTransactionIsolationLevel.ReadCommitted
+            SqlTransactionIsolationLevel.ReadCommitted,
         };
 
         foreach (var transactionLevel in transactionLevels)
@@ -369,12 +378,12 @@ public class UnitTests
                 TableLock = false,
             };
 
-            var result = await MicrosoftSQL.BulkInsert(_input, options, default);
+            var result = await MicrosoftSQL.BulkInsert(defaultInput, options, default);
             Assert.IsTrue(result.Success);
             Assert.AreEqual(3, result.Count);
             Assert.AreEqual(3, GetRowCount());
 
-            await MicrosoftSQL.BulkInsert(_input, options, default);
+            await MicrosoftSQL.BulkInsert(defaultInput, options, default);
             Assert.AreEqual(6, GetRowCount());
 
             CleanUp();
@@ -384,12 +393,13 @@ public class UnitTests
     [TestMethod]
     public async Task TestBulkInsert_NotifyAfterOne()
     {
-        var transactionLevels = new List<SqlTransactionIsolationLevel>() {
+        var transactionLevels = new List<SqlTransactionIsolationLevel>()
+        {
             SqlTransactionIsolationLevel.Unspecified,
             SqlTransactionIsolationLevel.Serializable,
             SqlTransactionIsolationLevel.None,
             SqlTransactionIsolationLevel.ReadUncommitted,
-            SqlTransactionIsolationLevel.ReadCommitted
+            SqlTransactionIsolationLevel.ReadCommitted,
         };
 
         foreach (var transactionLevel in transactionLevels)
@@ -408,12 +418,12 @@ public class UnitTests
                 TableLock = false,
             };
 
-            var result = await MicrosoftSQL.BulkInsert(_input, options, default);
+            var result = await MicrosoftSQL.BulkInsert(defaultInput, options, default);
             Assert.IsTrue(result.Success);
             Assert.AreEqual(3, result.Count);
             Assert.AreEqual(3, GetRowCount());
 
-            await MicrosoftSQL.BulkInsert(_input, options, default);
+            await MicrosoftSQL.BulkInsert(defaultInput, options, default);
             Assert.AreEqual(6, GetRowCount());
 
             CleanUp();
@@ -427,7 +437,7 @@ public class UnitTests
         {
             ColumnMapping.JsonPropertyOrder,
             ColumnMapping.JsonPropertyNames,
-            ColumnMapping.ManualColumnMapping
+            ColumnMapping.ManualColumnMapping,
         };
 
         var options = new Options()
@@ -466,11 +476,11 @@ public class UnitTests
         {
             var input = new Input
             {
-                ConnectionString = _connString,
-                TableName = _tableName,
+                ConnectionString = ConnString,
+                TableName = TableName,
                 InputData = json,
                 ColumnMapping = columnMapping,
-                ManualColumnMapping = manualMapping
+                ManualColumnMapping = manualMapping,
             };
 
             var result = await MicrosoftSQL.BulkInsert(input, options, default);
@@ -480,10 +490,10 @@ public class UnitTests
 
     private static int GetRowCount()
     {
-        using var connection = new SqlConnection(_connString);
+        using var connection = new SqlConnection(ConnString);
         connection.Open();
         var getRows = connection.CreateCommand();
-        getRows.CommandText = $"SELECT COUNT(*) FROM {_tableName}";
+        getRows.CommandText = $"SELECT COUNT(*) FROM {TableName}";
         var count = (int)getRows.ExecuteScalar();
         connection.Close();
         connection.Dispose();

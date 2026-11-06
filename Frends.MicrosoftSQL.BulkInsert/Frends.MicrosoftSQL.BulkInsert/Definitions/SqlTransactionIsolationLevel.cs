@@ -31,7 +31,7 @@ public enum SqlTransactionIsolationLevel
     ReadUncommitted = 256,
 
     /// <summary>
-    /// Locks are placed on all data that is used in a query, preventing other users from updating the data. 
+    /// Locks are placed on all data that is used in a query, preventing other users from updating the data.
     /// Prevents non-repeatable reads but phantom rows are still possible.
     /// </summary>
     RepeatableRead = 65536,
@@ -42,8 +42,8 @@ public enum SqlTransactionIsolationLevel
     Serializable = 1048576,
 
     /// <summary>
-    /// Reduces blocking by storing a version of data that one application can read while another is modifying the same data. 
+    /// Reduces blocking by storing a version of data that one application can read while another is modifying the same data.
     /// Indicates that from one transaction you cannot see changes made in other transactions, even if you requery.
     /// </summary>
-    Snapshot = 16777216
+    Snapshot = 16777216,
 }

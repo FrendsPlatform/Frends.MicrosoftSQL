@@ -9,26 +9,18 @@ public class Result
     /// Operation complete without errors.
     /// </summary>
     /// <example>true</example>
-    public bool Success { get; private set; }
+    public bool Success { get; set; }
 
     /// <summary>
     /// Number of processed rows.
     /// In case of failure it shows notified number of processed rows. Approximation logic is defined by Options.NotifyAfter
     /// </summary>
     /// <example>100</example>
-    public long Count { get; private set; }
+    public long Count { get; set; }
 
     /// <summary>
-    /// Error message.
-    /// This value is generated when an exception occurs and Options.ThrowErrorOnFailure = false.
+    /// Error that occurred during task execution.
     /// </summary>
-    /// <example>Login failed for user 'user'.</example>
-    public string ErrorMessage { get; private set; }
-
-    internal Result(bool success, long count, string errorMessage)
-    {
-        Success = success;
-        Count = count;
-        ErrorMessage = errorMessage;
-    }
+    /// <example>object { string Message, Exception AdditionalInfo }</example>
+    public Error Error { get; set; }
 }

@@ -1,5 +1,14 @@
 # Changelog
 
+## [4.0.0] - 2026-11-02
+
+### Changed
+
+- **[Breaking Change]** Replaced `Result.ErrorMessage` with `Result.Error` object containing `Message` and `AdditionalInfo`.
+- **[Breaking Change]** Error messages and exception types thrown on failure have changed; the original exception is now thrown (with details of the transaction state in the message when a bulk insert fails).
+- Added `Options.ErrorMessageOnFailure` to override the error message on failure.
+- Upgraded the Task to target .NET 8.
+
 ## [3.3.0] - 2026-06-18
 
 ### Changed
