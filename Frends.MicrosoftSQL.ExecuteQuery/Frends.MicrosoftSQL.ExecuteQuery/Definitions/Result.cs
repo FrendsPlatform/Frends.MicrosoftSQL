@@ -1,10 +1,18 @@
-﻿namespace Frends.MicrosoftSQL.ExecuteQuery.Definitions;
+namespace Frends.MicrosoftSQL.ExecuteQuery.Definitions;
 
 /// <summary>
 /// Task's result.
 /// </summary>
 public class Result
 {
+    internal Result(bool success, int recordsAffected, dynamic data)
+    {
+        Success = success;
+        RecordsAffected = recordsAffected;
+        Data = data;
+        Error = null;
+    }
+
     /// <summary>
     /// Operation complete without errors.
     /// </summary>
@@ -19,13 +27,6 @@ public class Result
     public int RecordsAffected { get; private set; }
 
     /// <summary>
-    /// Error message.
-    /// This value is generated when an exception occurs and Options.ThrowErrorOnFailure = false.
-    /// </summary>
-    /// <example>Login failed for user 'user'.</example>
-    public string ErrorMessage { get; private set; }
-
-    /// <summary>
     /// Query result as JToken.
     /// </summary>
     /// <example>
@@ -35,11 +36,9 @@ public class Result
     /// </example>
     public dynamic Data { get; private set; }
 
-    internal Result(bool success, int recordsAffected, string errorMessage, dynamic data)
-    {
-        Success = success;
-        RecordsAffected = recordsAffected;
-        ErrorMessage = errorMessage;
-        Data = data;
-    }
+    /// <summary>
+    /// Error that occurred during task execution.
+    /// </summary>
+    /// <example>object { string Message, Exception AdditionalInfo }</example>
+    public Error Error { get; internal set; }
 }

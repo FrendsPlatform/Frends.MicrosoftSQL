@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.0.0] - 2026-11-04
+
+### Changed
+
+- Updated the task to .NET 8 and added structured error details to failed results.
+- [Breaking] Removed `Result.ErrorMessage`; read failed result messages from `Result.Error.Message` instead.
+
 ## [2.3.0] - 2026-01-22
 
 ### Changed

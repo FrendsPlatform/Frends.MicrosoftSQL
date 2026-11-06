@@ -1,8 +1,8 @@
 using Frends.MicrosoftSQL.ExecuteQuery.Definitions;
 using Frends.MicrosoftSQL.ExecuteQuery.Tests.Lib;
+using Microsoft.Data.SqlClient;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Newtonsoft.Json.Linq;
-using Microsoft.Data.SqlClient;
 
 namespace Frends.MicrosoftSQL.ExecuteQuery.Tests;
 
@@ -12,52 +12,53 @@ public class ExecuteReaderUnitTests : ExecuteQueryTestBase
     [TestMethod]
     public async Task TestExecuteQuery_ExecuteReader()
     {
-        var transactionLevels = new List<SqlTransactionIsolationLevel>() {
+        var transactionLevels = new List<SqlTransactionIsolationLevel>()
+        {
             SqlTransactionIsolationLevel.Unspecified,
             SqlTransactionIsolationLevel.Serializable,
             SqlTransactionIsolationLevel.None,
             SqlTransactionIsolationLevel.ReadUncommitted,
-            SqlTransactionIsolationLevel.ReadCommitted
+            SqlTransactionIsolationLevel.ReadCommitted,
         };
 
         var inputInsert = new Input()
         {
-            ConnectionString = _connString,
-            Query = $@"INSERT INTO {_tableName} VALUES (1, 'Suku', 'Etu'), (2, 'Last', 'Forst'), (3, 'Hiiri', 'Mikki')",
+            ConnectionString = ConnString,
+            Query = $@"INSERT INTO {TableName} VALUES (1, 'Suku', 'Etu'), (2, 'Last', 'Forst'), (3, 'Hiiri', 'Mikki')",
             ExecuteType = ExecuteTypes.ExecuteReader,
-            Parameters = null
+            Parameters = null,
         };
 
         var inputSelect = new Input()
         {
-            ConnectionString = _connString,
-            Query = $"select * from {_tableName}",
+            ConnectionString = ConnString,
+            Query = $"select * from {TableName}",
             ExecuteType = ExecuteTypes.ExecuteReader,
-            Parameters = null
+            Parameters = null,
         };
 
         var inputSelectSingle = new Input()
         {
-            ConnectionString = _connString,
-            Query = $"select * from {_tableName} where Id = 1",
+            ConnectionString = ConnString,
+            Query = $"select * from {TableName} where Id = 1",
             ExecuteType = ExecuteTypes.ExecuteReader,
-            Parameters = null
+            Parameters = null,
         };
 
         var inputUpdate = new Input()
         {
-            ConnectionString = _connString,
-            Query = $@"update {_tableName} set LastName = 'Edit' where Id = 2",
+            ConnectionString = ConnString,
+            Query = $@"update {TableName} set LastName = 'Edit' where Id = 2",
             ExecuteType = ExecuteTypes.ExecuteReader,
-            Parameters = null
+            Parameters = null,
         };
 
         var inputDelete = new Input()
         {
-            ConnectionString = _connString,
-            Query = $"delete from {_tableName} where Id = 2",
+            ConnectionString = ConnString,
+            Query = $"delete from {TableName} where Id = 2",
             ExecuteType = ExecuteTypes.ExecuteReader,
-            Parameters = null
+            Parameters = null,
         };
 
         foreach (var level in transactionLevels)
@@ -68,21 +69,21 @@ public class ExecuteReaderUnitTests : ExecuteQueryTestBase
             {
                 SqlTransactionIsolationLevel = level,
                 CommandTimeoutSeconds = 2,
-                ThrowErrorOnFailure = true
+                ThrowErrorOnFailure = true,
             };
 
             // Insert rows
             var insert = await MicrosoftSQL.ExecuteQuery(inputInsert, options, default);
             Assert.IsTrue(insert.Success);
             Assert.AreEqual(3, insert.RecordsAffected);
-            Assert.IsNull(insert.ErrorMessage);
-            Assert.AreEqual(3, Helper.GetRowCount(_connString, _tableName)); // Make sure rows inserted before moving on.
+            Assert.IsNull(insert.Error);
+            Assert.AreEqual(3, Helper.GetRowCount(ConnString, TableName)); // Make sure rows inserted before moving on.
 
             // Select all
             var select = await MicrosoftSQL.ExecuteQuery(inputSelect, options, default);
             Assert.IsTrue(select.Success);
             Assert.AreEqual(-1, select.RecordsAffected);
-            Assert.IsNull(select.ErrorMessage);
+            Assert.IsNull(select.Error);
             Assert.AreEqual(typeof(JArray), select.Data.GetType());
             Assert.AreEqual("Suku", (string)select.Data[0]["LastName"]);
             Assert.AreEqual("Etu", (string)select.Data[0]["FirstName"]);
@@ -90,24 +91,24 @@ public class ExecuteReaderUnitTests : ExecuteQueryTestBase
             Assert.AreEqual("Forst", (string)select.Data[1]["FirstName"]);
             Assert.AreEqual("Hiiri", (string)select.Data[2]["LastName"]);
             Assert.AreEqual("Mikki", (string)select.Data[2]["FirstName"]);
-            Assert.AreEqual(3, Helper.GetRowCount(_connString, _tableName)); // double check
+            Assert.AreEqual(3, Helper.GetRowCount(ConnString, TableName)); // double check
 
             // Select single
             var selectSingle = await MicrosoftSQL.ExecuteQuery(inputSelectSingle, options, default);
             Assert.IsTrue(selectSingle.Success);
             Assert.AreEqual(-1, selectSingle.RecordsAffected);
-            Assert.IsNull(selectSingle.ErrorMessage);
+            Assert.IsNull(selectSingle.Error);
             Assert.AreEqual(typeof(JArray), selectSingle.Data.GetType());
             Assert.AreEqual("Suku", (string)selectSingle.Data[0]["LastName"]);
             Assert.AreEqual("Etu", (string)selectSingle.Data[0]["FirstName"]);
-            Assert.AreEqual(3, Helper.GetRowCount(_connString, _tableName)); // double check
+            Assert.AreEqual(3, Helper.GetRowCount(ConnString, TableName)); // double check
 
             // Update
             var update = await MicrosoftSQL.ExecuteQuery(inputUpdate, options, default);
             Assert.IsTrue(update.Success);
             Assert.AreEqual(1, update.RecordsAffected);
-            Assert.IsNull(update.ErrorMessage);
-            Assert.AreEqual(3, Helper.GetRowCount(_connString, _tableName)); // double check
+            Assert.IsNull(update.Error);
+            Assert.AreEqual(3, Helper.GetRowCount(ConnString, TableName)); // double check
             var checkUpdateResult = await MicrosoftSQL.ExecuteQuery(inputSelect, options, default);
             Assert.AreEqual("Suku", (string)checkUpdateResult.Data[0]["LastName"]);
             Assert.AreEqual("Etu", (string)checkUpdateResult.Data[0]["FirstName"]);
@@ -115,14 +116,14 @@ public class ExecuteReaderUnitTests : ExecuteQueryTestBase
             Assert.AreEqual("Forst", (string)checkUpdateResult.Data[1]["FirstName"]);
             Assert.AreEqual("Hiiri", (string)checkUpdateResult.Data[2]["LastName"]);
             Assert.AreEqual("Mikki", (string)checkUpdateResult.Data[2]["FirstName"]);
-            Assert.AreEqual(3, Helper.GetRowCount(_connString, _tableName)); // double check
+            Assert.AreEqual(3, Helper.GetRowCount(ConnString, TableName)); // double check
 
             // Delete
             var delete = await MicrosoftSQL.ExecuteQuery(inputDelete, options, default);
             Assert.IsTrue(delete.Success);
             Assert.AreEqual(1, delete.RecordsAffected);
-            Assert.IsNull(delete.ErrorMessage);
-            Assert.AreEqual(2, Helper.GetRowCount(_connString, _tableName)); // double check
+            Assert.IsNull(delete.Error);
+            Assert.AreEqual(2, Helper.GetRowCount(ConnString, TableName)); // double check
             var checkDeleteResult = await MicrosoftSQL.ExecuteQuery(inputSelect, options, default);
             Assert.AreEqual("Suku", (string)checkDeleteResult.Data[0]["LastName"]);
             Assert.AreEqual("Etu", (string)checkDeleteResult.Data[0]["FirstName"]);
@@ -144,17 +145,17 @@ public class ExecuteReaderUnitTests : ExecuteQueryTestBase
 
         var input = new Input
         {
-            ConnectionString = _connString,
+            ConnectionString = ConnString,
             Query = $"INSERT INTO {table} VALUES (1, @bin)",
             ExecuteType = ExecuteTypes.NonQuery,
-            Parameters = new QueryParameter[] { new QueryParameter { Name = "bin", Value = binary, SqlDataType = SqlDataTypes.VarBinary } }
+            Parameters = new QueryParameter[] { new QueryParameter { Name = "bin", Value = binary, SqlDataType = SqlDataTypes.VarBinary } },
         };
 
         var options = new Options
         {
             CommandTimeoutSeconds = 30,
             SqlTransactionIsolationLevel = SqlTransactionIsolationLevel.ReadCommitted,
-            ThrowErrorOnFailure = true
+            ThrowErrorOnFailure = true,
         };
 
         var result = await MicrosoftSQL.ExecuteQuery(input, options, default);
@@ -162,10 +163,10 @@ public class ExecuteReaderUnitTests : ExecuteQueryTestBase
 
         input = new Input
         {
-            ConnectionString = _connString,
+            ConnectionString = ConnString,
             Query = $@"SELECT Id, Data From {table}",
             ExecuteType = ExecuteTypes.ExecuteReader,
-            Parameters = null
+            Parameters = null,
         };
 
         result = await MicrosoftSQL.ExecuteQuery(input, options, default);
@@ -179,7 +180,7 @@ public class ExecuteReaderUnitTests : ExecuteQueryTestBase
 
     private static void ExecuteQuery(string command)
     {
-        using var connection = new SqlConnection(_connString);
+        using var connection = new SqlConnection(ConnString);
         connection.Open();
         var createTable = connection.CreateCommand();
         createTable.CommandText = command;
