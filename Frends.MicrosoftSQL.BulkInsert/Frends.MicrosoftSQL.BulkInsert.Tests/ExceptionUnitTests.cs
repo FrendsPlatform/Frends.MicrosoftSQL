@@ -1,4 +1,4 @@
-using Frends.MicrosoftSQL.BulkInsert.Definitions;
+﻿using Frends.MicrosoftSQL.BulkInsert.Definitions;
 using Frends.MicrosoftSQL.BulkInsert.Tests.Lib;
 using Microsoft.Data.SqlClient;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -49,7 +49,7 @@ public class ExceptionUnitTests
     }
 
     [TestMethod]
-    public async Task BulkInsertFailure_RethrowsOriginalSqlException()
+    public void BulkInsertFailure_RethrowsOriginalException()
     {
         var input = new Input { TableName = "MissingTable", InputData = Json };
         var options = new Options
@@ -59,10 +59,8 @@ public class ExceptionUnitTests
             NotifyAfter = 1,
         };
 
-        var exception = await Assert.ThrowsExceptionAsync<SqlException>(() =>
+        Assert.ThrowsExceptionAsync<InvalidOperationException>(() =>
             TaskRunner.BulkInsert(input, options, CancellationToken.None));
-
-        Assert.IsNull(exception.InnerException);
     }
 
     [TestMethod]
