@@ -1,4 +1,5 @@
 using Frends.MicrosoftSQL.BatchOperation.Definitions;
+using Frends.MicrosoftSQL.BatchOperation.Tests.Lib;
 using Microsoft.Data.SqlClient;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -7,95 +8,128 @@ namespace Frends.MicrosoftSQL.BatchOperation.Tests;
 [TestClass]
 public class ExceptionUnitTests
 {
-    /*
-        docker-compose up
-   */
-
     [TestMethod]
-    public async Task TestBatchOperation_Invalid_Creds_ThrowError()
+    public async Task InvalidCredentials_RethrowsOriginalSqlException()
     {
-        var input = new Input()
+        var connectionString = new SqlConnectionStringBuilder(SqlServerContainer.ConnectionString)
         {
-            ConnectionString = "Server=127.0.0.1,1433;Database=Master;User Id=SA;Password=WrongPassWord;TrustServerCertificate=True",
-        };
+            Password = "WrongPassWord",
+        }.ConnectionString;
 
-        var options = new Options()
-        {
-            SqlTransactionIsolationLevel = SqlTransactionIsolationLevel.ReadCommitted,
-            CommandTimeoutSeconds = 2,
-            ThrowErrorOnFailure = true,
-        };
+        var exception = await Assert.ThrowsExceptionAsync<SqlException>(() =>
+            TaskRunner.BatchOperation(
+                new Input(),
+                new Options { ThrowErrorOnFailure = true },
+                default,
+                new Connection { ConnectionString = connectionString }));
 
-        var ex = await Assert.ThrowsExceptionAsync<SqlException>(() => MicrosoftSQL.BatchOperation(input, options, default));
-        Assert.IsNotNull(ex);
-        Assert.IsTrue(ex.Message.Contains("Login failed for user 'SA'."));
+        StringAssert.Contains(exception.Message, "Login failed for user");
     }
 
     [TestMethod]
-    public async Task TestBatchOperation_Invalid_Creds_ReturnErrorDetails()
+    public async Task InvalidCredentials_ReturnsErrorWhenThrowingDisabled()
     {
-        var input = new Input()
+        var connectionString = new SqlConnectionStringBuilder(SqlServerContainer.ConnectionString)
         {
-            ConnectionString = "Server=127.0.0.1,1433;Database=Master;User Id=SA;Password=WrongPassWord;TrustServerCertificate=True",
-        };
+            Password = "WrongPassWord",
+        }.ConnectionString;
 
-        var options = new Options()
-        {
-            SqlTransactionIsolationLevel = SqlTransactionIsolationLevel.ReadCommitted,
-            CommandTimeoutSeconds = 2,
-            ThrowErrorOnFailure = false,
-        };
+        var result = await TaskRunner.BatchOperation(
+            new Input(),
+            new Options { ThrowErrorOnFailure = false },
+            default,
+            new Connection { ConnectionString = connectionString });
 
-        var result = await MicrosoftSQL.BatchOperation(input, options, default);
         Assert.IsFalse(result.Success);
-        Assert.IsTrue(result.Error.Message.Contains("Login failed for user 'SA'."));
-        Assert.IsNotNull(result.Error.AdditionalInfo);
-        Assert.AreEqual(0, result.RecordsAffected);
+        StringAssert.Contains(result.Error.Message, "Login failed for user");
+        Assert.IsInstanceOfType(result.Error.AdditionalInfo, typeof(SqlException));
     }
 
     [TestMethod]
-    public async Task TestBatchOperation_ExecuteHandler_Exception_TransactionIsNull()
+    public async Task BatchOperationFailure_RethrowsOriginalSqlExceptionWithoutTransaction()
     {
-        // Arrange
         var input = new Input
         {
-            ConnectionString = "Server=127.0.0.1,1433;Database=Master;User Id=SA;Password=Salakala123!;TrustServerCertificate=True",
+            Query = "INSERT INTO MissingTable VALUES (1)",
+            InputJson = "[{}]",
         };
-
         var options = new Options
         {
             ThrowErrorOnFailure = true,
             SqlTransactionIsolationLevel = SqlTransactionIsolationLevel.None,
-            CommandTimeoutSeconds = 60,
         };
 
-        // Act
-        var ex = await Assert.ThrowsExceptionAsync<Exception>(() => MicrosoftSQL.BatchOperation(input, options, CancellationToken.None));
-        Console.WriteLine("Actual exception message: " + ex.Message);
+        var exception = await Assert.ThrowsExceptionAsync<SqlException>(() =>
+            TaskRunner.BatchOperation(input, options, default));
 
-        // Assert
-        Assert.IsNotNull(ex.InnerException);
-        Assert.IsTrue(ex.Message.Contains("ExecuteHandler exception: 'Options.SqlTransactionIsolationLevel = None', so there was no transaction rollback."));
+        StringAssert.Contains(exception.Message, "Invalid object name");
+        Assert.IsNull(exception.InnerException);
     }
 
     [TestMethod]
-    public async Task TestBatchOperation_ExecuteHandler_Exception_TransactionIsNotNull()
+    public async Task BatchOperationFailure_RollsBackAndReturnsOriginalSqlException()
     {
-        var input = new Input
-        {
-            ConnectionString = "Server=127.0.0.1,1433;Database=Master;User Id=SA;Password=Salakala123!;TrustServerCertificate=True",
-        };
+        const string tableName = "RollbackTest";
+        PrepareTable(tableName);
 
-        var options = new Options
-        {
-            ThrowErrorOnFailure = true,
-            SqlTransactionIsolationLevel = SqlTransactionIsolationLevel.ReadCommitted,
-            CommandTimeoutSeconds = 60,
-        };
+        var result = await TaskRunner.BatchOperation(CreateFailingInput(tableName), CreateRollbackOptions(false), default);
 
-        var ex = await Assert.ThrowsExceptionAsync<Exception>(() => MicrosoftSQL.BatchOperation(input, options, CancellationToken.None));
+        Assert.IsFalse(result.Success);
+        Assert.IsInstanceOfType(result.Error.AdditionalInfo, typeof(SqlException));
+        StringAssert.Contains(result.Error.Message, "rollback test failure");
+        Assert.AreEqual(0, GetRowCount(tableName));
+        DropTable(tableName);
+    }
 
-        Assert.IsNotNull(ex.InnerException);
-        Assert.IsTrue(ex.Message.Contains("ExecuteHandler exception: (If required) transaction rollback completed without exception."));
+    [TestMethod]
+    public async Task BatchOperationFailure_RollsBackAndRethrowsOriginalSqlException()
+    {
+        const string tableName = "RollbackTestThrow";
+        PrepareTable(tableName);
+
+        var exception = await Assert.ThrowsExceptionAsync<SqlException>(() =>
+            TaskRunner.BatchOperation(CreateFailingInput(tableName), CreateRollbackOptions(true), default));
+
+        StringAssert.Contains(exception.Message, "rollback test failure");
+        Assert.IsNull(exception.InnerException);
+        Assert.AreEqual(0, GetRowCount(tableName));
+        DropTable(tableName);
+    }
+
+    private static Input CreateFailingInput(string tableName) => new()
+    {
+        // Rows 1 and 2 are inserted before row 3 fails, so rollback has to remove real data.
+        Query = $"INSERT INTO {tableName} VALUES (@Id); IF @Id = 3 THROW 51000, 'rollback test failure', 1;",
+        InputJson = "[{\"Id\":1},{\"Id\":2},{\"Id\":3}]",
+    };
+
+    private static Options CreateRollbackOptions(bool throwErrorOnFailure) => new()
+    {
+        ThrowErrorOnFailure = throwErrorOnFailure,
+        SqlTransactionIsolationLevel = SqlTransactionIsolationLevel.ReadCommitted,
+        CommandTimeoutSeconds = 30,
+    };
+
+    private static void PrepareTable(string tableName) =>
+        Execute($"IF OBJECT_ID('{tableName}') IS NOT NULL DROP TABLE {tableName}; CREATE TABLE {tableName}(Id int);");
+
+    private static void DropTable(string tableName) => Execute($"DROP TABLE {tableName}");
+
+    private static int GetRowCount(string tableName)
+    {
+        using var sqlConnection = new SqlConnection(SqlServerContainer.ConnectionString);
+        sqlConnection.Open();
+        using var command = sqlConnection.CreateCommand();
+        command.CommandText = $"SELECT COUNT(*) FROM {tableName}";
+        return (int)command.ExecuteScalar();
+    }
+
+    private static void Execute(string sql)
+    {
+        using var sqlConnection = new SqlConnection(SqlServerContainer.ConnectionString);
+        sqlConnection.Open();
+        using var command = sqlConnection.CreateCommand();
+        command.CommandText = sql;
+        command.ExecuteNonQuery();
     }
 }

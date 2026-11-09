@@ -1,0 +1,49 @@
+using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
+using Frends.MicrosoftSQL.ExecuteProcedure.Attributes;
+
+namespace Frends.MicrosoftSQL.ExecuteProcedure.Definitions;
+
+/// <summary>
+/// Connection parameters.
+/// </summary>
+public class Connection
+{
+    /// <summary>
+    /// Connection string.
+    /// </summary>
+    /// <example>Server=myServerAddress;Database=myDataBase;User Id=myUsername;******;</example>
+    [PasswordPropertyText]
+    [DisplayFormat(DataFormatString = "Text")]
+    [DefaultValue("Server=myServerAddress;Database=myDataBase;User Id=myUsername;******;")]
+    public string ConnectionString { get; set; }
+
+    /// <summary>
+    /// If set, allows you to give the user credentials to use to make sql executions on remote hosts.
+    /// If not set, the agent service user credentials will be used.
+    /// This feature is only supported on Windows machines.
+    /// </summary>
+    /// <example>false</example>
+    [DefaultValue(false)]
+    public bool UseGivenUserCredentialsForRemoteConnections { get; set; }
+
+    /// <summary>
+    /// The username for the remote connection. Needs to be of format domain\username.
+    /// </summary>
+    /// <example>domain\username</example>
+    [UIHint(nameof(UseGivenUserCredentialsForRemoteConnections), "", true)]
+    [RequiredIf(nameof(UseGivenUserCredentialsForRemoteConnections), true)]
+    [DisplayFormat(DataFormatString = "Text")]
+    [DefaultValue("domain\\username")]
+    public string Username { get; set; }
+
+    /// <summary>
+    /// Password for the given credentials.
+    /// </summary>
+    /// <example>Password123</example>
+    [UIHint(nameof(UseGivenUserCredentialsForRemoteConnections), "", true)]
+    [RequiredIf(nameof(UseGivenUserCredentialsForRemoteConnections), true)]
+    [PasswordPropertyText]
+    [DisplayFormat(DataFormatString = "Text")]
+    public string Password { get; set; }
+}

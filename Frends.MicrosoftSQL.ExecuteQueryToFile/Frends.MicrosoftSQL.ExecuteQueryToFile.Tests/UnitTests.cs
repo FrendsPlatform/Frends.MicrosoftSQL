@@ -11,34 +11,19 @@ using Frends.MicrosoftSQL.ExecuteQueryToFile.Enums;
 using Microsoft.Data.SqlClient;
 using NUnit.Framework;
 
-/// <summary>
-/// docker run -e "ACCEPT_EULA=Y" -e "SA_PASSWORD=Salakala123!" -p 1433:1433 --name sql1 --hostname sql1 -d mcr.microsoft.com/mssql/server:2019-CU18-ubuntu-20.04
-/// with Git bash add winpty to the start of
-/// winpty docker exec -it sql1 "bash"
-/// /opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P "Salakala123!"
-/// Check rows before CleanUp:
-/// SELECT* FROM TestTable
-/// GO
-/// Optional queries:
-/// SELECT Name FROM sys.Databases;
-/// GO
-/// SELECT* FROM INFORMATION_SCHEMA.TABLES;
-/// GO
-/// </summary>
 [TestFixture]
 public class UnitTests
 {
-    private static readonly string ConnectionString = Helper.GetConnectionString();
+    private static readonly string TableName = "TestTable";
+    private static readonly string Destination = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "../../../TestData/test.csv");
+    private Options options;
 
-    private static readonly Definitions.Connection DatabaseConnection = new()
+    private static string ConnectionString => Helper.GetConnectionString();
+
+    private static Definitions.Connection DatabaseConnection => new()
     {
         ConnectionString = ConnectionString,
     };
-
-    private static readonly string TableName = "TestTable";
-    private static readonly string Destination = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "../../../TestData/test.csv");
-
-    private Options options;
 
     [SetUp]
     public void Init()

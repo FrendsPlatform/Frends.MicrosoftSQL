@@ -1,5 +1,11 @@
 ﻿# Changelog
 
+## [3.1.0] - 2026-11-09
+
+### Added
+
+- Added new `Connection` properties `UseGivenUserCredentialsForRemoteConnections`, `Username` and `Password` to support Windows Authentication for remote connections.
+
 ## [3.0.0] - 2026-11-02
 ### Changed
 - **[Breaking Change]**Moved the `ConnectionString` from the Input tab to a new Connection tab.

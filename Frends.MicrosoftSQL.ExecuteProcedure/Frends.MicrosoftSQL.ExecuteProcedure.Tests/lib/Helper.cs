@@ -1,44 +1,44 @@
-﻿namespace Frends.MicrosoftSQL.ExecuteProcedure.Tests;
-
+﻿using Frends.MicrosoftSQL.ExecuteProcedure.Tests.Lib;
 using Microsoft.Data.SqlClient;
+
+namespace Frends.MicrosoftSQL.ExecuteProcedure.Tests;
 
 internal static class Helper
 {
-    internal static string GetConnectionString()
-    {
-        var user = "SA";
-        var pwd = "Salakala123!";
-        return $"Server=127.0.0.1,1433;Database=Master;User Id={user};Password={pwd};TrustServerCertificate=True";
-    }
+    internal static string GetConnectionString() => SqlServerContainer.ConnectionString;
 
     internal static string GetInvalidConnectionString()
     {
-        var user = "SA";
-        var pwd = "WrongPassWord";
-        return $"Server=127.0.0.1,1433;Database=Master;User Id={user};Password={pwd};TrustServerCertificate=True";
+        var builder = new SqlConnectionStringBuilder(GetConnectionString()) { Password = "WrongPassWord" };
+        return builder.ConnectionString;
     }
 
-    // Simple select query
+    internal static Task<Definitions.Result> ExecuteProcedure(
+        Definitions.Input input,
+        Definitions.Options options,
+        CancellationToken cancellationToken = default,
+        Definitions.Connection? connection = null) =>
+        MicrosoftSQL.ExecuteProcedure(
+            input,
+            connection ?? new Definitions.Connection { ConnectionString = GetConnectionString() },
+            options,
+            cancellationToken);
+
     internal static int GetRowCount(string tableName)
     {
         using var connection = new SqlConnection(GetConnectionString());
         connection.Open();
-        var getRows = connection.CreateCommand();
-        getRows.CommandText = $"SELECT COUNT(*) FROM {tableName}";
-        var count = (int)getRows.ExecuteScalar();
-        connection.Close();
-        connection.Dispose();
-        return count;
+        using var command = connection.CreateCommand();
+        command.CommandText = $"SELECT COUNT(*) FROM {tableName}";
+        return (int)command.ExecuteScalar();
     }
 
     internal static void ExecuteNonQuery(string command)
     {
         using var connection = new SqlConnection(GetConnectionString());
         connection.Open();
-        var createTable = connection.CreateCommand();
-        createTable.CommandText = command;
-        createTable.ExecuteNonQuery();
-        connection.Close();
-        connection.Dispose();
+        using var sqlCommand = connection.CreateCommand();
+        sqlCommand.CommandText = command;
+        sqlCommand.ExecuteNonQuery();
     }
 }

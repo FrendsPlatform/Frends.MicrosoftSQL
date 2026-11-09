@@ -4,25 +4,12 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Frends.MicrosoftSQL.ExecuteProcedure.Tests;
 
-/// <summary>
-/// docker run -e "ACCEPT_EULA=Y" -e "SA_PASSWORD=Salakala123!" -p 1433:1433 --name sql1 --hostname sql1 -d mcr.microsoft.com/mssql/server:2019-CU18-ubuntu-20.04
-/// with Git bash add winpty to the start of
-/// winpty docker exec -it sql1 "bash"
-/// /opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P "Salakala123!"
-/// Check rows before CleanUp:
-/// SELECT* FROM TestTable
-/// GO
-/// Optional queries:
-/// SELECT Name FROM sys.Databases;
-/// GO
-/// SELECT* FROM INFORMATION_SCHEMA.TABLES;
-/// GO
-/// </summary>
 [TestClass]
 public class ScalarUnitTests
 {
-    private static readonly string ConnectionString = Helper.GetConnectionString();
     private static readonly string TableName = "TestTable";
+
+    private static string ConnectionString => Helper.GetConnectionString();
 
     [TestInitialize]
     public void Init()
@@ -107,7 +94,6 @@ DECLARE cur CURSOR
 
         var inputInsert = new Input()
         {
-            ConnectionString = ConnectionString,
             Execute = "InsertValues",
             ExecuteType = ExecuteTypes.Scalar,
             Parameters = null,
@@ -115,7 +101,6 @@ DECLARE cur CURSOR
 
         var inputSelect = new Input()
         {
-            ConnectionString = ConnectionString,
             Execute = "SelectAll",
             ExecuteType = ExecuteTypes.Scalar,
             Parameters = null,
@@ -123,7 +108,6 @@ DECLARE cur CURSOR
 
         var inputSelectSingle = new Input()
         {
-            ConnectionString = ConnectionString,
             Execute = "SelectLastname",
             ExecuteType = ExecuteTypes.Scalar,
             Parameters = null,
@@ -131,7 +115,6 @@ DECLARE cur CURSOR
 
         var inputUpdate = new Input()
         {
-            ConnectionString = ConnectionString,
             Execute = "UpdateValue",
             ExecuteType = ExecuteTypes.Scalar,
             Parameters = null,
@@ -139,7 +122,6 @@ DECLARE cur CURSOR
 
         var inputDelete = new Input()
         {
-            ConnectionString = ConnectionString,
             Execute = "DeleteValue",
             ExecuteType = ExecuteTypes.Scalar,
             Parameters = null,
@@ -147,7 +129,6 @@ DECLARE cur CURSOR
 
         var inputSelectAfterExecution = new Input()
         {
-            ConnectionString = ConnectionString,
             Execute = "SelectAll",
             ExecuteType = ExecuteTypes.ExecuteReader,
             Parameters = null,
@@ -156,14 +137,14 @@ DECLARE cur CURSOR
         foreach (var options in transactionLevels.Select(e => new Options { SqlTransactionIsolationLevel = e, CommandTimeoutSeconds = 2, ThrowErrorOnFailure = true }))
         {
             // Insert rows
-            var insert = await MicrosoftSQL.ExecuteProcedure(inputInsert, options, default);
+            var insert = await Helper.ExecuteProcedure(inputInsert, options, default);
             Assert.IsTrue(insert.Success);
             Assert.AreEqual(1, insert.RecordsAffected);
             Assert.IsNull(insert.Error);
             Assert.AreEqual(3, Helper.GetRowCount(TableName));
 
             // Select all - Returns 1 because first value (row/column) is ID = 1
-            var select = await MicrosoftSQL.ExecuteProcedure(inputSelect, options, default);
+            var select = await Helper.ExecuteProcedure(inputSelect, options, default);
             Assert.IsTrue(select.Success);
             Assert.AreEqual(1, select.RecordsAffected);
             Assert.IsNull(select.Error);
@@ -171,7 +152,7 @@ DECLARE cur CURSOR
             Assert.AreEqual(3, Helper.GetRowCount(TableName));
 
             // Select single
-            var selectSingle = await MicrosoftSQL.ExecuteProcedure(inputSelectSingle, options, default);
+            var selectSingle = await Helper.ExecuteProcedure(inputSelectSingle, options, default);
             Assert.IsTrue(selectSingle.Success);
             Assert.AreEqual(1, selectSingle.RecordsAffected);
             Assert.IsNull(selectSingle.Error);
@@ -179,12 +160,12 @@ DECLARE cur CURSOR
             Assert.AreEqual(3, Helper.GetRowCount(TableName));
 
             // Update
-            var update = await MicrosoftSQL.ExecuteProcedure(inputUpdate, options, default);
+            var update = await Helper.ExecuteProcedure(inputUpdate, options, default);
             Assert.IsTrue(update.Success);
             Assert.AreEqual(1, update.RecordsAffected);
             Assert.IsNull(update.Error);
             Assert.AreEqual(3, Helper.GetRowCount(TableName));
-            var checkUpdateResult = await MicrosoftSQL.ExecuteProcedure(inputSelectAfterExecution, options, default);
+            var checkUpdateResult = await Helper.ExecuteProcedure(inputSelectAfterExecution, options, default);
             Assert.AreEqual("Suku", (string)checkUpdateResult.Data[0]["LastName"]);
             Assert.AreEqual("Etu", (string)checkUpdateResult.Data[0]["FirstName"]);
             Assert.AreEqual("Edit", (string)checkUpdateResult.Data[1]["LastName"]);
@@ -194,12 +175,12 @@ DECLARE cur CURSOR
             Assert.AreEqual(3, Helper.GetRowCount(TableName));
 
             // Delete
-            var delete = await MicrosoftSQL.ExecuteProcedure(inputDelete, options, default);
+            var delete = await Helper.ExecuteProcedure(inputDelete, options, default);
             Assert.IsTrue(delete.Success);
             Assert.AreEqual(1, delete.RecordsAffected);
             Assert.IsNull(delete.Error);
             Assert.AreEqual(2, Helper.GetRowCount(TableName));
-            var checkDeleteResult = await MicrosoftSQL.ExecuteProcedure(inputSelectAfterExecution, options, default);
+            var checkDeleteResult = await Helper.ExecuteProcedure(inputSelectAfterExecution, options, default);
             Assert.AreEqual("Suku", (string)checkDeleteResult.Data[0]["LastName"]);
             Assert.AreEqual("Etu", (string)checkDeleteResult.Data[0]["FirstName"]);
             Assert.AreEqual("Hiiri", (string)checkDeleteResult.Data[1]["LastName"]);
@@ -222,7 +203,6 @@ DECLARE cur CURSOR
 
         var inputInsert = new Input()
         {
-            ConnectionString = ConnectionString,
             Execute = "InsertValues",
             ExecuteType = ExecuteTypes.Scalar,
             Parameters = null,
@@ -230,7 +210,6 @@ DECLARE cur CURSOR
 
         var parameterInput = new Input()
         {
-            ConnectionString = ConnectionString,
             Execute = "SelectSingleParameter",
             ExecuteType = ExecuteTypes.ExecuteReader,
             Parameters = new ProcedureParameter[] { parameter },
@@ -243,9 +222,9 @@ DECLARE cur CURSOR
             ThrowErrorOnFailure = true,
         };
 
-        await MicrosoftSQL.ExecuteProcedure(inputInsert, options, default);
+        await Helper.ExecuteProcedure(inputInsert, options, default);
 
-        var insert = await MicrosoftSQL.ExecuteProcedure(parameterInput, options, default);
+        var insert = await Helper.ExecuteProcedure(parameterInput, options, default);
         Assert.IsTrue(insert.Success);
         Assert.AreEqual(-1, insert.RecordsAffected);
         Assert.IsNull(insert.Error);

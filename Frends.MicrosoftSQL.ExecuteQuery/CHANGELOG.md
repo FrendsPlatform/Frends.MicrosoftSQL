@@ -5,15 +5,12 @@
 ### Changed
 
 - **[Breaking Change]** Exceptions are now rethrown instead of wrapping in general Exception.
-- **[Breaking Change]** `Input.ConnectionString` is moved to new tab `Connection`
+- **[Breaking Change]** Moved `ConnectionString` from `Input` to new `Connection` tab.
+- Rollback now uses a non-cancelled token so cancellation of a Process does not prevent transaction rollback.
 
 ### Added
 
 - Added new `Connection` properties `UseGivenUserCredentialsForRemoteConnections`, `Username` and `Password` to support Windows Authentication for remote connections.
-
-### Fixed
-
-- Transaction rollback no longer fails with "There is already an open DataReader" when an error occurs while reading query results.
 
 ## [3.0.0] - 2026-11-04
 

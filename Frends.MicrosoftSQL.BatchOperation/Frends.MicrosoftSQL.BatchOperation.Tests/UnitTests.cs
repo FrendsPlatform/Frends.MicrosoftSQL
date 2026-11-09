@@ -1,4 +1,5 @@
 using Frends.MicrosoftSQL.BatchOperation.Definitions;
+using Frends.MicrosoftSQL.BatchOperation.Tests.Lib;
 using Microsoft.Data.SqlClient;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -7,18 +8,9 @@ namespace Frends.MicrosoftSQL.BatchOperation.Tests;
 [TestClass]
 public class UnitTests
 {
-    /*
-        docker-compose up
-
-        How to use via terminal:
-        docker exec -it sql1 "bash"
-        /opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P "Salakala123!"
-        SELECT * FROM TestTable
-        GO
-   */
-
-    private static readonly string ConnString = "Server=127.0.0.1,1433;Database=Master;User Id=SA;Password=Salakala123!;TrustServerCertificate=True";
     private static readonly string TableName = "TestTable";
+
+    private static string ConnString => SqlServerContainer.ConnectionString;
 
     [TestInitialize]
     public void Init()
@@ -58,35 +50,30 @@ public class UnitTests
 
         var inputInsert = new Input()
         {
-            ConnectionString = ConnString,
             Query = $@"INSERT INTO {TableName} VALUES (@Id, @last_name, @first_name)",
             InputJson = "[{\"Id\":1,\"last_name\":\"Suku\",\"first_name\":\"Etu\"},{\"Id\":2,\"last_name\":\"Last\",\"first_name\":\"Forst\"},{\"Id\":3,\"last_name\":\"Hiiri\",\"first_name\":\"Mikki\"}]",
         };
 
         var inputUpdateSingle = new Input()
         {
-            ConnectionString = ConnString,
             Query = $@"UPDATE {TableName} SET LastName = @last_name WHERE Id = @Id",
             InputJson = "[{\"Id\":2,\"last_name\":\"Edit\"}]",
         };
 
         var inputUpdateMultiple = new Input()
         {
-            ConnectionString = ConnString,
             Query = $@"UPDATE {TableName} SET LastName = @last_name WHERE Id = @Id",
             InputJson = "[{\"Id\":1,\"last_name\":\"Foobar\"},{\"Id\":3,\"last_name\":\"Foobar\"}]",
         };
 
         var inputDeleteSingle = new Input()
         {
-            ConnectionString = ConnString,
             Query = $"delete from {TableName} where Id = 2",
             InputJson = "[{\"Id\":2}]",
         };
 
         var inputDeleteMultiple = new Input()
         {
-            ConnectionString = ConnString,
             Query = $"delete from {TableName} where Id = @Id",
             InputJson = "[{\"Id\":1}, {\"Id\":3}]",
         };
@@ -103,35 +90,35 @@ public class UnitTests
             };
 
             // Insert rows
-            var insert = await MicrosoftSQL.BatchOperation(inputInsert, options, default);
+            var insert = await TaskRunner.BatchOperation(inputInsert, options, default);
             Assert.IsTrue(insert.Success);
             Assert.AreEqual(3, insert.RecordsAffected);
             Assert.IsNull(insert.Error);
             Assert.AreEqual(3, GetRowCount($"SELECT COUNT(*) FROM {TableName}"));
 
             // Update single
-            var updateSingle = await MicrosoftSQL.BatchOperation(inputUpdateSingle, options, default);
+            var updateSingle = await TaskRunner.BatchOperation(inputUpdateSingle, options, default);
             Assert.IsTrue(updateSingle.Success);
             Assert.AreEqual(1, updateSingle.RecordsAffected);
             Assert.IsNull(updateSingle.Error);
             Assert.AreEqual(1, GetRowCount($"SELECT COUNT(*) FROM {TableName} WHERE LastName = 'Edit'"));
 
             // Update multiple
-            var updateMultiple = await MicrosoftSQL.BatchOperation(inputUpdateMultiple, options, default);
+            var updateMultiple = await TaskRunner.BatchOperation(inputUpdateMultiple, options, default);
             Assert.IsTrue(updateMultiple.Success);
             Assert.AreEqual(2, updateMultiple.RecordsAffected);
             Assert.IsNull(updateMultiple.Error);
             Assert.AreEqual(2, GetRowCount($"SELECT COUNT(*) FROM {TableName} WHERE LastName = 'Foobar'"));
 
             // Delete single
-            var deleteSingle = await MicrosoftSQL.BatchOperation(inputDeleteSingle, options, default);
+            var deleteSingle = await TaskRunner.BatchOperation(inputDeleteSingle, options, default);
             Assert.IsTrue(deleteSingle.Success);
             Assert.AreEqual(1, deleteSingle.RecordsAffected);
             Assert.IsNull(deleteSingle.Error);
             Assert.AreEqual(2, GetRowCount($"SELECT COUNT(*) FROM {TableName}"));
 
             // Delete multiple
-            var deleteMultiple = await MicrosoftSQL.BatchOperation(inputDeleteMultiple, options, default);
+            var deleteMultiple = await TaskRunner.BatchOperation(inputDeleteMultiple, options, default);
             Assert.IsTrue(deleteMultiple.Success);
             Assert.AreEqual(2, deleteMultiple.RecordsAffected);
             Assert.IsNull(deleteMultiple.Error);

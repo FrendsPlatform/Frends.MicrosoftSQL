@@ -17,17 +17,16 @@ namespace Frends.MicrosoftSQL.ExecuteQueryToFile.Tests;
 [TestFixture]
 public class JsonUnitTests
 {
-    private static readonly string ConnectionString = Helper.GetConnectionString();
+    private static readonly string TableName = "TestTable";
+    private static readonly string Destination = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "../../../TestData/test.json");
+    private Options options;
 
-    private static readonly Definitions.Connection DatabaseConnection = new()
+    private static string ConnectionString => Helper.GetConnectionString();
+
+    private static Definitions.Connection DatabaseConnection => new()
     {
         ConnectionString = ConnectionString,
     };
-
-    private static readonly string TableName = "TestTable";
-    private static readonly string Destination = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "../../../TestData/test.json");
-
-    private Options options;
 
     [SetUp]
     public void Init()

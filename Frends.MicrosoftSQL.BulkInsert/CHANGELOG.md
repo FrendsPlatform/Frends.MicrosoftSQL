@@ -1,5 +1,17 @@
 # Changelog
 
+## [5.0.0] - 2026-11-09
+
+### Added
+
+- Added new `Connection` properties `UseGivenUserCredentialsForRemoteConnections`, `Username` and `Password` to support Windows Authentication for remote connections.
+
+### Changed
+
+- **[Breaking Change]** Moved `ConnectionString` from `Input` to new `Connection` tab.
+- **[Breaking Change]** Exceptions are now rethrown instead of wrapping in general Exception.
+- Rollback now uses a non-cancelled token so cancellation of a Process does not prevent transaction rollback.
+
 ## [4.0.0] - 2026-11-02
 
 ### Changed

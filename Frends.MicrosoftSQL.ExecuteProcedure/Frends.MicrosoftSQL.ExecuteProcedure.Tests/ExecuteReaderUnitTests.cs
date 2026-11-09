@@ -5,25 +5,12 @@ using Newtonsoft.Json.Linq;
 
 namespace Frends.MicrosoftSQL.ExecuteProcedure.Tests;
 
-/// <summary>
-/// docker run -e "ACCEPT_EULA=Y" -e "SA_PASSWORD=Salakala123!" -p 1433:1433 --name sql1 --hostname sql1 -d mcr.microsoft.com/mssql/server:2019-CU18-ubuntu-20.04
-/// with Git bash add winpty to the start of
-/// winpty docker exec -it sql1 "bash"
-/// /opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P "Salakala123!"
-/// Check rows before CleanUp:
-/// SELECT* FROM TestTable
-/// GO
-/// Optional queries:
-/// SELECT Name FROM sys.Databases;
-/// GO
-/// SELECT* FROM INFORMATION_SCHEMA.TABLES;
-/// GO
-/// </summary>
 [TestClass]
 public class ExecuteReaderUnitTests
 {
-    private static readonly string ConnectionString = Helper.GetConnectionString();
     private static readonly string TableName = "TestTable";
+
+    private static string ConnectionString => Helper.GetConnectionString();
 
     [TestInitialize]
     public void Init()
@@ -108,7 +95,6 @@ DECLARE cur CURSOR
 
         var inputInsert = new Input()
         {
-            ConnectionString = ConnectionString,
             Execute = "InsertValues",
             ExecuteType = ExecuteTypes.ExecuteReader,
             Parameters = null,
@@ -116,7 +102,6 @@ DECLARE cur CURSOR
 
         var inputSelect = new Input()
         {
-            ConnectionString = ConnectionString,
             Execute = "SelectAll",
             ExecuteType = ExecuteTypes.ExecuteReader,
             Parameters = null,
@@ -124,7 +109,6 @@ DECLARE cur CURSOR
 
         var inputSelectSingle = new Input()
         {
-            ConnectionString = ConnectionString,
             Execute = "SelectSingle",
             ExecuteType = ExecuteTypes.ExecuteReader,
             Parameters = null,
@@ -132,7 +116,6 @@ DECLARE cur CURSOR
 
         var inputUpdate = new Input()
         {
-            ConnectionString = ConnectionString,
             Execute = "UpdateValue",
             ExecuteType = ExecuteTypes.ExecuteReader,
             Parameters = null,
@@ -140,7 +123,6 @@ DECLARE cur CURSOR
 
         var inputDelete = new Input()
         {
-            ConnectionString = ConnectionString,
             Execute = "DeleteValue",
             ExecuteType = ExecuteTypes.ExecuteReader,
             Parameters = null,
@@ -156,14 +138,14 @@ DECLARE cur CURSOR
             };
 
             // Insert rows
-            var insert = await MicrosoftSQL.ExecuteProcedure(inputInsert, options, default);
+            var insert = await Helper.ExecuteProcedure(inputInsert, options, default);
             Assert.IsTrue(insert.Success, $"TransactionLevel: {level}.");
             Assert.AreEqual(3, insert.RecordsAffected, $"TransactionLevel: {level}.");
             Assert.IsNull(insert.Error, $"TransactionLevel: {level}.");
             Assert.AreEqual(3, Helper.GetRowCount(TableName), $"TransactionLevel: {level}.");
 
             // Select all
-            var select = await MicrosoftSQL.ExecuteProcedure(inputSelect, options, default);
+            var select = await Helper.ExecuteProcedure(inputSelect, options, default);
             Assert.IsTrue(select.Success, $"TransactionLevel: {level}.");
             Assert.AreEqual(-1, select.RecordsAffected, $"TransactionLevel: {level}.");
             Assert.IsNull(select.Error, $"TransactionLevel: {level}.");
@@ -177,7 +159,7 @@ DECLARE cur CURSOR
             Assert.AreEqual(3, Helper.GetRowCount(TableName), $"TransactionLevel: {level}.");
 
             // Select single
-            var selectSingle = await MicrosoftSQL.ExecuteProcedure(inputSelectSingle, options, default);
+            var selectSingle = await Helper.ExecuteProcedure(inputSelectSingle, options, default);
             Assert.IsTrue(selectSingle.Success, $"TransactionLevel: {level}.");
             Assert.AreEqual(-1, selectSingle.RecordsAffected, $"TransactionLevel: {level}.");
             Assert.IsNull(selectSingle.Error, $"TransactionLevel: {level}.");
@@ -187,12 +169,12 @@ DECLARE cur CURSOR
             Assert.AreEqual(3, Helper.GetRowCount(TableName));
 
             // Update
-            var update = await MicrosoftSQL.ExecuteProcedure(inputUpdate, options, default);
+            var update = await Helper.ExecuteProcedure(inputUpdate, options, default);
             Assert.IsTrue(update.Success, $"TransactionLevel: {level}.");
             Assert.AreEqual(1, update.RecordsAffected, $"TransactionLevel: {level}.");
             Assert.IsNull(update.Error, $"TransactionLevel: {level}.");
             Assert.AreEqual(3, Helper.GetRowCount(TableName), $"TransactionLevel: {level}.");
-            var checkUpdateResult = await MicrosoftSQL.ExecuteProcedure(inputSelect, options, default);
+            var checkUpdateResult = await Helper.ExecuteProcedure(inputSelect, options, default);
             Assert.AreEqual("Suku", (string)checkUpdateResult.Data[0]["LastName"], $"TransactionLevel: {level}.");
             Assert.AreEqual("Etu", (string)checkUpdateResult.Data[0]["FirstName"], $"TransactionLevel: {level}.");
             Assert.AreEqual("Edit", (string)checkUpdateResult.Data[1]["LastName"], $"TransactionLevel: {level}.");
@@ -202,12 +184,12 @@ DECLARE cur CURSOR
             Assert.AreEqual(3, Helper.GetRowCount(TableName));
 
             // Delete
-            var delete = await MicrosoftSQL.ExecuteProcedure(inputDelete, options, default);
+            var delete = await Helper.ExecuteProcedure(inputDelete, options, default);
             Assert.IsTrue(delete.Success, $"TransactionLevel: {level}.");
             Assert.AreEqual(1, delete.RecordsAffected, $"TransactionLevel: {level}.");
             Assert.IsNull(delete.Error, $"TransactionLevel: {level}.");
             Assert.AreEqual(2, Helper.GetRowCount(TableName), $"TransactionLevel: {level}.");
-            var checkDeleteResult = await MicrosoftSQL.ExecuteProcedure(inputSelect, options, default);
+            var checkDeleteResult = await Helper.ExecuteProcedure(inputSelect, options, default);
             Assert.AreEqual("Suku", (string)checkDeleteResult.Data[0]["LastName"], $"TransactionLevel: {level}.");
             Assert.AreEqual("Etu", (string)checkDeleteResult.Data[0]["FirstName"], $"TransactionLevel: {level}.");
             Assert.AreEqual("Hiiri", (string)checkDeleteResult.Data[1]["LastName"], $"TransactionLevel: {level}.");
@@ -230,7 +212,6 @@ DECLARE cur CURSOR
 
         var inputInsert = new Input()
         {
-            ConnectionString = ConnectionString,
             Execute = "InsertValues",
             ExecuteType = ExecuteTypes.ExecuteReader,
             Parameters = null,
@@ -238,7 +219,6 @@ DECLARE cur CURSOR
 
         var parameterInput = new Input()
         {
-            ConnectionString = ConnectionString,
             Execute = "SelectSingleParameter",
             ExecuteType = ExecuteTypes.ExecuteReader,
             Parameters = new ProcedureParameter[] { parameter },
@@ -251,9 +231,9 @@ DECLARE cur CURSOR
             ThrowErrorOnFailure = true,
         };
 
-        await MicrosoftSQL.ExecuteProcedure(inputInsert, options, default);
+        await Helper.ExecuteProcedure(inputInsert, options, default);
 
-        var query = await MicrosoftSQL.ExecuteProcedure(parameterInput, options, default);
+        var query = await Helper.ExecuteProcedure(parameterInput, options, default);
         Assert.IsTrue(query.Success);
         Assert.AreEqual(-1, query.RecordsAffected);
         Assert.IsNull(query.Error);
@@ -276,7 +256,6 @@ DECLARE cur CURSOR
 
         var input = new Input
         {
-            ConnectionString = ConnectionString,
             Execute = "InsertBinaryValues",
             ExecuteType = ExecuteTypes.NonQuery,
             Parameters = new ProcedureParameter[] { new ProcedureParameter { Name = "binary", Value = binary, SqlDataType = SqlDataTypes.VarBinary } },
@@ -289,7 +268,7 @@ DECLARE cur CURSOR
             ThrowErrorOnFailure = true,
         };
 
-        var result = await MicrosoftSQL.ExecuteProcedure(input, options, default);
+        var result = await Helper.ExecuteProcedure(input, options, default);
         Assert.IsTrue(result.Success);
 
         // Select single
@@ -298,13 +277,12 @@ DECLARE cur CURSOR
 
         input = new Input
         {
-            ConnectionString = ConnectionString,
             Execute = "SelectSingleBinary",
             ExecuteType = ExecuteTypes.ExecuteReader,
             Parameters = null,
         };
 
-        result = await MicrosoftSQL.ExecuteProcedure(input, options, default);
+        result = await Helper.ExecuteProcedure(input, options, default);
 
         command = $"IF EXISTS(SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = '{table}') BEGIN DROP TABLE IF EXISTS {table}; END";
         Helper.ExecuteNonQuery(command);
@@ -327,7 +305,6 @@ DECLARE cur CURSOR
 
         var input = new Input
         {
-            ConnectionString = ConnectionString,
             Execute = string.Empty,
             ExecuteType = ExecuteTypes.NonQuery,
             Parameters = null,
@@ -350,18 +327,18 @@ DECLARE cur CURSOR
         {
             input.Execute = "InsertGeography";
 
-            var result = await MicrosoftSQL.ExecuteProcedure(input, options, default);
+            var result = await Helper.ExecuteProcedure(input, options, default);
             Assert.IsTrue(result.Success, "First insert");
 
             input.Execute = "InsertGeometry";
 
-            result = await MicrosoftSQL.ExecuteProcedure(input, options, default);
+            result = await Helper.ExecuteProcedure(input, options, default);
             Assert.IsTrue(result.Success, "Second insert");
 
             input.Execute = "SelectGeography";
             input.ExecuteType = ExecuteTypes.ExecuteReader;
 
-            result = await MicrosoftSQL.ExecuteProcedure(input, options, default);
+            result = await Helper.ExecuteProcedure(input, options, default);
             Assert.IsTrue(result.Success, "Select");
             Assert.AreEqual(typeof(JArray), result.Data.GetType());
             Assert.AreEqual(2, result.Data.Count);

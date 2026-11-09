@@ -9,14 +9,6 @@ namespace Frends.MicrosoftSQL.BulkInsert.Definitions;
 public class Input
 {
     /// <summary>
-    /// Connection string.
-    /// </summary>
-    /// <example>Server=myServerAddress;Database=myDataBase;User Id=myUsername;Password=myPassword;</example>
-    [PasswordPropertyText]
-    [DefaultValue("Server=myServerAddress;Database=myDataBase;User Id=myUsername;Password=myPassword;")]
-    public string ConnectionString { get; set; }
-
-    /// <summary>
     /// Destination table name.
     /// </summary>
     /// <example>TestTable</example>

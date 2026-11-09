@@ -1,5 +1,4 @@
-﻿using System.ComponentModel;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace Frends.MicrosoftSQL.BatchOperation.Definitions;
 
@@ -8,14 +7,6 @@ namespace Frends.MicrosoftSQL.BatchOperation.Definitions;
 /// </summary>
 public class Input
 {
-    /// <summary>
-    /// Connection string.
-    /// </summary>
-    /// <example>Server=myServerAddress;Database=myDataBase;User Id=myUsername;Password=myPassword;</example>
-    [PasswordPropertyText]
-    [DefaultValue("Server=myServerAddress;Database=myDataBase;User Id=myUsername;Password=myPassword;")]
-    public string ConnectionString { get; set; }
-
     /// <summary>
     /// Query string for batch operation.
     /// </summary>

@@ -4,34 +4,19 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Frends.MicrosoftSQL.ExecuteProcedure.Tests;
 
-/// <summary>
-/// docker run -e "ACCEPT_EULA=Y" -e "SA_PASSWORD=Salakala123!" -p 1433:1433 --name sql1 --hostname sql1 -d mcr.microsoft.com/mssql/server:2019-CU18-ubuntu-20.04
-/// with Git bash add winpty to the start of
-/// winpty docker exec -it sql1 "bash"
-/// /opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P "Salakala123!"
-/// Check rows before CleanUp:
-/// SELECT* FROM TestTable
-/// GO
-/// Optional queries:
-/// SELECT Name FROM sys.Databases;
-/// GO
-/// SELECT* FROM INFORMATION_SCHEMA.TABLES;
-/// GO
-/// </summary>
 [TestClass]
 public class ExceptionUnitTests
 {
-    private static readonly string ConnectionString = Helper.GetInvalidConnectionString();
-
     private Input input = new();
     private Options options = new();
+
+    private static string ConnectionString => Helper.GetInvalidConnectionString();
 
     [TestInitialize]
     public void Init()
     {
         input = new()
         {
-            ConnectionString = ConnectionString,
             Execute = "foo",
             ExecuteType = ExecuteTypes.NonQuery,
             Parameters = null,
@@ -61,7 +46,12 @@ public class ExceptionUnitTests
                 var procedureOptions = options;
                 procedureOptions.SqlTransactionIsolationLevel = isolation;
 
-                var ex = await Assert.ThrowsExceptionAsync<SqlException>(() => MicrosoftSQL.ExecuteProcedure(procedureInput, procedureOptions, default));
+                var ex = await Assert.ThrowsExceptionAsync<SqlException>(() =>
+                    Helper.ExecuteProcedure(
+                        procedureInput,
+                        procedureOptions,
+                        default,
+                        new Connection { ConnectionString = ConnectionString }));
                 Assert.IsTrue(ex.Message.Contains("Login failed for user 'SA'."), $"ExecuteType: {executeType}, IsolationLevel: {isolation}");
             }
         }
@@ -84,7 +74,11 @@ public class ExceptionUnitTests
                 procedureOptions.SqlTransactionIsolationLevel = isolation;
                 procedureOptions.ThrowErrorOnFailure = false;
 
-                var result = await MicrosoftSQL.ExecuteProcedure(procedureInput, procedureOptions, default);
+                var result = await Helper.ExecuteProcedure(
+                    procedureInput,
+                    procedureOptions,
+                    default,
+                    new Connection { ConnectionString = ConnectionString });
                 Assert.IsFalse(result.Success, $"ExecuteType: {executeType}, IsolationLevel: {isolation}");
                 Assert.IsTrue(result.Error.Message.Contains("Login failed for user 'SA'."), $"ExecuteType: {executeType}, IsolationLevel: {isolation}");
                 Assert.IsNotNull(result.Error.AdditionalInfo, $"ExecuteType: {executeType}, IsolationLevel: {isolation}");
@@ -100,7 +94,7 @@ public class ExceptionUnitTests
         options.ThrowErrorOnFailure = false;
         options.ErrorMessageOnFailure = "Custom procedure failure";
 
-        var result = await MicrosoftSQL.ExecuteProcedure(input, options, default);
+        var result = await Helper.ExecuteProcedure(input, options, default);
 
         Assert.IsTrue(result.Error.Message.StartsWith("Custom procedure failure:"));
     }
@@ -114,7 +108,7 @@ public class ExceptionUnitTests
 
         try
         {
-            await MicrosoftSQL.ExecuteProcedure(input, options, cancellationTokenSource.Token);
+            await Helper.ExecuteProcedure(input, options, cancellationTokenSource.Token);
             Assert.Fail("Expected cancellation to be rethrown.");
         }
         catch (OperationCanceledException)
