@@ -66,34 +66,34 @@ public class ExceptionUnitTests
     [TestMethod]
     public async Task BulkInsertFailure_RollsBackRows_ReturnsError()
     {
-        await WithFailingTrigger(async () =>
+        await WithFailingTrigger(async tableName =>
         {
-            var result = await TaskRunner.BulkInsert(CreateInput(), CreateRollbackOptions(false), default);
+            var result = await TaskRunner.BulkInsert(CreateInput(tableName), CreateRollbackOptions(false), default);
 
             Assert.IsFalse(result.Success);
             Assert.IsInstanceOfType(result.Error.AdditionalInfo, typeof(SqlException));
             StringAssert.Contains(result.Error.Message, "rollback test failure");
-            Assert.AreEqual(0, GetRowCount());
+            Assert.AreEqual(0, GetRowCount(tableName));
         });
     }
 
     [TestMethod]
     public async Task BulkInsertFailure_RollsBackRows_RethrowsOriginalSqlException()
     {
-        await WithFailingTrigger(async () =>
+        await WithFailingTrigger(async tableName =>
         {
             var exception = await Assert.ThrowsExceptionAsync<SqlException>(() =>
-                TaskRunner.BulkInsert(CreateInput(), CreateRollbackOptions(true), default));
+                TaskRunner.BulkInsert(CreateInput(tableName), CreateRollbackOptions(true), default));
 
             StringAssert.Contains(exception.Message, "rollback test failure");
             Assert.IsNull(exception.InnerException);
-            Assert.AreEqual(0, GetRowCount());
+            Assert.AreEqual(0, GetRowCount(tableName));
         });
     }
 
-    private static Input CreateInput() => new()
+    private static Input CreateInput(string tableName) => new()
     {
-        TableName = "TestTable",
+        TableName = tableName,
         InputData = """
             [
               {"Id":1,"Firstname":"Etu","Lastname":"Suku"},
@@ -111,33 +111,34 @@ public class ExceptionUnitTests
         CommandTimeoutSeconds = 30,
     };
 
-    private static async Task WithFailingTrigger(Func<Task> test)
+    private static async Task WithFailingTrigger(Func<string, Task> test)
     {
-        const string triggerName = "FailBulkInsert";
+        var tableName = $"BulkInsertRollback_{Guid.NewGuid():N}";
+        var triggerName = $"FailBulkInsert_{Guid.NewGuid():N}";
         Execute($@"
-            IF OBJECT_ID('{triggerName}', 'TR') IS NOT NULL DROP TRIGGER {triggerName};");
+            CREATE TABLE {tableName} (Id int, Firstname varchar(255), Lastname varchar(255));");
         Execute($@"
-            CREATE TRIGGER {triggerName} ON TestTable AFTER INSERT AS
+            CREATE TRIGGER {triggerName} ON {tableName} AFTER INSERT AS
             BEGIN
                 THROW 51000, 'rollback test failure', 1;
             END");
 
         try
         {
-            await test();
+            await test(tableName);
         }
         finally
         {
-            Execute($"DROP TRIGGER IF EXISTS {triggerName}");
+            Execute($"DROP TRIGGER IF EXISTS {triggerName}; DROP TABLE IF EXISTS {tableName};");
         }
     }
 
-    private static int GetRowCount()
+    private static int GetRowCount(string tableName)
     {
         using var sqlConnection = new SqlConnection(SqlServerContainer.ConnectionString);
         sqlConnection.Open();
         using var command = sqlConnection.CreateCommand();
-        command.CommandText = "SELECT COUNT(*) FROM TestTable";
+        command.CommandText = $"SELECT COUNT(*) FROM {tableName}";
         return (int)command.ExecuteScalar();
     }
 
