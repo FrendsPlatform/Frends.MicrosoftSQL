@@ -52,7 +52,7 @@ public class ExceptionUnitTests
                         procedureOptions,
                         default,
                         new Connection { ConnectionString = ConnectionString }));
-                Assert.IsTrue(ex.Message.Contains("Login failed for user 'SA'."), $"ExecuteType: {executeType}, IsolationLevel: {isolation}");
+                Assert.IsTrue(ex.Message.Contains("Login failed for user 'sa'."), $"ExecuteType: {executeType}, IsolationLevel: {isolation}");
             }
         }
     }
@@ -80,7 +80,7 @@ public class ExceptionUnitTests
                     default,
                     new Connection { ConnectionString = ConnectionString });
                 Assert.IsFalse(result.Success, $"ExecuteType: {executeType}, IsolationLevel: {isolation}");
-                Assert.IsTrue(result.Error.Message.Contains("Login failed for user 'SA'."), $"ExecuteType: {executeType}, IsolationLevel: {isolation}");
+                Assert.IsTrue(result.Error.Message.Contains("Login failed for user 'sa'."), $"ExecuteType: {executeType}, IsolationLevel: {isolation}");
                 Assert.IsNotNull(result.Error.AdditionalInfo, $"ExecuteType: {executeType}, IsolationLevel: {isolation}");
                 Assert.AreEqual(0, result.RecordsAffected, $"ExecuteType: {executeType}, IsolationLevel: {isolation}");
                 Assert.IsNull(result.Data, $"ExecuteType: {executeType}, IsolationLevel: {isolation}");
