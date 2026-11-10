@@ -51,8 +51,9 @@ public static class MicrosoftSQL
         try
         {
             ValidationHandler.Run(connection);
+            var connectionString = GetConnectionString(connection);
             if (!connection.UseGivenUserCredentialsForRemoteConnections)
-                return await BatchOperationInternal(input, connection, options, cancellationToken).ConfigureAwait(false);
+                return await BatchOperationInternal(input, connectionString, options, cancellationToken).ConfigureAwait(false);
 
             if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
                 throw new PlatformNotSupportedException("Simple impersonation feature is only supported on Windows machines.");
@@ -65,7 +66,7 @@ public static class MicrosoftSQL
             using var handle = credentials.LogonUser(LogonType.NewCredentials);
             return await WindowsIdentity.RunImpersonatedAsync(
                     handle,
-                    () => BatchOperationInternal(input, connection, options, cancellationToken))
+                    () => BatchOperationInternal(input, connectionString, options, cancellationToken))
                 .ConfigureAwait(false);
         }
         catch (Exception ex)
@@ -76,27 +77,20 @@ public static class MicrosoftSQL
 
     private static async Task<Result> BatchOperationInternal(
         Input input,
-        Connection connection,
+        string connectionString,
         Options options,
         CancellationToken cancellationToken)
     {
-        try
+        using var sqlConnection = new SqlConnection(connectionString);
+        await sqlConnection.OpenAsync(cancellationToken).ConfigureAwait(false);
+        if (options.SqlTransactionIsolationLevel is not SqlTransactionIsolationLevel.None)
         {
-            using var sqlConnection = new SqlConnection(connection.ConnectionString);
-            await sqlConnection.OpenAsync(cancellationToken).ConfigureAwait(false);
-            if (options.SqlTransactionIsolationLevel is not SqlTransactionIsolationLevel.None)
-            {
-                using var transaction = sqlConnection.BeginTransaction(GetIsolationLevel(options));
-                return await ExecuteHandler(input, options, sqlConnection, transaction, cancellationToken).ConfigureAwait(false);
-            }
-            else
-            {
-                return await ExecuteHandler(input, options, sqlConnection, null, cancellationToken).ConfigureAwait(false);
-            }
+            using var transaction = sqlConnection.BeginTransaction(GetIsolationLevel(options));
+            return await ExecuteHandler(input, options, sqlConnection, transaction, cancellationToken).ConfigureAwait(false);
         }
-        finally
+        else
         {
-            SqlConnection.ClearAllPools();
+            return await ExecuteHandler(input, options, sqlConnection, null, cancellationToken).ConfigureAwait(false);
         }
     }
 
@@ -136,10 +130,22 @@ public static class MicrosoftSQL
 
             throw;
         }
-        finally
+    }
+
+    private static string GetConnectionString(Connection connection)
+    {
+        if (!connection.UseGivenUserCredentialsForRemoteConnections)
+            return connection.ConnectionString;
+
+        var builder = new SqlConnectionStringBuilder(connection.ConnectionString);
+        if (!builder.IntegratedSecurity)
         {
-            SqlConnection.ClearAllPools();
+            throw new ArgumentException(
+                "ConnectionString must use Integrated Security=true when UseGivenUserCredentialsForRemoteConnections is enabled.");
         }
+
+        builder.Pooling = false;
+        return builder.ConnectionString;
     }
 
     private static IsolationLevel GetIsolationLevel(Options options)

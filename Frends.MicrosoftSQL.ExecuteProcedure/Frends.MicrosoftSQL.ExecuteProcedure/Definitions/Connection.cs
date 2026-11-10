@@ -21,7 +21,8 @@ public class Connection
     /// <summary>
     /// If set, allows you to give the user credentials to use to make sql executions on remote hosts.
     /// If not set, the agent service user credentials will be used.
-    /// This feature is only supported on Windows machines.
+    /// This feature is only supported on Windows machines and requires ConnectionString to use Integrated Security=true.
+    /// Connection pooling is disabled when this option is enabled.
     /// </summary>
     /// <example>false</example>
     [DefaultValue(false)]

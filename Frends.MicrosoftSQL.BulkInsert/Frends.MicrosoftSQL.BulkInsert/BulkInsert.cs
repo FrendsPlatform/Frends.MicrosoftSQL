@@ -37,8 +37,9 @@ public static class MicrosoftSQL
         try
         {
             ValidationHandler.Run(connection);
+            var connectionString = GetConnectionString(connection);
             if (!connection.UseGivenUserCredentialsForRemoteConnections)
-                return await BulkInsertInternal(input, connection, options, cancellationToken).ConfigureAwait(false);
+                return await BulkInsertInternal(input, connectionString, options, cancellationToken).ConfigureAwait(false);
 
             if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
                 throw new PlatformNotSupportedException("Simple impersonation feature is only supported on Windows machines.");
@@ -51,7 +52,7 @@ public static class MicrosoftSQL
             using var handle = credentials.LogonUser(LogonType.NewCredentials);
             return await WindowsIdentity.RunImpersonatedAsync(
                     handle,
-                    () => BulkInsertInternal(input, connection, options, cancellationToken))
+                    () => BulkInsertInternal(input, connectionString, options, cancellationToken))
                 .ConfigureAwait(false);
         }
         catch (Exception ex)
@@ -64,78 +65,87 @@ public static class MicrosoftSQL
 
     private static async Task<Result> BulkInsertInternal(
         Input input,
-        Connection connection,
+        string connectionString,
         Options options,
         CancellationToken cancellationToken)
     {
         var inputJson = @"{""data"": {""Table"": " + input.InputData + @"
               }
             }";
+        DataSet dataSet = JObject.Parse(inputJson)["data"].ToObject<DataSet>();
+        _ = dataSet.Tables["Table"];
+
+        using var sqlConnection = new SqlConnection(connectionString);
+        await sqlConnection.OpenAsync(cancellationToken).ConfigureAwait(false);
+        cancellationToken.ThrowIfCancellationRequested();
+
+        // Convert string.Empty values to null so non-text fields can be inserted.
+        if (options.ConvertEmptyPropertyValuesToNull)
+            SetEmptyDataRowsToNull(dataSet);
+
+        if (options.SqlTransactionIsolationLevel is SqlTransactionIsolationLevel.None)
+        {
+            var result = await ExecuteHandler(
+                    options,
+                    input,
+                    dataSet,
+                    new SqlBulkCopy(sqlConnection, GetSqlBulkCopyOptions(options), null),
+                    cancellationToken)
+                .ConfigureAwait(false);
+
+            return new Result { Success = true, Count = result };
+        }
+
+        using var transaction = sqlConnection.BeginTransaction(GetIsolationLevel(options));
+
         try
         {
-            DataSet dataSet = JObject.Parse(inputJson)["data"].ToObject<DataSet>();
-            _ = dataSet.Tables["Table"];
+            var result = await ExecuteHandler(
+                    options,
+                    input,
+                    dataSet,
+                    new SqlBulkCopy(sqlConnection, GetSqlBulkCopyOptions(options), transaction),
+                    cancellationToken)
+                .ConfigureAwait(false);
+            await transaction.CommitAsync(cancellationToken).ConfigureAwait(false);
 
-            using var sqlConnection = new SqlConnection(connection.ConnectionString);
-            await sqlConnection.OpenAsync(cancellationToken).ConfigureAwait(false);
-            cancellationToken.ThrowIfCancellationRequested();
-
-            // Convert string.Empty values to null so non-text fields can be inserted.
-            if (options.ConvertEmptyPropertyValuesToNull)
-                SetEmptyDataRowsToNull(dataSet);
-
-            if (options.SqlTransactionIsolationLevel is SqlTransactionIsolationLevel.None)
-            {
-                var result = await ExecuteHandler(
-                        options,
-                        input,
-                        dataSet,
-                        new SqlBulkCopy(sqlConnection, GetSqlBulkCopyOptions(options), null),
-                        cancellationToken)
-                    .ConfigureAwait(false);
-
-                return new Result { Success = true, Count = result };
-            }
-
-            using var transaction = sqlConnection.BeginTransaction(GetIsolationLevel(options));
-
+            return new Result { Success = true, Count = result };
+        }
+        catch (Exception ex)
+        {
             try
             {
-                var result = await ExecuteHandler(
-                        options,
-                        input,
-                        dataSet,
-                        new SqlBulkCopy(sqlConnection, GetSqlBulkCopyOptions(options), transaction),
-                        cancellationToken)
-                    .ConfigureAwait(false);
-                await transaction.CommitAsync(cancellationToken).ConfigureAwait(false);
-
-                return new Result { Success = true, Count = result };
+                await transaction.RollbackAsync(CancellationToken.None).ConfigureAwait(false);
             }
-            catch (Exception ex)
+            catch (Exception rollbackEx)
             {
-                try
-                {
-                    await transaction.RollbackAsync(CancellationToken.None).ConfigureAwait(false);
-                }
-                catch (Exception rollbackEx)
-                {
-                    var aggregate = new AggregateException(
-                        "Bulk insert failed and transaction rollback also failed.",
-                        ex,
-                        rollbackEx);
-                    if (ex.Data["RowsCopied"] != null)
-                        aggregate.Data["RowsCopied"] = ex.Data["RowsCopied"];
-                    throw aggregate;
-                }
-
-                throw;
+                var aggregate = new AggregateException(
+                    "Bulk insert failed and transaction rollback also failed.",
+                    ex,
+                    rollbackEx);
+                if (ex.Data["RowsCopied"] != null)
+                    aggregate.Data["RowsCopied"] = ex.Data["RowsCopied"];
+                throw aggregate;
             }
+
+            throw;
         }
-        finally
+    }
+
+    private static string GetConnectionString(Connection connection)
+    {
+        if (!connection.UseGivenUserCredentialsForRemoteConnections)
+            return connection.ConnectionString;
+
+        var builder = new SqlConnectionStringBuilder(connection.ConnectionString);
+        if (!builder.IntegratedSecurity)
         {
-            SqlConnection.ClearAllPools();
+            throw new ArgumentException(
+                "ConnectionString must use Integrated Security=true when UseGivenUserCredentialsForRemoteConnections is enabled.");
         }
+
+        builder.Pooling = false;
+        return builder.ConnectionString;
     }
 
     private static async Task<long> ExecuteHandler(

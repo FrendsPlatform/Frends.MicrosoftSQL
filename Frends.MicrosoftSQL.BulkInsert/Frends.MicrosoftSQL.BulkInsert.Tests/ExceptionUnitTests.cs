@@ -49,7 +49,7 @@ public class ExceptionUnitTests
     }
 
     [TestMethod]
-    public void BulkInsertFailure_RethrowsOriginalException()
+    public async Task BulkInsertFailure_RethrowsOriginalException()
     {
         var input = new Input { TableName = "MissingTable", InputData = Json };
         var options = new Options
@@ -59,7 +59,7 @@ public class ExceptionUnitTests
             NotifyAfter = 1,
         };
 
-        Assert.ThrowsExceptionAsync<InvalidOperationException>(() =>
+        await Assert.ThrowsExceptionAsync<InvalidOperationException>(() =>
             TaskRunner.BulkInsert(input, options, CancellationToken.None));
     }
 

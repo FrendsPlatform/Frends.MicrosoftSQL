@@ -39,8 +39,9 @@ public static class MicrosoftSQL
         try
         {
             ValidationHandler.Run(connection);
+            var connectionString = GetConnectionString(connection);
             if (!connection.UseGivenUserCredentialsForRemoteConnections)
-                return await ExecuteProcedureInternal(input, connection, options, cancellationToken).ConfigureAwait(false);
+                return await ExecuteProcedureInternal(input, connectionString, options, cancellationToken).ConfigureAwait(false);
 
             if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
                 throw new PlatformNotSupportedException("Simple impersonation feature is only supported on Windows machines.");
@@ -53,7 +54,7 @@ public static class MicrosoftSQL
             using var handle = credentials.LogonUser(LogonType.NewCredentials);
             return await WindowsIdentity.RunImpersonatedAsync(
                     handle,
-                    () => ExecuteProcedureInternal(input, connection, options, cancellationToken))
+                    () => ExecuteProcedureInternal(input, connectionString, options, cancellationToken))
                 .ConfigureAwait(false);
         }
         catch (Exception ex)
@@ -64,59 +65,44 @@ public static class MicrosoftSQL
 
     private static async Task<Result> ExecuteProcedureInternal(
         Input input,
-        Connection connection,
+        string connectionString,
         Options options,
         CancellationToken cancellationToken)
     {
-        Result result;
+        using var sqlConnection = new SqlConnection(connectionString);
+        await sqlConnection.OpenAsync(cancellationToken).ConfigureAwait(false);
 
-        try
+        using var command = sqlConnection.CreateCommand();
+        command.CommandTimeout = options.CommandTimeoutSeconds;
+        command.CommandText = input.Execute;
+        command.CommandType = CommandType.StoredProcedure;
+
+        if (input.Parameters != null)
         {
-            using var sqlConnection = new SqlConnection(connection.ConnectionString);
-            await sqlConnection.OpenAsync(cancellationToken).ConfigureAwait(false);
-
-            using var command = sqlConnection.CreateCommand();
-            command.CommandTimeout = options.CommandTimeoutSeconds;
-            command.CommandText = input.Execute;
-            command.CommandType = CommandType.StoredProcedure;
-
-            if (input.Parameters != null)
+            foreach (var parameter in input.Parameters)
             {
-                foreach (var parameter in input.Parameters)
-                {
-                    if (parameter.Value is null)
-                        parameter.Value = DBNull.Value;
+                if (parameter.Value is null)
+                    parameter.Value = DBNull.Value;
 
-                    if (parameter.SqlDataType is SqlDataTypes.Auto)
-                    {
-                        command.Parameters.AddWithValue(parameterName: parameter.Name, value: parameter.Value);
-                    }
-                    else
-                    {
-                        var sqlDbType = (SqlDbType)Enum.Parse(typeof(SqlDbType), parameter.SqlDataType.ToString());
-                        var commandParameter = command.Parameters.Add(parameter.Name, sqlDbType);
-                        commandParameter.Value = parameter.Value;
-                    }
+                if (parameter.SqlDataType is SqlDataTypes.Auto)
+                {
+                    command.Parameters.AddWithValue(parameterName: parameter.Name, value: parameter.Value);
+                }
+                else
+                {
+                    var sqlDbType = (SqlDbType)Enum.Parse(typeof(SqlDbType), parameter.SqlDataType.ToString());
+                    var commandParameter = command.Parameters.Add(parameter.Name, sqlDbType);
+                    commandParameter.Value = parameter.Value;
                 }
             }
-
-            if (options.SqlTransactionIsolationLevel is SqlTransactionIsolationLevel.None)
-            {
-                result = await ExecuteHandler(input, options, command, cancellationToken).ConfigureAwait(false);
-            }
-            else
-            {
-                using var transaction = sqlConnection.BeginTransaction(GetIsolationLevel(options.SqlTransactionIsolationLevel));
-                command.Transaction = transaction;
-                result = await ExecuteHandler(input, options, command, cancellationToken).ConfigureAwait(false);
-            }
-
-            return result;
         }
-        finally
-        {
-            SqlConnection.ClearAllPools();
-        }
+
+        if (options.SqlTransactionIsolationLevel is SqlTransactionIsolationLevel.None)
+            return await ExecuteHandler(input, options, command, cancellationToken).ConfigureAwait(false);
+
+        using var transaction = sqlConnection.BeginTransaction(GetIsolationLevel(options.SqlTransactionIsolationLevel));
+        command.Transaction = transaction;
+        return await ExecuteHandler(input, options, command, cancellationToken).ConfigureAwait(false);
     }
 
     private static async Task<Result> ExecuteHandler(Input input, Options options, SqlCommand command, CancellationToken cancellationToken)
@@ -237,5 +223,21 @@ public static class MicrosoftSQL
             SqlTransactionIsolationLevel.Snapshot => IsolationLevel.Snapshot,
             _ => IsolationLevel.ReadCommitted,
         };
+    }
+
+    private static string GetConnectionString(Connection connection)
+    {
+        if (!connection.UseGivenUserCredentialsForRemoteConnections)
+            return connection.ConnectionString;
+
+        var builder = new SqlConnectionStringBuilder(connection.ConnectionString);
+        if (!builder.IntegratedSecurity)
+        {
+            throw new ArgumentException(
+                "ConnectionString must use Integrated Security=true when UseGivenUserCredentialsForRemoteConnections is enabled.");
+        }
+
+        builder.Pooling = false;
+        return builder.ConnectionString;
     }
 }

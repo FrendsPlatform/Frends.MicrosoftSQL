@@ -38,8 +38,9 @@ public static class MicrosoftSQL
         try
         {
             ValidationHandler.Run(connection);
+            var connectionString = GetConnectionString(connection);
             if (!connection.UseGivenUserCredentialsForRemoteConnections)
-                return await ExecuteQueryInternal(input, connection, options, cancellationToken).ConfigureAwait(false);
+                return await ExecuteQueryInternal(input, connectionString, options, cancellationToken).ConfigureAwait(false);
 
             if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
@@ -58,7 +59,7 @@ public static class MicrosoftSQL
             using var handle = credentials.LogonUser(LogonType.NewCredentials);
             return await WindowsIdentity.RunImpersonatedAsync(
                     handle,
-                    async () => await ExecuteQueryInternal(input, connection, options, cancellationToken)
+                    async () => await ExecuteQueryInternal(input, connectionString, options, cancellationToken)
                         .ConfigureAwait(false))
                 .ConfigureAwait(false);
         }
@@ -70,7 +71,7 @@ public static class MicrosoftSQL
 
     private static async Task<Result> ExecuteQueryInternal(
         Input input,
-        Connection connection,
+        string connectionString,
         Options options,
         CancellationToken cancellationToken)
     {
@@ -78,7 +79,7 @@ public static class MicrosoftSQL
         SqlCommand command;
         try
         {
-            sqlCon = new SqlConnection(connection.ConnectionString);
+            sqlCon = new SqlConnection(connectionString);
             await sqlCon.OpenAsync(cancellationToken).ConfigureAwait(false);
 
             command = sqlCon.CreateCommand();
@@ -296,5 +297,21 @@ public static class MicrosoftSQL
             SqlTransactionIsolationLevel.Snapshot => IsolationLevel.Snapshot,
             _ => IsolationLevel.ReadCommitted,
         };
+    }
+
+    private static string GetConnectionString(Connection connection)
+    {
+        if (!connection.UseGivenUserCredentialsForRemoteConnections)
+            return connection.ConnectionString;
+
+        var builder = new SqlConnectionStringBuilder(connection.ConnectionString);
+        if (!builder.IntegratedSecurity)
+        {
+            throw new ArgumentException(
+                "ConnectionString must use Integrated Security=true when UseGivenUserCredentialsForRemoteConnections is enabled.");
+        }
+
+        builder.Pooling = false;
+        return builder.ConnectionString;
     }
 }

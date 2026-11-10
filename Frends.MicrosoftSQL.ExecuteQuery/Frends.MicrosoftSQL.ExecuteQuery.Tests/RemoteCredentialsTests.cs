@@ -62,6 +62,24 @@ public class RemoteCredentialsTests
     }
 
     [TestMethod]
+    public async Task RemoteCredentials_RequireIntegratedSecurity()
+    {
+        var connection = new Connection
+        {
+            ConnectionString = "Server=server-not-used;Database=Master;User Id=user;Password=pwd;",
+            UseGivenUserCredentialsForRemoteConnections = true,
+            Username = @"domain\username",
+            Password = "password",
+        };
+
+        var result = await MicrosoftSQL.ExecuteQuery(WhoAmIInput, connection, NoThrowOptions, default);
+
+        Assert.IsFalse(result.Success);
+        StringAssert.Contains(result.Error.Message, "Integrated Security=true");
+        Assert.IsInstanceOfType(result.Error.AdditionalInfo, typeof(ArgumentException));
+    }
+
+    [TestMethod]
     public async Task Windows_UnsupportedPlatformErrorIsNotRaised()
     {
         RequireOs(windows: true);

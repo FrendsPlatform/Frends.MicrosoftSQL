@@ -36,6 +36,7 @@ public static class MicrosoftSQL
         try
         {
             ValidationHandler.Run(connection);
+            var connectionString = GetConnectionString(connection);
             if (connection.UseGivenUserCredentialsForRemoteConnections)
             {
                 if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
@@ -49,11 +50,11 @@ public static class MicrosoftSQL
                 using var handle = credentials.LogonUser(LogonType.NewCredentials);
                 return await WindowsIdentity.RunImpersonatedAsync(
                         handle,
-                        () => ExecuteQueryToFileInternal(input, connection, options, cancellationToken))
+                        () => ExecuteQueryToFileInternal(input, connectionString, options, cancellationToken))
                     .ConfigureAwait(false);
             }
 
-            return await ExecuteQueryToFileInternal(input, connection, options, cancellationToken).ConfigureAwait(false);
+            return await ExecuteQueryToFileInternal(input, connectionString, options, cancellationToken).ConfigureAwait(false);
         }
         catch (Exception ex)
         {
@@ -63,13 +64,13 @@ public static class MicrosoftSQL
 
     private static async Task<Result> ExecuteQueryToFileInternal(
         Input input,
-        Connection connection,
+        string connectionString,
         Options options,
         CancellationToken cancellationToken)
     {
         Result result = new();
 
-        await using var sqlConnection = new SqlConnection(connection.ConnectionString);
+        await using var sqlConnection = new SqlConnection(connectionString);
         await sqlConnection.OpenAsync(cancellationToken).ConfigureAwait(false);
 
         await using var command = sqlConnection.CreateCommand();
@@ -115,5 +116,21 @@ public static class MicrosoftSQL
         }
 
         return result;
+    }
+
+    private static string GetConnectionString(Connection connection)
+    {
+        if (!connection.UseGivenUserCredentialsForRemoteConnections)
+            return connection.ConnectionString;
+
+        var builder = new SqlConnectionStringBuilder(connection.ConnectionString);
+        if (!builder.IntegratedSecurity)
+        {
+            throw new ArgumentException(
+                "ConnectionString must use Integrated Security=true when UseGivenUserCredentialsForRemoteConnections is enabled.");
+        }
+
+        builder.Pooling = false;
+        return builder.ConnectionString;
     }
 }
