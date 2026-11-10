@@ -12,10 +12,10 @@ public class Connection
     /// <summary>
     /// Connection string.
     /// </summary>
-    /// <example>Server=myServerAddress;Database=myDataBase;User Id=myUsername;******;</example>
+    /// <example>Server=myServerAddress;Database=myDataBase;User Id=myUsername;Password=******;</example>
     [PasswordPropertyText]
     [DisplayFormat(DataFormatString = "Text")]
-    [DefaultValue("Server=myServerAddress;Database=myDataBase;User Id=myUsername;******;")]
+    [DefaultValue("Server=myServerAddress;Database=myDataBase;User Id=myUsername;Password=******;")]
     public string ConnectionString { get; set; }
 
     /// <summary>
