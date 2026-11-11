@@ -62,6 +62,22 @@ public static class MicrosoftSQL
         }
     }
 
+    internal static string GetConnectionString(Connection connection)
+    {
+        if (!connection.UseGivenUserCredentialsForRemoteConnections)
+            return connection.ConnectionString;
+
+        var builder = new SqlConnectionStringBuilder(connection.ConnectionString);
+        if (!builder.IntegratedSecurity)
+        {
+            throw new ArgumentException(
+                "ConnectionString must use Integrated Security=true when UseGivenUserCredentialsForRemoteConnections is enabled.");
+        }
+
+        builder.Pooling = false;
+        return builder.ConnectionString;
+    }
+
     private static async Task<Result> BulkInsertInternal(
         Input input,
         string connectionString,
@@ -129,22 +145,6 @@ public static class MicrosoftSQL
 
             throw;
         }
-    }
-
-    private static string GetConnectionString(Connection connection)
-    {
-        if (!connection.UseGivenUserCredentialsForRemoteConnections)
-            return connection.ConnectionString;
-
-        var builder = new SqlConnectionStringBuilder(connection.ConnectionString);
-        if (!builder.IntegratedSecurity)
-        {
-            throw new ArgumentException(
-                "ConnectionString must use Integrated Security=true when UseGivenUserCredentialsForRemoteConnections is enabled.");
-        }
-
-        builder.Pooling = false;
-        return builder.ConnectionString;
     }
 
     private static async Task<long> ExecuteHandler(

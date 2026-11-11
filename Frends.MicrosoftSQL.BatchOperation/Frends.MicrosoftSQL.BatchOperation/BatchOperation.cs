@@ -51,9 +51,9 @@ public static class MicrosoftSQL
         try
         {
             ValidationHandler.Run(connection);
-            var connectionString = GetConnectionString(connection);
             if (connection.UseGivenUserCredentialsForRemoteConnections && !RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
                 throw new PlatformNotSupportedException("Simple impersonation feature is only supported on Windows machines.");
+            var connectionString = GetConnectionString(connection);
             if (!connection.UseGivenUserCredentialsForRemoteConnections)
                 return await BatchOperationInternal(input, connectionString, options, cancellationToken).ConfigureAwait(false);
 
@@ -72,6 +72,22 @@ public static class MicrosoftSQL
         {
             return ex.Handle(options);
         }
+    }
+
+    internal static string GetConnectionString(Connection connection)
+    {
+        if (!connection.UseGivenUserCredentialsForRemoteConnections)
+            return connection.ConnectionString;
+
+        var builder = new SqlConnectionStringBuilder(connection.ConnectionString);
+        if (!builder.IntegratedSecurity)
+        {
+            throw new ArgumentException(
+                "ConnectionString must use Integrated Security=true when UseGivenUserCredentialsForRemoteConnections is enabled.");
+        }
+
+        builder.Pooling = false;
+        return builder.ConnectionString;
     }
 
     private static async Task<Result> BatchOperationInternal(
@@ -129,22 +145,6 @@ public static class MicrosoftSQL
 
             throw;
         }
-    }
-
-    private static string GetConnectionString(Connection connection)
-    {
-        if (!connection.UseGivenUserCredentialsForRemoteConnections)
-            return connection.ConnectionString;
-
-        var builder = new SqlConnectionStringBuilder(connection.ConnectionString);
-        if (!builder.IntegratedSecurity)
-        {
-            throw new ArgumentException(
-                "ConnectionString must use Integrated Security=true when UseGivenUserCredentialsForRemoteConnections is enabled.");
-        }
-
-        builder.Pooling = false;
-        return builder.ConnectionString;
     }
 
     private static IsolationLevel GetIsolationLevel(Options options)

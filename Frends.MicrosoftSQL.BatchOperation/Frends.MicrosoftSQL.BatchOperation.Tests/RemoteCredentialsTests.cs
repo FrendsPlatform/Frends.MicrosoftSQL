@@ -37,6 +37,9 @@ public class RemoteCredentialsTests
     [TestMethod]
     public async Task RemoteCredentials_RequireIntegratedSecurity()
     {
+        if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            Assert.Inconclusive("Connection-string validation runs after the platform check on non-Windows platforms.");
+
         var result = await TaskRunner.BatchOperation(
             new Input(),
             new Options { ThrowErrorOnFailure = false },
@@ -121,7 +124,11 @@ public class RemoteCredentialsTests
                 Query = $"IF SUSER_SNAME() <> N'{escapedUsername}' THROW 51000, 'Unexpected SQL user', 1;",
                 InputJson = "[{}]",
             },
-            new Options { ThrowErrorOnFailure = false, SqlTransactionIsolationLevel = SqlTransactionIsolationLevel.None },
+            new Options
+            {
+                ThrowErrorOnFailure = false,
+                SqlTransactionIsolationLevel = SqlTransactionIsolationLevel.None
+            },
             default,
             CreateConnection(server, username, password));
 
@@ -136,7 +143,11 @@ public class RemoteCredentialsTests
 
         var (server, username, _) = RequireWindowsAuthSettings();
         var result = await TaskRunner.BatchOperation(
-            new Input { Query = "SELECT 1", InputJson = "[]" },
+            new Input
+            {
+                Query = "SELECT 1",
+                InputJson = "[]"
+            },
             new Options { ThrowErrorOnFailure = false },
             default,
             CreateConnection(server, username, Guid.NewGuid().ToString("N")));
@@ -167,7 +178,8 @@ public class RemoteCredentialsTests
 
     private static Connection CreateConnection(string server, string username, string password) => new()
     {
-        ConnectionString = $"Server={server};Database=Master;Integrated Security=true;Encrypt=true;TrustServerCertificate=True;",
+        ConnectionString =
+            $"Server={server};Database=Master;Integrated Security=true;Encrypt=true;TrustServerCertificate=True;",
         UseGivenUserCredentialsForRemoteConnections = true,
         Username = username,
         Password = password,

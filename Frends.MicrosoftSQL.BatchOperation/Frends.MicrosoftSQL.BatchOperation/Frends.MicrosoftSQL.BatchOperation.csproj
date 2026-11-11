@@ -20,6 +20,7 @@
 	  <None Include="FrendsTaskMetadata.json" Pack="true" PackagePath="/">
 		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </None>
+    <InternalsVisibleTo Include="Frends.MicrosoftSQL.BatchOperation.Tests" />
   </ItemGroup>
 
   <ItemGroup>

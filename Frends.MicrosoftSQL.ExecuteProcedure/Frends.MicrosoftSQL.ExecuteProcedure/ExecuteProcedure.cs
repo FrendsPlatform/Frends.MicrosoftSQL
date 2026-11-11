@@ -62,6 +62,22 @@ public static class MicrosoftSQL
         }
     }
 
+    internal static string GetConnectionString(Connection connection)
+    {
+        if (!connection.UseGivenUserCredentialsForRemoteConnections)
+            return connection.ConnectionString;
+
+        var builder = new SqlConnectionStringBuilder(connection.ConnectionString);
+        if (!builder.IntegratedSecurity)
+        {
+            throw new ArgumentException(
+                "ConnectionString must use Integrated Security=true when UseGivenUserCredentialsForRemoteConnections is enabled.");
+        }
+
+        builder.Pooling = false;
+        return builder.ConnectionString;
+    }
+
     private static async Task<Result> ExecuteProcedureInternal(
         Input input,
         string connectionString,
@@ -222,21 +238,5 @@ public static class MicrosoftSQL
             SqlTransactionIsolationLevel.Snapshot => IsolationLevel.Snapshot,
             _ => IsolationLevel.ReadCommitted,
         };
-    }
-
-    private static string GetConnectionString(Connection connection)
-    {
-        if (!connection.UseGivenUserCredentialsForRemoteConnections)
-            return connection.ConnectionString;
-
-        var builder = new SqlConnectionStringBuilder(connection.ConnectionString);
-        if (!builder.IntegratedSecurity)
-        {
-            throw new ArgumentException(
-                "ConnectionString must use Integrated Security=true when UseGivenUserCredentialsForRemoteConnections is enabled.");
-        }
-
-        builder.Pooling = false;
-        return builder.ConnectionString;
     }
 }
