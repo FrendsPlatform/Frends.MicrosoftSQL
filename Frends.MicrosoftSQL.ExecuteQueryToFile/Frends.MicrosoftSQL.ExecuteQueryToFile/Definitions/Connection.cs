@@ -16,6 +16,7 @@ public class Connection
     [DefaultValue("\"Server=myServerAddress;Database=myDataBase;User Id=myUsername;******;\"")]
     [PasswordPropertyText]
     [DisplayFormat(DataFormatString = "Text")]
+    [Required]
     public string ConnectionString { get; set; }
 
     /// <summary>
