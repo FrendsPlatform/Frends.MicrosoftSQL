@@ -8,6 +8,12 @@ using NUnit.Framework;
 
 namespace Frends.MicrosoftSQL.ExecuteQueryToFile.Tests;
 
+/// <summary>
+/// Tests for Connection.UseGivenUserCredentialsForRemoteConnections.
+/// Tests that need a real Windows-authenticated SQL Server read their settings from environment variables:
+/// MSSQL_WINDOWS_AUTH_SERVER (e.g. "myserver,1433"), MSSQL_WINDOWS_USERNAME (domain\username)
+/// and MSSQL_WINDOWS_PASSWORD. They are reported as inconclusive when the variables are not set.
+/// </summary>
 [TestFixture]
 public class RemoteCredentialsTests
 {

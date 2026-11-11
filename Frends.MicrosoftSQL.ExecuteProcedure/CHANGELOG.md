@@ -4,15 +4,12 @@
 
 ### Changed
 
+- **[Breaking Change]** Moved `ConnectionString` from `Input` to new `Connection` tab.
 - Require Windows-authenticated connection strings and disable pooling when remote credentials are enabled.
 
 ### Added
 
 - Added new `Connection` properties `UseGivenUserCredentialsForRemoteConnections`, `Username` and `Password` to support Windows Authentication for remote connections.
-
-### Changed
-
-- **[Breaking Change]** Moved `ConnectionString` from `Input` to new `Connection` tab.
 
 ## [3.0.0] - 2026-11-02
 
