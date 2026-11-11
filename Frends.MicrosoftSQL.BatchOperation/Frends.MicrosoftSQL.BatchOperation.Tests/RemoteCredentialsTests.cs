@@ -37,9 +37,6 @@ public class RemoteCredentialsTests
     [TestMethod]
     public async Task RemoteCredentials_RequireIntegratedSecurity()
     {
-        if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            Assert.Inconclusive("Connection-string validation runs after the platform check on non-Windows platforms.");
-
         var result = await TaskRunner.BatchOperation(
             new Input(),
             new Options { ThrowErrorOnFailure = false },
