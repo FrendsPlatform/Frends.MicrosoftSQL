@@ -43,6 +43,12 @@ public class ExecuteReaderUnitTests
         command.CommandText = $"CREATE PROCEDURE SelectLastname AS select LastName from {TableName} where Id = 1";
         command.ExecuteNonQuery();
 
+        // Select special values
+        command.CommandText = "CREATE PROCEDURE SelectNull AS SELECT CAST(NULL AS INT) AS NullValue";
+        command.ExecuteNonQuery();
+        command.CommandText = "CREATE PROCEDURE SelectGeographyValue AS SELECT geography::Point(47.651, -122.349, 4326) AS Value";
+        command.ExecuteNonQuery();
+
         // Update
         command.CommandText = $@"CREATE PROCEDURE UpdateValue AS update {TableName} set LastName = 'Edit' where Id = 2";
         command.ExecuteNonQuery();
@@ -91,6 +97,8 @@ DECLARE cur CURSOR
             SqlTransactionIsolationLevel.None,
             SqlTransactionIsolationLevel.ReadUncommitted,
             SqlTransactionIsolationLevel.ReadCommitted,
+            SqlTransactionIsolationLevel.RepeatableRead,
+            (SqlTransactionIsolationLevel)int.MaxValue,
         };
 
         var inputInsert = new Input()
@@ -359,5 +367,57 @@ DECLARE cur CURSOR
 
             Helper.ExecuteNonQuery($"DROP TABLE {table}");
         }
+    }
+
+    [TestMethod]
+    public async Task ExecuteScalar_ConvertsGeographyValueToText()
+    {
+        var result = await Helper.ExecuteProcedure(
+            new Input
+            {
+                Execute = "SelectGeographyValue",
+                ExecuteType = ExecuteTypes.Scalar,
+            },
+            new Options { SqlTransactionIsolationLevel = SqlTransactionIsolationLevel.None },
+            default);
+
+        Assert.IsTrue(result.Success, result.Error?.Message);
+        Assert.IsTrue(result.Data["Value"].ToString().StartsWith("POINT"));
+    }
+
+    [TestMethod]
+    public async Task ExecuteReader_MapsDatabaseNullToJsonNull()
+    {
+        var result = await Helper.ExecuteProcedure(
+            new Input
+            {
+                Execute = "SelectNull",
+                ExecuteType = ExecuteTypes.ExecuteReader,
+            },
+            new Options { SqlTransactionIsolationLevel = SqlTransactionIsolationLevel.None },
+            default);
+
+        Assert.IsTrue(result.Success, result.Error?.Message);
+        Assert.AreEqual(JTokenType.Null, result.Data[0]["NullValue"].Type);
+    }
+
+    [TestMethod]
+    public async Task UnsupportedExecuteType_ReturnsError()
+    {
+        var result = await Helper.ExecuteProcedure(
+            new Input
+            {
+                Execute = "SelectAll",
+                ExecuteType = (ExecuteTypes)int.MaxValue,
+            },
+            new Options
+            {
+                SqlTransactionIsolationLevel = SqlTransactionIsolationLevel.None,
+                ThrowErrorOnFailure = false,
+            },
+            default);
+
+        Assert.IsFalse(result.Success);
+        Assert.IsInstanceOfType(result.Error.AdditionalInfo, typeof(NotSupportedException));
     }
 }

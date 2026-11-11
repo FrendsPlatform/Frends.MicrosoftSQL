@@ -46,6 +46,8 @@ public class UnitTests
             SqlTransactionIsolationLevel.None,
             SqlTransactionIsolationLevel.ReadUncommitted,
             SqlTransactionIsolationLevel.ReadCommitted,
+            SqlTransactionIsolationLevel.RepeatableRead,
+            (SqlTransactionIsolationLevel)int.MaxValue,
         };
 
         var inputInsert = new Input()

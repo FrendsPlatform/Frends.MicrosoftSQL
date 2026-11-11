@@ -2,6 +2,7 @@ using Frends.MicrosoftSQL.BatchOperation.Definitions;
 using Frends.MicrosoftSQL.BatchOperation.Tests.Lib;
 using Microsoft.Data.SqlClient;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Newtonsoft.Json;
 
 namespace Frends.MicrosoftSQL.BatchOperation.Tests;
 
@@ -94,6 +95,22 @@ public class ExceptionUnitTests
         Assert.IsNull(exception.InnerException);
         Assert.AreEqual(0, GetRowCount(tableName));
         DropTable(tableName);
+    }
+
+    [TestMethod]
+    public async Task InvalidInputJson_ReturnsErrorWithoutTransaction()
+    {
+        var result = await TaskRunner.BatchOperation(
+            new Input { Query = "SELECT 1", InputJson = "not-json" },
+            new Options
+            {
+                ThrowErrorOnFailure = false,
+                SqlTransactionIsolationLevel = SqlTransactionIsolationLevel.None,
+            },
+            default);
+
+        Assert.IsFalse(result.Success);
+        Assert.IsInstanceOfType(result.Error.AdditionalInfo, typeof(JsonReaderException));
     }
 
     private static Input CreateFailingInput(string tableName) => new()
