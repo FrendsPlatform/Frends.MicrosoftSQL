@@ -40,6 +40,9 @@ public class RemoteCredentialsTests
     [Test]
     public async Task RemoteCredentials_RequireIntegratedSecurity()
     {
+        if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            Assert.Ignore("Connection-string validation runs after the platform check on non-Windows platforms.");
+
         var result = await MicrosoftSQL.ExecuteQueryToFile(
             new Input(),
             new Connection
@@ -68,6 +71,7 @@ public class RemoteCredentialsTests
 
         Assert.That(result.Success, Is.False);
         Assert.That(result.Error.Message, Does.Contain("Username is required"));
+        Assert.That(result.Error.Message, Does.Contain("ConnectionString"));
         Assert.That(result.Error.AdditionalInfo, Is.InstanceOf<ValidationException>());
     }
 

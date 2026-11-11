@@ -51,7 +51,7 @@ public static class MicrosoftSQL
         try
         {
             ValidationHandler.Run(connection);
-			if (connection.UseGivenUserCredentialsForRemoteConnections && !RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            if (connection.UseGivenUserCredentialsForRemoteConnections && !RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
                 throw new PlatformNotSupportedException("Simple impersonation feature is only supported on Windows machines.");
             var connectionString = GetConnectionString(connection);
             if (!connection.UseGivenUserCredentialsForRemoteConnections)

@@ -64,6 +64,8 @@ public class RemoteCredentialsTests
     [TestMethod]
     public async Task RemoteCredentials_RequireIntegratedSecurity()
     {
+        RequireOs(windows: true);
+
         var connection = new Connection
         {
             ConnectionString = "Server=server-not-used;Database=Master;User Id=user;Password=pwd;",
