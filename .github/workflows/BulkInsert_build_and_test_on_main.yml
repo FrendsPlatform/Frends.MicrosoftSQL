@@ -2,7 +2,7 @@ name: BulkInsert build main
 
 on:
   push:
-    branches:    
+    branches:
       - main
     paths:
       - 'Frends.MicrosoftSQL.BulkInsert/**'
@@ -13,6 +13,5 @@ jobs:
     uses: FrendsPlatform/FrendsTasks/.github/workflows/linux_build_main.yml@main
     with:
       workdir: Frends.MicrosoftSQL.BulkInsert
-      prebuild_command: docker-compose -f ./Frends.MicrosoftSQL.BulkInsert.Tests/docker-compose.yml up -d
     secrets:
       badge_service_api_key: ${{ secrets.BADGE_SERVICE_API_KEY }}

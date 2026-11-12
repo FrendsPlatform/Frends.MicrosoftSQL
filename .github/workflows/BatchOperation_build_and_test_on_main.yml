@@ -2,7 +2,7 @@ name: BatchOperation build main
 
 on:
   push:
-    branches:    
+    branches:
       - main
     paths:
       - 'Frends.MicrosoftSQL.BatchOperation/**'
@@ -13,6 +13,5 @@ jobs:
     uses: FrendsPlatform/FrendsTasks/.github/workflows/linux_build_main.yml@main
     with:
       workdir: Frends.MicrosoftSQL.BatchOperation
-      prebuild_command: docker-compose -f ./Frends.MicrosoftSQL.BatchOperation.Tests/docker-compose.yml up -d
     secrets:
       badge_service_api_key: ${{ secrets.BADGE_SERVICE_API_KEY }}

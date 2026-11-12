@@ -18,9 +18,8 @@ Rebuild the project
 
 Run tests
 
- Create a simple SQL server to docker:
- `docker-compose up`
- 
+Docker must be running; the tests create and clean up their own SQL Server container.
+
 `dotnet test`
 
 

@@ -1,4 +1,5 @@
 using Frends.MicrosoftSQL.BulkInsert.Definitions;
+using Frends.MicrosoftSQL.BulkInsert.Tests.Lib;
 using Microsoft.Data.SqlClient;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -7,17 +8,6 @@ namespace Frends.MicrosoftSQL.BulkInsert.Tests;
 [TestClass]
 public class UnitTests
 {
-    /*
-        docker-compose up
-
-        How to use via terminal:
-        docker exec -it sql1 "bash"
-        /opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P "Salakala123!"
-        SELECT * FROM TestTable
-        GO
-   */
-
-    private static readonly string ConnString = "Server=127.0.0.1,1433;Database=Master;User Id=SA;Password=Salakala123!;TrustServerCertificate=True";
     private static readonly string TableName = "TestTable";
     private static readonly string Json = @"[
                   {
@@ -39,10 +29,11 @@ public class UnitTests
 
     private readonly Input defaultInput = new()
     {
-        ConnectionString = ConnString,
         TableName = TableName,
         InputData = Json,
     };
+
+    private static string ConnString => SqlServerContainer.ConnectionString;
 
     [TestInitialize]
     public void Init()
@@ -97,12 +88,12 @@ public class UnitTests
                 TableLock = false,
             };
 
-            var result = await MicrosoftSQL.BulkInsert(defaultInput, options, default);
+            var result = await TaskRunner.BulkInsert(defaultInput, options, default);
             Assert.IsTrue(result.Success);
             Assert.AreEqual(3, result.Count);
             Assert.AreEqual(3, GetRowCount());
 
-            await MicrosoftSQL.BulkInsert(defaultInput, options, default);
+            await TaskRunner.BulkInsert(defaultInput, options, default);
             Assert.AreEqual(6, GetRowCount());
 
             CleanUp();
@@ -137,12 +128,12 @@ public class UnitTests
                 TableLock = false,
             };
 
-            var result = await MicrosoftSQL.BulkInsert(defaultInput, options, default);
+            var result = await TaskRunner.BulkInsert(defaultInput, options, default);
             Assert.IsTrue(result.Success);
             Assert.AreEqual(3, result.Count);
             Assert.AreEqual(3, GetRowCount());
 
-            await MicrosoftSQL.BulkInsert(defaultInput, options, default);
+            await TaskRunner.BulkInsert(defaultInput, options, default);
             Assert.AreEqual(6, GetRowCount());
 
             CleanUp();
@@ -177,12 +168,12 @@ public class UnitTests
                 TableLock = false,
             };
 
-            var result = await MicrosoftSQL.BulkInsert(defaultInput, options, default);
+            var result = await TaskRunner.BulkInsert(defaultInput, options, default);
             Assert.IsTrue(result.Success);
             Assert.AreEqual(3, result.Count);
             Assert.AreEqual(3, GetRowCount());
 
-            await MicrosoftSQL.BulkInsert(defaultInput, options, default);
+            await TaskRunner.BulkInsert(defaultInput, options, default);
             Assert.AreEqual(6, GetRowCount());
 
             CleanUp();
@@ -217,12 +208,12 @@ public class UnitTests
                 TableLock = false,
             };
 
-            var result = await MicrosoftSQL.BulkInsert(defaultInput, options, default);
+            var result = await TaskRunner.BulkInsert(defaultInput, options, default);
             Assert.IsTrue(result.Success);
             Assert.AreEqual(3, result.Count);
             Assert.AreEqual(3, GetRowCount());
 
-            await MicrosoftSQL.BulkInsert(defaultInput, options, default);
+            await TaskRunner.BulkInsert(defaultInput, options, default);
             Assert.AreEqual(6, GetRowCount());
 
             CleanUp();
@@ -257,12 +248,12 @@ public class UnitTests
                 TableLock = true,
             };
 
-            var result = await MicrosoftSQL.BulkInsert(defaultInput, options, default);
+            var result = await TaskRunner.BulkInsert(defaultInput, options, default);
             Assert.IsTrue(result.Success);
             Assert.AreEqual(3, result.Count);
             Assert.AreEqual(3, GetRowCount());
 
-            await MicrosoftSQL.BulkInsert(defaultInput, options, default);
+            await TaskRunner.BulkInsert(defaultInput, options, default);
             Assert.AreEqual(6, GetRowCount());
 
             CleanUp();
@@ -298,12 +289,12 @@ public class UnitTests
                 TableLock = true,
             };
 
-            var result = await MicrosoftSQL.BulkInsert(defaultInput, options, default);
+            var result = await TaskRunner.BulkInsert(defaultInput, options, default);
             Assert.IsTrue(result.Success);
             Assert.AreEqual(3, result.Count);
             Assert.AreEqual(3, GetRowCount());
 
-            await MicrosoftSQL.BulkInsert(defaultInput, options, default);
+            await TaskRunner.BulkInsert(defaultInput, options, default);
             Assert.AreEqual(6, GetRowCount());
 
             CleanUp();
@@ -338,12 +329,12 @@ public class UnitTests
                 TableLock = false,
             };
 
-            var result = await MicrosoftSQL.BulkInsert(defaultInput, options, default);
+            var result = await TaskRunner.BulkInsert(defaultInput, options, default);
             Assert.IsTrue(result.Success);
             Assert.AreEqual(3, result.Count);
             Assert.AreEqual(3, GetRowCount());
 
-            await MicrosoftSQL.BulkInsert(defaultInput, options, default);
+            await TaskRunner.BulkInsert(defaultInput, options, default);
             Assert.AreEqual(6, GetRowCount());
 
             CleanUp();
@@ -378,12 +369,12 @@ public class UnitTests
                 TableLock = false,
             };
 
-            var result = await MicrosoftSQL.BulkInsert(defaultInput, options, default);
+            var result = await TaskRunner.BulkInsert(defaultInput, options, default);
             Assert.IsTrue(result.Success);
             Assert.AreEqual(3, result.Count);
             Assert.AreEqual(3, GetRowCount());
 
-            await MicrosoftSQL.BulkInsert(defaultInput, options, default);
+            await TaskRunner.BulkInsert(defaultInput, options, default);
             Assert.AreEqual(6, GetRowCount());
 
             CleanUp();
@@ -418,12 +409,12 @@ public class UnitTests
                 TableLock = false,
             };
 
-            var result = await MicrosoftSQL.BulkInsert(defaultInput, options, default);
+            var result = await TaskRunner.BulkInsert(defaultInput, options, default);
             Assert.IsTrue(result.Success);
             Assert.AreEqual(3, result.Count);
             Assert.AreEqual(3, GetRowCount());
 
-            await MicrosoftSQL.BulkInsert(defaultInput, options, default);
+            await TaskRunner.BulkInsert(defaultInput, options, default);
             Assert.AreEqual(6, GetRowCount());
 
             CleanUp();
@@ -476,14 +467,13 @@ public class UnitTests
         {
             var input = new Input
             {
-                ConnectionString = ConnString,
                 TableName = TableName,
                 InputData = json,
                 ColumnMapping = columnMapping,
                 ManualColumnMapping = manualMapping,
             };
 
-            var result = await MicrosoftSQL.BulkInsert(input, options, default);
+            var result = await TaskRunner.BulkInsert(input, options, default);
             Assert.IsTrue(result.Success);
         }
     }

@@ -1,28 +1,15 @@
-using Frends.MicrosoftSQL.ExecuteProcedure.Definitions;
+﻿using Frends.MicrosoftSQL.ExecuteProcedure.Definitions;
 using Microsoft.Data.SqlClient;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Frends.MicrosoftSQL.ExecuteProcedure.Tests;
 
-/// <summary>
-/// docker run -e "ACCEPT_EULA=Y" -e "SA_PASSWORD=Salakala123!" -p 1433:1433 --name sql1 --hostname sql1 -d mcr.microsoft.com/mssql/server:2019-CU18-ubuntu-20.04
-/// with Git bash add winpty to the start of
-/// winpty docker exec -it sql1 "bash"
-/// /opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P "Salakala123!"
-/// Check rows before CleanUp:
-/// SELECT* FROM TestTable
-/// GO
-/// Optional queries:
-/// SELECT Name FROM sys.Databases;
-/// GO
-/// SELECT* FROM INFORMATION_SCHEMA.TABLES;
-/// GO
-/// </summary>
 [TestClass]
-public class ManualTesting
+public class TransactionRollbackTests
 {
-    private static readonly string ConnectionString = Helper.GetConnectionString();
     private static readonly string TableName = "TestTable";
+
+    private static string ConnectionString => Helper.GetConnectionString();
 
     [TestInitialize]
     public void Init()
@@ -98,7 +85,6 @@ DECLARE cur CURSOR
     {
         var inputInsert = new Input()
         {
-            ConnectionString = ConnectionString,
             Execute = "InsertThenFail",
             ExecuteType = ExecuteTypes.ExecuteReader,
             Parameters = null,
@@ -112,7 +98,7 @@ DECLARE cur CURSOR
         };
 
         // Insert rows
-        var insert = await MicrosoftSQL.ExecuteProcedure(inputInsert, options, default);
+        var insert = await Helper.ExecuteProcedure(inputInsert, options, default);
         Assert.IsFalse(insert.Success);
         Assert.AreEqual(0, insert.RecordsAffected);
         Assert.IsNotNull(insert.Error);
@@ -126,7 +112,6 @@ DECLARE cur CURSOR
     {
         var inputInsert = new Input()
         {
-            ConnectionString = ConnectionString,
             Execute = "InsertThenFail",
             ExecuteType = ExecuteTypes.ExecuteReader,
             Parameters = null,
@@ -140,7 +125,7 @@ DECLARE cur CURSOR
         };
 
         // Insert rows
-        var insert = await Assert.ThrowsExceptionAsync<SqlException>(async () => await MicrosoftSQL.ExecuteProcedure(inputInsert, options, default));
+        var insert = await Assert.ThrowsExceptionAsync<SqlException>(async () => await Helper.ExecuteProcedure(inputInsert, options, default));
         Assert.IsTrue(insert.Message.Contains("Transaction rollback test failure."));
         Assert.IsNull(insert.InnerException);
         Assert.AreEqual(0, Helper.GetRowCount(TableName));

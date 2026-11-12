@@ -21,7 +21,7 @@ You can install the Task via frends UI Task View.
 
 ### Run tests
 
-Run the tests
+Docker must be running; the tests create and clean up their own SQL Server container.
 
 `dotnet test`
 

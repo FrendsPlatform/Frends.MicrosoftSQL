@@ -1,6 +1,7 @@
 namespace Frends.MicrosoftSQL.ExecuteQueryToFile.Tests;
 
 using System;
+using System.ComponentModel.DataAnnotations;
 using System.Threading.Tasks;
 using Frends.MicrosoftSQL.ExecuteQueryToFile.Definitions;
 using Frends.MicrosoftSQL.ExecuteQueryToFile.Helpers;
@@ -17,7 +18,7 @@ public class ErrorHandlerTests
         var result = await MicrosoftSQL.ExecuteQueryToFile(new Input(), null, options, default);
 
         Assert.That(result.Success, Is.False);
-        Assert.That(result.Error.AdditionalInfo, Is.TypeOf<NullReferenceException>());
+        Assert.That(result.Error.AdditionalInfo, Is.TypeOf<ValidationException>());
     }
 
     [Test]

@@ -1,5 +1,18 @@
 # Changelog
 
+## [4.0.0] - 2026-11-04
+
+### Changed
+
+- Require Windows-authenticated connection strings and disable pooling when remote credentials are enabled.
+- **[Breaking Change]** If no `ErrorMessageOnFailure` is set, exceptions are now rethrown instead of wrapping in general Exception.
+- **[Breaking Change]** Moved `ConnectionString` from `Input` to new `Connection` tab.
+- Rollback now uses a non-cancelled token so cancellation of a Process does not prevent transaction rollback.
+
+### Added
+
+- Added new `Connection` properties `UseGivenUserCredentialsForRemoteConnections`, `Username` and `Password` to support Windows Authentication for remote connections.
+
 ## [3.0.0] - 2026-11-04
 
 ### Changed

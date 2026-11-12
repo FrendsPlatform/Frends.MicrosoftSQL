@@ -1,12 +1,15 @@
 ﻿using System;
 using System.ComponentModel;
 using System.Data;
+using System.Runtime.InteropServices;
+using System.Security.Principal;
 using System.Threading;
 using System.Threading.Tasks;
 using Frends.MicrosoftSQL.ExecuteQueryToFile.Definitions;
 using Frends.MicrosoftSQL.ExecuteQueryToFile.Enums;
 using Frends.MicrosoftSQL.ExecuteQueryToFile.Helpers;
 using Microsoft.Data.SqlClient;
+using SimpleImpersonation;
 
 namespace Frends.MicrosoftSQL.ExecuteQueryToFile;
 
@@ -32,58 +35,101 @@ public static class MicrosoftSQL
     {
         try
         {
-            Result result = new();
-
-            await using var sqlConnection = new SqlConnection(connection.ConnectionString);
-            await sqlConnection.OpenAsync(cancellationToken).ConfigureAwait(false);
-
-            await using var command = sqlConnection.CreateCommand();
-            command.CommandTimeout = options.TimeoutSeconds;
-            command.CommandText = input.Query;
-            command.CommandType = CommandType.Text;
-
-            if (input.QueryParameters != null)
+            ValidationHandler.Run(connection);
+            if (connection.UseGivenUserCredentialsForRemoteConnections && !RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                throw new PlatformNotSupportedException("Simple impersonation feature is only supported on Windows machines.");
+            var connectionString = GetConnectionString(connection);
+            if (connection.UseGivenUserCredentialsForRemoteConnections)
             {
-                foreach (var parameter in input.QueryParameters)
-                {
-                    parameter.Value ??= DBNull.Value;
+                var domainAndUsername = (connection.Username ?? string.Empty).Split('\\');
+                if (domainAndUsername.Length != 2)
+                    throw new ArgumentException($@"Username field must be of format domain\username was: {connection.Username}");
 
-                    if (parameter.SqlDataType is SqlDataTypes.Auto)
-                    {
-                        command.Parameters.AddWithValue(parameterName: parameter.Name, value: parameter.Value);
-                    }
-                    else
-                    {
-                        var sqlDbType = (SqlDbType)Enum.Parse(typeof(SqlDbType), parameter.SqlDataType.ToString());
-                        var commandParameter = command.Parameters.Add(parameter.Name, sqlDbType);
-                        commandParameter.Value = parameter.Value;
-                    }
-                }
+                var credentials = new UserCredentials(domainAndUsername[0], domainAndUsername[1], connection.Password);
+                using var handle = credentials.LogonUser(LogonType.NewCredentials);
+                return await WindowsIdentity.RunImpersonatedAsync(
+                        handle,
+                        () => ExecuteQueryToFileInternal(input, connectionString, options, cancellationToken))
+                    .ConfigureAwait(false);
             }
 
-            switch (options.ReturnFormat)
-            {
-                case ReturnFormat.CSV:
-                    {
-                        await using var csvWriter = new CsvFileWriter(command, input, options.CsvOptions);
-                        result = await csvWriter.SaveQueryToCsv(cancellationToken).ConfigureAwait(false);
-
-                        break;
-                    }
-
-                case ReturnFormat.JSON:
-                    {
-                        await using var jsonWriter = new JsonFileWriter(command, input, options.JsonOptions);
-                        result = await jsonWriter.SaveQueryToJson(cancellationToken).ConfigureAwait(false);
-                        break;
-                    }
-            }
-
-            return result;
+            return await ExecuteQueryToFileInternal(input, connectionString, options, cancellationToken).ConfigureAwait(false);
         }
         catch (Exception ex)
         {
             return ex.Handle(options);
         }
+    }
+
+    internal static string GetConnectionString(Connection connection)
+    {
+        if (!connection.UseGivenUserCredentialsForRemoteConnections)
+            return connection.ConnectionString;
+
+        var builder = new SqlConnectionStringBuilder(connection.ConnectionString);
+        if (!builder.IntegratedSecurity)
+        {
+            throw new ArgumentException(
+                "ConnectionString must use Integrated Security=true when UseGivenUserCredentialsForRemoteConnections is enabled.");
+        }
+
+        builder.Pooling = false;
+        return builder.ConnectionString;
+    }
+
+    private static async Task<Result> ExecuteQueryToFileInternal(
+        Input input,
+        string connectionString,
+        Options options,
+        CancellationToken cancellationToken)
+    {
+        Result result = new();
+
+        await using var sqlConnection = new SqlConnection(connectionString);
+        await sqlConnection.OpenAsync(cancellationToken).ConfigureAwait(false);
+
+        await using var command = sqlConnection.CreateCommand();
+        command.CommandTimeout = options.TimeoutSeconds;
+        command.CommandText = input.Query;
+        command.CommandType = CommandType.Text;
+
+        if (input.QueryParameters != null)
+        {
+            foreach (var parameter in input.QueryParameters)
+            {
+                parameter.Value ??= DBNull.Value;
+
+                if (parameter.SqlDataType is SqlDataTypes.Auto)
+                {
+                    command.Parameters.AddWithValue(parameterName: parameter.Name, value: parameter.Value);
+                }
+                else
+                {
+                    var sqlDbType = (SqlDbType)Enum.Parse(typeof(SqlDbType), parameter.SqlDataType.ToString());
+                    var commandParameter = command.Parameters.Add(parameter.Name, sqlDbType);
+                    commandParameter.Value = parameter.Value;
+                }
+            }
+        }
+
+        switch (options.ReturnFormat)
+        {
+            case ReturnFormat.CSV:
+                {
+                    await using var csvWriter = new CsvFileWriter(command, input, options.CsvOptions);
+                    result = await csvWriter.SaveQueryToCsv(cancellationToken).ConfigureAwait(false);
+
+                    break;
+                }
+
+            case ReturnFormat.JSON:
+                {
+                    await using var jsonWriter = new JsonFileWriter(command, input, options.JsonOptions);
+                    result = await jsonWriter.SaveQueryToJson(cancellationToken).ConfigureAwait(false);
+                    break;
+                }
+        }
+
+        return result;
     }
 }

@@ -2,7 +2,7 @@ name: ExecuteProcedure build main
 
 on:
   push:
-    branches:    
+    branches:
       - main
     paths:
       - 'Frends.MicrosoftSQL.ExecuteProcedure/**'
@@ -13,6 +13,5 @@ jobs:
     uses: FrendsPlatform/FrendsTasks/.github/workflows/linux_build_main.yml@main
     with:
       workdir: Frends.MicrosoftSQL.ExecuteProcedure
-      prebuild_command: docker-compose -f ./Frends.MicrosoftSQL.ExecuteProcedure.Tests/docker-compose.yml up -d
     secrets:
       badge_service_api_key: ${{ secrets.BADGE_SERVICE_API_KEY }}

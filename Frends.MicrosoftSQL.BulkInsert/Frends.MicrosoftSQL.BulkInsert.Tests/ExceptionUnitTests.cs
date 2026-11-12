@@ -1,4 +1,5 @@
 ﻿using Frends.MicrosoftSQL.BulkInsert.Definitions;
+using Frends.MicrosoftSQL.BulkInsert.Tests.Lib;
 using Microsoft.Data.SqlClient;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -7,91 +8,146 @@ namespace Frends.MicrosoftSQL.BulkInsert.Tests;
 [TestClass]
 public class ExceptionUnitTests
 {
-    /*
-         docker-compose up
-
-         How to use via terminal:
-         docker exec -it sql1 "bash"
-         /opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P "Salakala123!"
-         SELECT * FROM TestTable
-         GO
-    */
-
-    private static readonly string ConnString = "Server=127.0.0.1,1433;Database=Master;User Id=SA;Password=WrongPassWord;TrustServerCertificate=True";
-    private static readonly string TableName = "TestTable";
-    private static readonly string Json = @"[
-                  {
-                    ""Id"": 1,
-                    ""Firstname"": ""Etu"",
-                    ""Lastname"": ""Suku""
-                  }
-                ]";
+    private const string Json = """[{"Id":1,"Firstname":"Etu","Lastname":"Suku"}]""";
 
     [TestMethod]
-    public async Task TestBulkInsert_Invalid_Creds()
+    public async Task InvalidCredentials_RethrowsOriginalSqlException()
     {
-        var input = new Input()
+        var connectionString = new SqlConnectionStringBuilder(SqlServerContainer.ConnectionString)
         {
-            ConnectionString = ConnString,
-            TableName = TableName,
-            InputData = Json,
-        };
+            Password = "WrongPassWord",
+        }.ConnectionString;
 
-        var options = new Options()
-        {
-            SqlTransactionIsolationLevel = SqlTransactionIsolationLevel.ReadCommitted,
-            CommandTimeoutSeconds = 60,
-            ThrowErrorOnFailure = true,
-        };
+        var input = new Input { TableName = "TestTable", InputData = Json };
+        var exception = await Assert.ThrowsExceptionAsync<SqlException>(() =>
+            TaskRunner.BulkInsert(
+                input,
+                new Options { ThrowErrorOnFailure = true },
+                default,
+                new Connection { ConnectionString = connectionString }));
 
-        var ex = await Assert.ThrowsExceptionAsync<SqlException>(() => MicrosoftSQL.BulkInsert(input, options, default));
-        Assert.IsTrue(ex.Message.Contains("Login failed for user 'SA'."));
+        StringAssert.Contains(exception.Message, "Login failed for user");
     }
 
     [TestMethod]
-    public async Task TestBulkInsert_Invalid_Creds_ReturnErrorMessage()
+    public async Task InvalidCredentials_ReturnsErrorWhenThrowingDisabled()
     {
-        var input = new Input()
+        var connectionString = new SqlConnectionStringBuilder(SqlServerContainer.ConnectionString)
         {
-            ConnectionString = ConnString,
-            TableName = TableName,
-            InputData = Json,
-        };
+            Password = "WrongPassWord",
+        }.ConnectionString;
 
-        var options = new Options()
-        {
-            SqlTransactionIsolationLevel = SqlTransactionIsolationLevel.ReadCommitted,
-            CommandTimeoutSeconds = 2,
-            ThrowErrorOnFailure = false,
-        };
+        var result = await TaskRunner.BulkInsert(
+            new Input { TableName = "TestTable", InputData = Json },
+            new Options { ThrowErrorOnFailure = false },
+            default,
+            new Connection { ConnectionString = connectionString });
 
-        var result = await MicrosoftSQL.BulkInsert(input, options, default);
         Assert.IsFalse(result.Success);
-        Assert.IsTrue(result.Error.Message.Contains("Login failed for user 'SA'."));
-        Assert.AreEqual(0, result.Count);
+        StringAssert.Contains(result.Error.Message, "Login failed for user");
+        Assert.IsInstanceOfType(result.Error.AdditionalInfo, typeof(SqlException));
     }
 
     [TestMethod]
-    public async Task TestBulkInsert_ExecuteHandler_Exception()
+    public async Task BulkInsertFailure_RethrowsOriginalException()
     {
-        var input = new Input
-        {
-            InputData = Json,
-            ConnectionString = "Server=127.0.0.1,1433;Database=Master;User Id=SA;Password=Salakala123!;TrustServerCertificate=True",
-            TableName = "InvalidTable",
-        };
-
+        var input = new Input { TableName = "MissingTable", InputData = Json };
         var options = new Options
         {
-            ConvertEmptyPropertyValuesToNull = false,
             ThrowErrorOnFailure = true,
             SqlTransactionIsolationLevel = SqlTransactionIsolationLevel.None,
-            CommandTimeoutSeconds = 60,
             NotifyAfter = 1,
         };
 
-        var ex = await Assert.ThrowsExceptionAsync<Exception>(() => MicrosoftSQL.BulkInsert(input, options, CancellationToken.None));
+        await Assert.ThrowsExceptionAsync<InvalidOperationException>(() =>
+            TaskRunner.BulkInsert(input, options, CancellationToken.None));
+    }
 
-        Assert.IsTrue(ex.Message.Contains("BulkInsert exception: 'Options.SqlTransactionIsolationLevel = None', so there was no transaction rollback."));
+    [TestMethod]
+    public async Task BulkInsertFailure_RollsBackRows_ReturnsError()
+    {
+        await WithFailingTrigger(async tableName =>
+        {
+            var result = await TaskRunner.BulkInsert(CreateInput(tableName), CreateRollbackOptions(false), default);
+
+            Assert.IsFalse(result.Success);
+            Assert.IsInstanceOfType(result.Error.AdditionalInfo, typeof(SqlException));
+            StringAssert.Contains(result.Error.Message, "rollback test failure");
+            Assert.AreEqual(0, GetRowCount(tableName));
+        });
+    }
+
+    [TestMethod]
+    public async Task BulkInsertFailure_RollsBackRows_RethrowsOriginalSqlException()
+    {
+        await WithFailingTrigger(async tableName =>
+        {
+            var exception = await Assert.ThrowsExceptionAsync<SqlException>(() =>
+                TaskRunner.BulkInsert(CreateInput(tableName), CreateRollbackOptions(true), default));
+
+            StringAssert.Contains(exception.Message, "rollback test failure");
+            Assert.IsNull(exception.InnerException);
+            Assert.AreEqual(0, GetRowCount(tableName));
+        });
+    }
+
+    private static Input CreateInput(string tableName) => new()
+    {
+        TableName = tableName,
+        InputData = """
+            [
+              {"Id":1,"Firstname":"Etu","Lastname":"Suku"},
+              {"Id":2,"Firstname":"Suku","Lastname":"Etu"},
+              {"Id":3,"Firstname":"F?rst","Lastname":"L??st"}
+            ]
+            """,
+    };
+
+    private static Options CreateRollbackOptions(bool throwErrorOnFailure) => new()
+    {
+        ThrowErrorOnFailure = throwErrorOnFailure,
+        FireTriggers = true,
+        SqlTransactionIsolationLevel = SqlTransactionIsolationLevel.ReadCommitted,
+        CommandTimeoutSeconds = 30,
+    };
+
+    private static async Task WithFailingTrigger(Func<string, Task> test)
+    {
+        var tableName = $"BulkInsertRollback_{Guid.NewGuid():N}";
+        var triggerName = $"FailBulkInsert_{Guid.NewGuid():N}";
+        Execute($@"
+            CREATE TABLE {tableName} (Id int, Firstname varchar(255), Lastname varchar(255));");
+        Execute($@"
+            CREATE TRIGGER {triggerName} ON {tableName} AFTER INSERT AS
+            BEGIN
+                THROW 51000, 'rollback test failure', 1;
+            END");
+
+        try
+        {
+            await test(tableName);
+        }
+        finally
+        {
+            Execute($"DROP TRIGGER IF EXISTS {triggerName}; DROP TABLE IF EXISTS {tableName};");
+        }
+    }
+
+    private static int GetRowCount(string tableName)
+    {
+        using var sqlConnection = new SqlConnection(SqlServerContainer.ConnectionString);
+        sqlConnection.Open();
+        using var command = sqlConnection.CreateCommand();
+        command.CommandText = $"SELECT COUNT(*) FROM {tableName}";
+        return (int)command.ExecuteScalar();
+    }
+
+    private static void Execute(string sql)
+    {
+        using var sqlConnection = new SqlConnection(SqlServerContainer.ConnectionString);
+        sqlConnection.Open();
+        using var command = sqlConnection.CreateCommand();
+        command.CommandText = sql;
+        command.ExecuteNonQuery();
     }
 }

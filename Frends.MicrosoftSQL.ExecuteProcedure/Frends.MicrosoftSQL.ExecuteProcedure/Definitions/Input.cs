@@ -9,15 +9,6 @@ namespace Frends.MicrosoftSQL.ExecuteProcedure.Definitions;
 public class Input
 {
     /// <summary>
-    /// Connection string.
-    /// </summary>
-    /// <example>Server=myServerAddress;Database=myDataBase;User Id=myUsername;Password=myPassword;</example>
-    [PasswordPropertyText]
-    [DisplayFormat(DataFormatString = "Text")]
-    [DefaultValue("Server=myServerAddress;Database=myDataBase;User Id=myUsername;Password=myPassword;")]
-    public string ConnectionString { get; set; }
-
-    /// <summary>
     /// Name of stored procedure to execute.
     /// Should only contain the name of the procedure without, for example, database name or semicolons.
     /// </summary>
